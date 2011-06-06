@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+import sys
+import math
+import subprocess
+
+sizes = { 'K':1, 'M':2, 'G':3, 'T':4, 'P':5 }
+unsizes = { 1:'K', 2:'M', 3:'G', 4:'T', 5:'P' }
+
+def key( x ):
+    x = x.split()[0]
+    suf = x[-1]
+    if suf.isalpha():
+        x = x[:-1]
+    val = float(x)
+    val *= 1024 ** sizes.get( suf, 0 )
+
+    return val
+
+def unkey( val ):
+    if val == 0:
+        return '0'
+    else:
+        power = int(math.log( val, 1024.0))
+        coeff = '%.1f' % (val / 1024.0 ** power)
+        return coeff + unsizes[power]
+
+
+try:
+    arg = sys.argv[1]
+except:
+    arg = '.'
+try:
+    duproc = subprocess.Popen('ls -A1 | xargs -d"\n" du -ckshx --',
+                              shell=True, cwd=arg,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+    #duproc.wait()
+    firstError = duproc.stderr.readline()
+    if firstError:
+        print >> sys.stderr, 'Warning: Could not read some files; listing may be incomplete.'
+
+    inlist = duproc.stdout.readlines()
+    inlist = [ e for e in inlist if e.split('\t', 1)[1] != 'total\n']
+    total = sum([key(e) for e in inlist])
+    inlist = [ (key(e), e) for e in inlist ]
+    inlist.sort()
+    inlist.reverse()
+    inlist = [ e[1] for e in inlist ]
+    inlist.reverse()
+    inlist.append( unkey(total) + '\ttotal' )
+
+    for e in inlist:
+        sys.stdout.write( e )
+    print
+except KeyboardInterrupt:
+    pass
