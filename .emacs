@@ -12,6 +12,9 @@
 ;(require 'pyrex-mode)
 ;(autoload 'rst-mode "rst-mode" "mode for editing reStructuredText documents" t)
 ;; Context hilighting, configure font-lock-mode
+
+(add-to-list 'load-path "~/.emacs.d/site-lisp/")
+
 (require 'font-lock)
 
 (when (fboundp 'windmove-default-keybindings)
@@ -38,6 +41,8 @@
 (setq ido-ignore-files
       '("\\.hi$")
       )
+
+(require 'guess-offset)
 
 (global-font-lock-mode t)
 (global-auto-revert-mode t)
