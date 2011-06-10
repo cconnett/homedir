@@ -9,6 +9,7 @@ alias ll="ls --color -ltr"
 alias locate='locate -i'
 alias less='less -S'
 alias getack='curl http://betterthangrep.com/ack-standalone > ~/bin/ack && chmod 0755 ~/bin/ack'
+alias gitg='gitg --all'
 
 # Change the window title of X terminals
 case $TERM in
