@@ -43,6 +43,7 @@
       )
 
 (require 'guess-offset)
+(require 'sourcepawn-mode)
 
 (global-font-lock-mode t)
 (global-auto-revert-mode t)
@@ -164,7 +165,7 @@
                 ("\\.hi$" . haskell-mode)
                 ("\\.l[hg]s$" . literate-haskell-mode)
                 ("\\.ebuild$" . shell-script-mode)
-                ("\\.sp$" . c++-mode)
+                ("\\.sp$" . sourcepawn-mode)
                 ("\\.txt$" . text-mode)
                 ("\\.org$" . org-mode)
                 ("todo$" . org-mode)
