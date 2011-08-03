@@ -18,12 +18,14 @@
 import XMonad hiding ((|||))
 import XMonad.Util.Replace
 import XMonad.Util.EZConfig
+import XMonad.Util.Dmenu
 import XMonad.Layout.NoBorders
 import XMonad.Layout.LayoutCombinators ((|||))
 import XMonad.Actions.CycleSelectedLayouts
 import Data.Monoid
 import System.Exit
 import System.Environment
+import System.Process
 import Control.Monad
 
 import XMonad.Config.Gnome
@@ -164,10 +166,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- , ((modm              , xK_b     ), sendMessage ToggleStruts)
 
     -- Quit xmonad
-    , ((modm .|. shiftMask, xK_Escape), io (exitWith ExitSuccess))
-
-    -- Restart xmonad
-    , ((modm              , xK_Escape), spawn "xmonad --recompile; xmonad --restart")
+    --, ((modm .|. shiftMask, xK_Escape), io (exitWith ExitSuccess))
     ]
     ++
 
@@ -316,11 +315,27 @@ main = do
   replace
   xmonad myConfig
 
+confirm prompt action = do
+  answer <- dmenu [prompt]
+  when (prompt == answer) (io action)
+
+choices alist = do
+  answer <- dmenu $ map fst alist
+  when ((not . null) answer) (io $ maybe (return ()) id $ lookup answer alist)
+
+lock = spawn "xscreensaver-command -lock"
+logout = exitWith ExitSuccess
+reload = spawn "xmonad --restart"
+
 myConfig = defaults
             `additionalKeysP` [("M-o", spawn "google-chrome")
                               ,("M-e", spawn "emacs")
                               ,("M-n", spawn "nautilus ~")
-                              ,("M-S-<Backspace>", spawn "gnome-session-save --logout-dialog")
+                              ,("M-`", io lock)
+                              ,("M-<Esc>", choices [("Lock", lock),
+                                                    ("Logout", logout),
+                                                    ("Reload xmonad", reload)])
+                              ,("M-S-<Esc>", confirm "Reload xmonad" reload)
                               ]
             `removeKeysP` ["M-w", "M-<Space>"]
 
@@ -330,7 +345,7 @@ myConfig = defaults
 --
 -- No need to modify this.
 --
-defaults = gnomeConfig {
+defaults = defaultConfig {
       -- simple stuff
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
