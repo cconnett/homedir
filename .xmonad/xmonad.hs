@@ -1,20 +1,3 @@
---
--- xmonad example config file for xmonad-0.9
---
--- A template showing all available configuration hooks,
--- and how to override the defaults in your own xmonad.hs conf file.
---
--- Normally, you'd only override those defaults you care about.
---
--- NOTE: Those updating from earlier xmonad versions, who use
--- EwmhDesktops, safeSpawn, WindowGo, or the simple-status-bar
--- setup functions (dzen, xmobar) probably need to change
--- xmonad.hs, please see the notes below, or the following
--- link for more details:
---
--- http://www.haskell.org/haskellwiki/Xmonad/Notable_changes_since_0.8
---
-
 import XMonad hiding ((|||))
 import XMonad.Util.Replace
 import XMonad.Util.EZConfig
@@ -315,27 +298,30 @@ main = do
   replace
   xmonad myConfig
 
+confirm :: String -> X () -> X ()
 confirm prompt action = do
   answer <- dmenu [prompt]
-  when (prompt == answer) (io action)
+  when (prompt == answer) action
 
+choices :: [(String, X ())] -> X ()
 choices alist = do
   answer <- dmenu $ map fst alist
-  when ((not . null) answer) (io $ maybe (return ()) id $ lookup answer alist)
+  when ((not . null) answer) $ maybe (return ()) id $ lookup answer alist
 
-lock = spawn "xscreensaver-command -lock"
-logout = exitWith ExitSuccess
-reload = spawn "xmonad --restart"
+lock,logout,reload :: X ()
+lock = io $ spawn "xscreensaver-command -lock"
+logout = io $ exitWith ExitSuccess
+reload = io $ spawn "xmonad --restart"
 
 myConfig = defaults
             `additionalKeysP` [("M-o", spawn "google-chrome")
                               ,("M-e", spawn "emacs")
                               ,("M-n", spawn "nautilus ~")
-                              ,("M-`", io lock)
+                              ,("M-`", lock)
                               ,("M-<Esc>", choices [("Lock", lock),
-                                                    ("Logout", logout),
-                                                    ("Reload xmonad", reload)])
-                              ,("M-S-<Esc>", confirm "Reload xmonad" reload)
+                                                    ("Logout", confirm "Logout?" logout),
+                                                    ("Reload", reload)])
+                              ,("M-S-<Esc>", confirm "Reload?" reload)
                               ]
             `removeKeysP` ["M-w", "M-<Space>"]
 
