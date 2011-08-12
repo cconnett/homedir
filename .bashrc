@@ -9,6 +9,7 @@ fi
 
 export PATH=~/bin:/usr/local/bin:$PATH
 export EDITOR='emacs -nw --no-splash'
+export LESS='-S -R -F -X'
 
 export HISTCONTROL=ignoreboth
 export HISTIGNORE=ls:ll:la:l:cd:pwd:exit:su:df:clear
@@ -19,6 +20,8 @@ export PYTHONPATH=~/Python:$PYTHONPATH
 export ACK_OPTIONS='--no-html'
 export ACK_COLOR_MATCH='red'
 export ACK_COLOR_FILENAME='on_cyan'
+export ACK_COLOR_LINENO='bold blue'
+export ACK_PAGER='less'
 export GIT_CEILING_DIRECTORIES=$HOME
 export GIT_EDITOR=$EDITOR
 
@@ -26,7 +29,6 @@ alias d="ls --color"
 alias ls='ls --color=auto -B'
 alias ll="ls --color -ltr"
 alias locate='locate -i'
-alias less='less -S'
 alias getack='curl http://betterthangrep.com/ack-standalone > ~/bin/ack && chmod 0755 ~/bin/ack'
 alias gitg='gitg --all'
 alias queeg='ssh -XYCA cxc0117@queeg.cs.rit.edu'
@@ -36,6 +38,7 @@ alias odb='java -jar /home/chris/bin/ODB.jar'
 alias serve='python -m SimpleHTTPServer'
 alias please=sudo
 alias math='rlwrap math'
+alias emacs='emacs 2> /dev/null'
 
 if   [ $(hostname -d) == "cs.rit.edu" ]; then
     export PATH=/usr/gnu/bin:/opt/csw/bin:/bin:/sbin:/usr/bin:/usr/sbin:$PATH
@@ -48,7 +51,6 @@ elif [ $(hostname) == "scruffy" ]; then
 else
     export VISUAL='emacs'
     alias zfslist='ssh scruffy zfs list -t filesystem -r mpool'
-    alias emacs='emacs 2> /dev/null'
     export SAT_PATHS=~/bin/sat/clasp/bin:~/bin/sat/minisat/simp:~/bin/sat/rsat_SAT-Race08_final_bin:~/bin/sat/zchaff64
     [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 fi
