@@ -32,8 +32,8 @@
 (setq-default truncate-lines t)
 (setq-default fill-column 80)
 (set-face-background 'column-marker-1 "magenta")
-(add-hook 'find-file-hook (lambda () (column-marker-1 81)))
-(add-hook 'first-change-hook (lambda () (column-marker-1 81)))
+(add-hook 'find-file-hook (lambda () (column-marker-1 80)))
+(add-hook 'first-change-hook (lambda () (column-marker-1 80)))
 
 (global-set-key (kbd "C-c SPC") 'just-one-space)
 (global-set-key (kbd "C-c TAB") 'tab-to-tab-stop)
