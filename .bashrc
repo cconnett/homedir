@@ -21,7 +21,6 @@ export ACK_OPTIONS='--no-html'
 export ACK_COLOR_MATCH='red'
 export ACK_COLOR_FILENAME='on_cyan'
 export ACK_COLOR_LINENO='bold blue'
-export ACK_PAGER='less'
 export GIT_CEILING_DIRECTORIES=$HOME
 export GIT_EDITOR=$EDITOR
 
