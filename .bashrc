@@ -26,10 +26,12 @@ export GIT_EDITOR=$EDITOR
 
 alias d="ls --color"
 alias ls='ls --color=auto -B'
-alias ll="ls --color -ltr"
+alias ll="ls -ltr"
+alias la="ll -A"
 alias locate='locate -i'
 alias getack='curl http://betterthangrep.com/ack-standalone > ~/bin/ack && chmod 0755 ~/bin/ack'
-alias gitg='gitg --all'
+alias gitg='gitg --all >& /dev/null &'
+alias gitk='gitk --all >& /dev/null &'
 alias queeg='ssh -XYCA cxc0117@queeg.cs.rit.edu'
 alias elvis='ssh -XYCA cxc0117@elvis.cs.rit.edu'
 alias doors='ssh -XYCA cxc0117@doors.cs.rit.edu'
