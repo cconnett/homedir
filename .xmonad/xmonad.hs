@@ -1,80 +1,49 @@
-import XMonad hiding ((|||))
-import XMonad.Util.Replace
-import XMonad.Util.EZConfig
-import XMonad.Util.Dmenu
-import XMonad.Layout.NoBorders
-import XMonad.Layout.LayoutCombinators ((|||))
-import XMonad.Actions.CycleSelectedLayouts
-import Data.Monoid
-import System.Exit
-import System.Environment
-import System.Process
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE TypeSynonymInstances, MultiParamTypeClasses #-}
+
 import Control.Monad
-
+import Data.List
+import Data.Monoid
+import System.Environment
+import System.Exit
+import System.Process
+import XMonad hiding ((|||))
+import XMonad.Actions.CycleSelectedLayouts
 import XMonad.Config.Gnome
+import XMonad.Layout.LayoutCombinators ((|||))
+import XMonad.Layout.LayoutModifier
+import XMonad.Layout.NoBorders
+import XMonad.Layout.MultiToggle
+import XMonad.Layout.MultiToggle.Instances
+import XMonad.StackSet
+import XMonad.Util.Dmenu
+import XMonad.Util.EZConfig
+import XMonad.Util.Replace
+import XMonad.Actions.CopyWindow
 
-import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
+import qualified XMonad.StackSet as W
 
--- The preferred terminal program, which is used in a binding below and by
--- certain contrib modules.
---
 myTerminal      = "gnome-terminal"
 --myTerminal      = "urxvt"
 
--- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
 
--- Width of the window border in pixels.
---
-myBorderWidth   = 1
+myBorderWidth = 1
+myModMask = mod1Mask
 
--- modMask lets you specify which modkey you want to use. The default
--- is mod1Mask ("left alt").  You may also consider using mod3Mask
--- ("right alt"), which does not conflict with emacs keybindings. The
--- "windows key" is usually mod4Mask.
---
-myModMask       = mod1Mask
-
--- NOTE: from 0.9.1 on numlock mask is set automatically. The numlockMask
--- setting should be removed from configs.
---
--- You can safely remove this even on earlier xmonad versions unless you
--- need to set it to something other than the default mod2Mask, (e.g. OSX).
---
--- The mask for the numlock key. Numlock status is "masked" from the
--- current modifier status, so the keybindings will work with numlock on or
--- off. You may need to change this on some systems.
---
--- You can find the numlock modifier by running "xmodmap" and looking for a
--- modifier with Num_Lock bound to it:
---
--- > $ xmodmap | grep Num
--- > mod2        Num_Lock (0x4d)
---
--- Set numlockMask = 0 if you don't have a numlock key, or want to treat
--- numlock status separately.
---
--- myNumlockMask   = mod2Mask -- deprecated in xmonad-0.9.1
-------------------------------------------------------------
-
-
--- The default number of workspaces (virtual screens) and their names.
--- By default we use numeric strings, but any string may be used as a
--- workspace name. The number of workspaces is determined by the length
--- of this list.
---
--- A tagging example:
---
--- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
---
-myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
+-- Number of workspaces and linking of workspaces across two screens like Gnome.
+myWorkspaces    = map show [1..18]
+chunk n = takeWhile (not.null) . map (take n) . iterate (drop n)
+pair = chunk 2
 
 -- Border colors for unfocused and focused windows, respectively.
 --
-myNormalBorderColor  = "#dddddd"
-myFocusedBorderColor = "#1e90ff"
+--myNormalBorderColor  = "#dddddd"
+myNormalBorderColor = "#aaaaaa"
+--myFocusedBorderColor = "#1e90ff"
+myFocusedBorderColor = "#ff0000"
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -85,7 +54,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
 
     -- launch dmenu
-    , ((modm,               xK_p     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
+    --, ((modm,               xK_p     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
 
     -- launch gmrun
     , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
@@ -94,8 +63,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask, xK_c     ), kill)
 
      -- Rotate through the available layout algorithms
-    , ((modm,               xK_Insert), cycleThroughLayouts ["Tall", "Mirror Tall"])
-    , ((modm              , xK_F11   ), cycleThroughLayouts ["Full", "Tall"])
+    , ((modm,               xK_Insert), sendMessage (Toggle MIRROR))
+    , ((modm              , xK_F11   ), sendMessage (Toggle FULL))
+    , ((modm              , xK_F12   ), cycleThroughLayouts ["Tall", description myGrid])
 
     --  Reset the layouts on the current workspace to default
     , ((modm .|. shiftMask, xK_Insert), setLayout $ XMonad.layoutHook conf)
@@ -153,25 +123,24 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     ]
     ++
 
-    --
-    -- mod-[1..9], Switch to workspace N
-    --
-    -- mod-[1..9], Switch to workspace N
-    -- mod-shift-[1..9], Move client to workspace N
-    --
-    [((m .|. mod4Mask, k), windows $ f i)
-        | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]
-        , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
+-- Workspaces
+    [((mod1Mask, key), do
+        screenWorkspace 0 >>= flip whenJust (windows . W.view)
+        windows $ W.view (screenPair !! 0)
+        screenWorkspace 1 >>= flip whenJust (windows . W.view)
+        windows $ W.view (screenPair !! 1)
+     )
+        | (screenPair, key) <- zip (pair $ XMonad.workspaces conf) [xK_1 .. xK_9]
+        --, (f, extraMod) <- [(W.greedyView, 0), (W.shift, shiftMask)]
+    ]
     ++
 
-    --
-    -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
-    -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
-    --
-    [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
-        | (key, sc) <- zip [xK_1, xK_2, xK_3] [0..]
-        , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
-
+    -- Physical/Xinerama screens
+    --[((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
+    --    | (key, sc) <- zip [xK_1, xK_2, xK_3] [0..]
+    --    , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+    -- ++
+    []
 
 ------------------------------------------------------------------------
 -- Mouse bindings: default actions bound to mouse events
@@ -179,15 +148,15 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- mod-button1, Set the window to floating mode and move by dragging
-    [ ((modm, button1), (\w -> focus w >> mouseMoveWindow w
-                                       >> windows W.shiftMaster))
+    [ ((modm, button1), (\w -> XMonad.focus w >> mouseMoveWindow w
+                                             >> windows W.shiftMaster))
 
     -- mod-button2, Raise the window to the top of the stack
-    , ((modm, button2), (\w -> focus w >> windows W.shiftMaster))
+    , ((modm, button2), (\w -> XMonad.focus w >> windows W.shiftMaster))
 
     -- mod-button3, Set the window to floating mode and resize by dragging
-    , ((modm, button3), (\w -> focus w >> mouseResizeWindow w
-                                       >> windows W.shiftMaster))
+    , ((modm, button3), (\w -> XMonad.focus w >> mouseResizeWindow w
+                                             >> windows W.shiftMaster))
 
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
@@ -209,7 +178,33 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = noBorders $ tiled ||| (Mirror tiled) ||| Full
+
+
+
+data OnlyBordersOn a = OnlyBordersOn [String] [a] deriving (Read, Show)
+instance LayoutModifier OnlyBordersOn Window where
+    unhook (OnlyBordersOn _ allWindows) =
+        asks (borderWidth . config) >>= setBorders allWindows
+
+    redoLayout (OnlyBordersOn classes allWindows) _ _ windowRectanglePairs = do
+      windowsWithBorders <- filterM predicate windows
+      width <- asks (borderWidth . config)
+      setBorders windowsWithBorders width
+      setBorders (windows \\ windowsWithBorders) 0
+      return (windowRectanglePairs, Just $ OnlyBordersOn classes windows)
+          where predicate = (liftM (`elem` classes)) . runQuery className
+                windows = map fst windowRectanglePairs
+
+setBorders :: [Window] -> Dimension -> X ()
+setBorders ws bw = withDisplay $ \d -> mapM_ (\w -> io $ setWindowBorderWidth d w bw) ws
+
+bordersOn classes = ModifiedLayout $ OnlyBordersOn classes []
+
+myGrid = Mirror Grid
+myLayout = --noBorders $
+           bordersOn ["Emacs", "Gnome-terminal"] $
+           mkToggle (FULL ?? MIRROR ?? EOT) $
+           tiled ||| myGrid
   where
     -- default tiling algorithm partitions the screen into two panes
     tiled   = Tall nmaster delta ratio
@@ -309,21 +304,22 @@ choices alist = do
   when ((not . null) answer) $ maybe (return ()) id $ lookup answer alist
 
 lock,logout,reload :: X ()
-lock = io $ spawn "xscreensaver-command -lock"
+lock = io $ spawn "gnome-screensaver-command -l"
 logout = io $ exitWith ExitSuccess
 reload = io $ spawn "xmonad --restart"
 
 myConfig = defaults
-            `additionalKeysP` [("M-o", spawn "google-chrome")
-                              ,("M-e", spawn "emacs")
-                              ,("M-n", spawn "nautilus ~")
-                              ,("M-`", lock)
-                              ,("M-<Esc>", choices [("Lock", lock),
-                                                    ("Logout", confirm "Logout?" logout),
-                                                    ("Reload", reload)])
-                              ,("M-S-<Esc>", confirm "Reload?" reload)
-                              ]
-            `removeKeysP` ["M-w", "M-<Space>"]
+           `additionalKeysP` [("M-o", runOrCopy "google-chrome" (className =? "Google-chrome"))
+                             ,("M-e", spawn "emacs")
+                             ,("M4-e", spawn "emacs")
+                             ,("M-n", spawn "nautilus ~")
+                             ,("M-`", lock)
+                             ,("M-<Esc>", choices [("Lock", lock),
+                                                   ("Logout", confirm "Logout?" logout),
+                                                   ("Reload", reload)])
+                             ,("M-S-<Esc>", confirm "Reload?" reload)
+                             ]
+           `removeKeysP` ["M-w", "M-<Space>"]
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
@@ -337,9 +333,8 @@ defaults = defaultConfig {
         focusFollowsMouse  = myFocusFollowsMouse,
         borderWidth        = myBorderWidth,
         modMask            = myModMask,
-        -- numlockMask deprecated in 0.9.1
-        -- numlockMask        = myNumlockMask,
-        workspaces         = myWorkspaces,
+
+        XMonad.workspaces  = myWorkspaces,
         normalBorderColor  = myNormalBorderColor,
         focusedBorderColor = myFocusedBorderColor,
 
@@ -353,4 +348,35 @@ defaults = defaultConfig {
         handleEventHook    = myEventHook,
         logHook            = myLogHook,
         startupHook        = myStartupHook
-    }
+}
+
+data Grid a = Grid | GridRatio Double deriving (Read, Show)
+
+defaultRatio :: Double
+defaultRatio = 16/9
+
+instance LayoutClass Grid a where
+    pureLayout Grid          r = pureLayout (GridRatio defaultRatio) r
+    pureLayout (GridRatio d) r = arrange d r . integrate
+arrange :: Double -> Rectangle -> [a] -> [(a, Rectangle)]
+arrange aspectRatio (Rectangle rx ry rw rh) st = zip st rectangles
+    where
+    nwins = length st
+    ncols = min nwins 3 --(nwins - 1) `div` 3 + 1
+    mincs = max 1 $ nwins `div` ncols
+    extrs = nwins - ncols * mincs
+    chop :: Int -> Dimension -> [(Position, Dimension)]
+    chop n m = ((0, m - k * fromIntegral (pred n)) :) . map (flip (,) k) . tail . reverse . take n . tail . iterate (subtract k') $ m'
+        where
+        k :: Dimension
+        k = m `div` fromIntegral n
+        m' = fromIntegral m
+        k' :: Position
+        k' = fromIntegral k
+    xcoords = chop ncols rw
+    ycoords = chop mincs rh
+    ycoords' = chop (succ mincs) rh
+    (xbase, xext) = splitAt (ncols - extrs) xcoords
+    rectangles = combine ycoords xbase ++ combine ycoords' xext
+        where
+        combine ys xs = [Rectangle (rx + x) (ry + y) w h | (x, w) <- xs, (y, h) <- ys]
