@@ -1,15 +1,19 @@
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 ;(load-file "/home/build/public/eng/elisp/google.el")
+(autoload 'python-mode "python-mode" "Python Mode." t)
 
 ;; XWindows preferences
 (unless (window-system)
       (menu-bar-mode -1))
 (when (window-system)
-  (set-scroll-bar-mode 'right))  ; show the scroll bar on the right side
+  (set-scroll-bar-mode 'right)
+  (setq confirm-kill-emacs 'y-or-n-p)
+  (setq ido-default-file-method 'other-frame)
+  )
 
 ;; Requires
 (require 'font-lock)
-(require 'guess-offset)
+;(require 'guess-offset)
 (require 'sourcepawn-mode)
 (require 'ido)
 (require 'highlight-symbol)
@@ -30,7 +34,8 @@
 (setq org-support-shift-select nil)
 (setq-default show-trailing-whitespace t)
 (setq-default truncate-lines t)
-(setq-default fill-column 80)
+(setq-default fill-column 72)
+(setq-default resize-mini-windows nil)
 (set-face-background 'column-marker-1 "magenta")
 (add-hook 'find-file-hook (lambda () (column-marker-1 80)))
 (add-hook 'first-change-hook (lambda () (column-marker-1 80)))
@@ -42,7 +47,7 @@
 (global-set-key (kbd "C-x f") 'ido-find-file)
 (global-set-key (kbd "C-x s") 'save-buffer)
 (global-set-key (kbd "RET") 'newline-and-indent)
-(global-set-key [(control f3)] 'highlight-symbol-at-point)
+(global-set-key [f4] 'highlight-symbol-at-point)
 (global-set-key [(meta f3)] 'highlight-symbol-prev)
 (global-set-key [(shift f3)] 'highlight-symbol-prev)
 (global-set-key [C-insert] 'overwrite-mode)
@@ -83,14 +88,10 @@
             (set-face-foreground 'py-pseudo-keyword-face "dodger blue")
             ))
 
-;;set intentation preferences
-;;(setq tab-width 8)
-;;(setq c-basic-offset 2)
-;;(setq indent-tabs-mode nil)
-
 (add-hook 'text-mode-hook
           (lambda ()
-            (setq truncate-lines nil)))
+            (setq truncate-lines nil)
+            (auto-fill-mode)))
 
 (add-hook 'sh-mode-hook
           (lambda ()
@@ -106,7 +107,7 @@
 
 (setq-default font-lock-use-fonts t)
 (setq-default font-lock-use-colors t)
-(setq-default font-lock-use-maximal-decoration t)
+(setq-default font-lock-maximum-decoration t)
 (setq-default scroll-preserve-screen-position t)
 (setq-default indent-tabs-mode nil)
 (setq-default default-major-mode 'text-mode)
@@ -157,6 +158,14 @@
  '(flyspell-issue-welcome-flag nil)
  '(haskell-font-lock-symbols t)
  '(haskell-program-name "ghci -fglasgow-exts")
+ '(highlight-symbol-on-navigation-p t)
+ '(ido-default-file-method (quote selected-window))
+ '(py-continuation-offset 2)
+ '(py-indent-offset 2)
+ '(py-smart-indentation nil)
+ '(python-continuation-offset 2)
+ '(python-guess-indent nil)
+ '(python-indent 2)
  '(safe-local-variable-values (quote ((Encoding . utf-8)))))
 
 ;; Insertion of Dates.
@@ -218,3 +227,41 @@
 	(error "No SCC at point")))))
 (global-set-key (kbd "C-c y") 'insert-scc-at-point)
 (global-set-key (kbd "C-c k") 'kill-scc-at-point)
+(custom-set-faces
+  ;; custom-set-faces was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ )
+
+(defadvice py-compute-indentation (after py-compute-indentation)
+  (save-excursion
+    (beginning-of-line)
+    (let* ((bod (py-point 'bod))
+           (pps (parse-partial-sexp bod (point)))
+           (boipps (parse-partial-sexp bod (py-point 'boi)))
+           placeholder)
+      (cond
+       ;; are we on a continuation line?
+       ((py-continuation-line-p)
+        (let ((startpos (point))
+              (open-bracket-pos (py-nesting-level))
+              endpos searching found state cind cline)
+          (if open-bracket-pos
+              (progn
+                (setq endpos (py-point 'bol))
+                (py-goto-initial-line)
+                (setq cind (current-indentation))
+                (setq cline cind)
+                (dolist (bp
+                         (nth 9 (save-excursion
+                                  (parse-partial-sexp (point) endpos)))
+                         cind)
+                  (if (search-forward "\n" bp t) (setq cline cind))
+                  (goto-char (1+ bp))
+                  (skip-chars-forward " \t")
+                  (setq ad-return-value
+                        (+ ad-return-value
+                           (if (memq (following-char) '(?\n ?# ?\\))
+                               py-continuation-offset
+                             0))))))))))))
