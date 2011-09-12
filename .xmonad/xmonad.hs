@@ -200,9 +200,9 @@ setBorders ws bw = withDisplay $ \d -> mapM_ (\w -> io $ setWindowBorderWidth d 
 
 bordersOn classes = ModifiedLayout $ OnlyBordersOn classes []
 
-myGrid = Mirror Grid
+myGrid = Grid
 myLayout = --noBorders $
-           bordersOn ["Emacs", "Gnome-terminal"] $
+           bordersOn [{-"Emacs",-}"Gnome-terminal"] $
            mkToggle (FULL ?? MIRROR ?? EOT) $
            tiled ||| myGrid
   where
@@ -213,7 +213,7 @@ myLayout = --noBorders $
     nmaster = 1
 
     -- Default proportion of screen occupied by master pane
-    ratio   = 1/2
+    ratio   = 2/3
 
     -- Percent of screen to increment by when resizing panes
     delta   = 3/100
