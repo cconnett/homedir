@@ -83,7 +83,7 @@
 (require 'thingatpt)
 (require 'hi-lock)
 (require 'hexrgb)
-(eval-when-compile (require 'cl))
+(require 'cl)
 
 (push "^No symbol at point$" debug-ignored-errors)
 
@@ -137,6 +137,10 @@ disabled for all buffers."
 (defvar highlight-symbol-list nil)
 ;(make-variable-buffer-local 'highlight-symbol-list)
 
+(defvar highlight-symbol-last-symbol nil)
+(defvar highlight-symbol-last-bounds nil)
+(defvar highlight-symbol-last-point nil)
+
 (defconst highlight-symbol-border-pattern
   (if (>= emacs-major-version 22) '("\\_<" . "\\_>") '("\\<" . "\\>")))
 
@@ -155,6 +159,18 @@ Highlighting takes place after `highlight-symbol-idle-delay'."
     (remove-hook 'post-command-hook 'highlight-symbol-mode-post-command t)
     (highlight-symbol-mode-remove-temp)
     (kill-local-variable 'highlight-symbol)))
+
+(defconst highlight-symbol-saturation-alist
+  (mapcar (lambda (pair) (list (/ (car pair) 360.0) (cadr pair)))
+          '(
+            (12 0.3) (13 0.8) (20 0.8) (25 0.75) (30 0.8) (35 0.9)
+            (60 0.8) (120 0.75) (125 0.75) (130 0.9) (140 1.0) (150 0.6)
+            (160 1.0) (170 0.8) (180 1.0) (210 0.4) (220 0.5) (230 0.45)
+            (240 0.35) (250 0.4) (260 0.55) (270 0.6) (290 0.7) (300 0.6)
+            (320 0.6) (330 0.5) (340 0.4)
+            ))
+  ;((0.0 0.6) (0.15 0.75) (0.3333 0.8) (0.4 0.8) (0.6667 0.5) (0.7 0.3))
+  )
 
 ;;;###autoload
 (defun highlight-symbol-at-point ()
@@ -178,9 +194,24 @@ element in of `highlight-symbol-faces'."
       ;; add
       (when (equal symbol highlight-symbol)
         (highlight-symbol-mode-remove-temp))
-      (let ((color (hexrgb-hsv-to-hex
-                    (/ (mod (sxhash symbol) 360) 360.0) 0.7 1.0))
-            )
+      (let* ((complete-saturation-alist
+              (let ((begin (car highlight-symbol-saturation-alist))
+                    (end (car (last highlight-symbol-saturation-alist))))
+                (append `((,(- (car end) 1) ,(cadr end)))
+                        highlight-symbol-saturation-alist
+                        `((,(+ (car begin) 1) ,(cadr begin))))))
+             (hue (/ (mod (sxhash symbol) 360) 360.0))
+             (bottom (find-if (lambda (item) (< hue (car item)))
+                              complete-saturation-alist :from-end))
+             (top    (find-if (lambda (item) (> hue (car item)))
+                              complete-saturation-alist))
+             (saturation (/ (+ (* (- hue (car bottom)) (cadr top))
+                               (* (- (car top) hue) (cadr bottom)))
+                            (- (car top) (car bottom))))
+             (color (hexrgb-hsv-to-hex
+                     hue saturation 1.0))
+             )
+        (print bottom)
         (setq color `((background-color . ,color)
                       (foreground-color . "black")))
         ;; highlight
@@ -198,8 +229,14 @@ element in of `highlight-symbol-faces'."
 (defun highlight-symbol-remove-all ()
   "Remove symbol highlighting in buffer."
   (interactive)
-  (mapc 'hi-lock-unface-buffer highlight-symbol-list)
-  (setq highlight-symbol-list nil))
+  (mapc (lambda (buffer)
+          (set-buffer buffer)
+          (mapc 'hi-lock-unface-buffer highlight-symbol-list)
+          (setq highlight-symbol-list nil)
+          )
+        (buffer-list)
+        )
+  )
 
 ;;;###autoload
 (defun highlight-symbol-next ()
@@ -245,8 +282,15 @@ element in of `highlight-symbol-faces'."
   (query-replace-regexp (highlight-symbol-get-symbol) replacement))
 
 (defun highlight-symbol-get-symbol ()
-  "Return a regular expression dandifying the symbol at point."
+  "Return a regular expressio dandifying the symbol at point."
   (let ((symbol (thing-at-point 'symbol)))
+    (if symbol
+        (progn
+          (setq highlight-symbol-last-symbol symbol)
+          (setq highlight-symbol-last-bounds (bounds-of-thing-at-point 'symbol))
+          (setq highlight-symbol-last-point (point))
+          )
+      (setq symbol highlight-symbol-last-symbol))
     (when symbol (concat (car highlight-symbol-border-pattern)
                          (regexp-quote symbol)
                          (cdr highlight-symbol-border-pattern)))))
@@ -285,8 +329,10 @@ DIR has to be 1 or -1."
   (let ((symbol (highlight-symbol-get-symbol)))
     (if symbol
         (let* ((case-fold-search nil)
-               (bounds (bounds-of-thing-at-point 'symbol))
-               (offset (- (point) (if (< 0 dir) (cdr bounds) (car bounds)))))
+               (b (bounds-of-thing-at-point 'symbol))
+               (bounds (if b b highlight-symbol-last-bounds))
+               (point (if b (point) highlight-symbol-last-point))
+               (offset (- point (if (< 0 dir) (cdr bounds) (car bounds)))))
           (unless (eq last-command 'highlight-symbol-jump)
             (push-mark))
           ;; move a little, so we don't find the same instance again
