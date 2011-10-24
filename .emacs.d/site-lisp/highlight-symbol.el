@@ -194,36 +194,40 @@ element in of `highlight-symbol-faces'."
       ;; add
       (when (equal symbol highlight-symbol)
         (highlight-symbol-mode-remove-temp))
-      (let* ((complete-saturation-alist
-              (let ((begin (car highlight-symbol-saturation-alist))
-                    (end (car (last highlight-symbol-saturation-alist))))
-                (append `((,(- (car end) 1) ,(cadr end)))
-                        highlight-symbol-saturation-alist
-                        `((,(+ (car begin) 1) ,(cadr begin))))))
-             (hue (/ (mod (sxhash symbol) 360) 360.0))
-             (bottom (find-if (lambda (item) (< hue (car item)))
-                              complete-saturation-alist :from-end))
-             (top    (find-if (lambda (item) (> hue (car item)))
-                              complete-saturation-alist))
-             (saturation (/ (+ (* (- hue (car bottom)) (cadr top))
-                               (* (- (car top) hue) (cadr bottom)))
-                            (- (car top) (car bottom))))
-             (color (hexrgb-hsv-to-hex
-                     hue saturation 1.0))
-             )
-        (print bottom)
-        (setq color `((background-color . ,color)
-                      (foreground-color . "black")))
-        ;; highlight
-        (with-no-warnings
-          (mapc (lambda (buffer)
-                  (set-buffer buffer)
-                  (if (< emacs-major-version 22)
-                      (hi-lock-set-pattern `(,symbol (0 (quote ,color) t)))
-                    (hi-lock-set-pattern symbol color))
-                  )
-                (buffer-list)))
-        (push symbol highlight-symbol-list)))))
+      (mapc (lambda (buffer)
+              (set-buffer buffer)
+              (highlight-symbol-current-buffer symbol))
+            (buffer-list))
+      )))
+
+(defun highlight-symbol-current-buffer (symbol)
+  (let* ((complete-saturation-alist
+          (let ((begin (car highlight-symbol-saturation-alist))
+                (end (car (last highlight-symbol-saturation-alist))))
+            (append `((,(- (car end) 1) ,(cadr end)))
+                    highlight-symbol-saturation-alist
+                    `((,(+ (car begin) 1) ,(cadr begin))))))
+         (hue (/ (mod (sxhash symbol) 360) 360.0))
+         (bottom (find-if (lambda (item) (< hue (car item)))
+                          complete-saturation-alist :from-end))
+         (top    (find-if (lambda (item) (> hue (car item)))
+                          complete-saturation-alist))
+         (saturation (/ (+ (* (- hue (car bottom)) (cadr top))
+                           (* (- (car top) hue) (cadr bottom)))
+                        (- (car top) (car bottom))))
+         (color (hexrgb-hsv-to-hex
+                 hue saturation 1.0))
+         )
+    (print bottom)
+    (setq color `((background-color . ,color)
+                  (foreground-color . "black")))
+    ;; highlight
+    (with-no-warnings
+      (if (< emacs-major-version 22)
+          (hi-lock-set-pattern `(,symbol (0 (quote ,color) t)))
+        (hi-lock-set-pattern symbol color))
+      )
+    (push symbol highlight-symbol-list)))
 
 ;;;###autoload
 (defun highlight-symbol-remove-all ()
@@ -348,3 +352,9 @@ DIR has to be 1 or -1."
 (provide 'highlight-symbol)
 
 ;;; highlight-symbol.el ends here
+
+(add-hook 'find-file-hook
+          (lambda ()
+            (mapc 'highlight-symbol-current-buffer
+                  highlight-symbol-list
+                  )))
