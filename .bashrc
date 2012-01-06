@@ -13,6 +13,7 @@ export LESS='-S -R -F -X'
 
 export HISTCONTROL=ignoreboth
 export HISTIGNORE=ls:ll:la:l:cd:pwd:exit:su:df:clear
+export HISTSIZE=15000
 shopt -s histappend
 shopt -s checkwinsize
 
@@ -23,15 +24,17 @@ export ACK_COLOR_FILENAME='on_cyan'
 export ACK_COLOR_LINENO='bold blue'
 export GIT_CEILING_DIRECTORIES=$HOME
 export GIT_EDITOR=$EDITOR
+export GDK_NATIVE_WINDOWS=1 # http://debbugs.gnu.org/cgi-bin/bugreport.cgi?bug=4870
 
 alias d="ls --color"
 alias ls='ls --color=auto -B'
 alias ll="ls -ltr"
-alias la="ll -A"
+alias lla="ll -A"
+alias la="lla"
 alias locate='locate -i'
 alias getack='curl http://betterthangrep.com/ack-standalone > ~/bin/ack && chmod 0755 ~/bin/ack'
 alias gitg='gitg --all >& /dev/null &'
-alias gitk='gitk --all >& /dev/null &'
+alias gitkk='gitk $(git branch | tr "\n*" "  ")>& /dev/null &'
 alias queeg='ssh -XYCA cxc0117@queeg.cs.rit.edu'
 alias elvis='ssh -XYCA cxc0117@elvis.cs.rit.edu'
 alias doors='ssh -XYCA cxc0117@doors.cs.rit.edu'

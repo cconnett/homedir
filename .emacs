@@ -6,6 +6,7 @@
 (unless (window-system)
       (menu-bar-mode -1))
 (when (window-system)
+  (setq default-frame-alist '((left-fringe . 0) (right-fringe . 0)))
   (set-scroll-bar-mode 'right)
   (setq confirm-kill-emacs 'y-or-n-p)
   (setq ido-default-file-method 'other-frame)
@@ -18,6 +19,7 @@
 (require 'ido)
 (require 'highlight-symbol)
 (require 'column-marker)
+(require 'flymake)
 
 (ido-mode t)
 (setq ido-enable-flex-matching t)
@@ -62,14 +64,39 @@
 (global-set-key [f4] 'highlight-symbol-at-point)
 (global-set-key [(meta f3)] 'highlight-symbol-prev)
 (global-set-key [(shift f3)] 'highlight-symbol-prev)
+(global-set-key [(meta f2)] 'highlight-symbol-prev-force)
+(global-set-key [(shift f2)] 'highlight-symbol-prev-force)
 (global-set-key [C-insert] 'overwrite-mode)
 (global-set-key [f3] 'highlight-symbol-next)
+(global-set-key [f2] 'highlight-symbol-next-force)
 (global-set-key [mouse-4] 'scroll-down)
 (global-set-key [mouse-5] 'scroll-up)
 (global-set-key [vertical-scroll-bar down-mouse-1] 'scroll-bar-drag)
 (global-set-key [vertical-scroll-bar drag-mouse-1] 'scroll-bar-drag)
+(global-set-key (kbd "M-p")
+                (lambda ()
+                  (interactive)
+                  (flymake-goto-prev-error)
+                  (let ((err-info (flymake-find-err-info
+                                   flymake-err-info
+                                   (flymake-current-line-no))))
+                    (if (car err-info)
+                        (message "%s"
+                                 (flymake-ler-text (caar err-info)))
+                      (message "No lint errors.")))))
+(global-set-key (kbd "M-n")
+                (lambda ()
+                  (interactive)
+                  (flymake-goto-next-error)
+                  (let ((err-info (flymake-find-err-info
+                                   flymake-err-info
+                                   (flymake-current-line-no))))
+                    (if (car err-info)
+                        (message "%s"
+                                 (flymake-ler-text (caar err-info)))
+                      (message "No lint errors.")))))
 (global-unset-key (kbd "<insert>"))
-(global-unset-key [f2])
+;(global-unset-key [f2])
 (global-unset-key [C-z])
 (global-unset-key [(control z)])
 (global-unset-key [(control x)(control z)])
@@ -99,6 +126,7 @@
             (set (make-local-variable 'font-lock-comment-face) 'py-comment-face)
             (set (make-local-variable 'font-lock-keyword-face) 'py-keyword-face)
             (set-face-foreground 'py-pseudo-keyword-face "dodger blue")
+            (flymake-mode t)
             ))
 
 (add-hook 'text-mode-hook
@@ -181,6 +209,24 @@
  '(python-indent 2)
  '(safe-local-variable-values (quote ((Encoding . utf-8)))))
 
+(defun pcl ()
+  (interactive)
+  (insert (format "%s" (python-continuation-line-p))))
+(defun pci ()
+  (interactive)
+  (insert (format "%s" (python-calculate-indentation))))
+
+(defun flymake-pylint-init ()
+  (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                     'flymake-create-temp-inplace))
+         (local-file (file-relative-name
+                      temp-file
+                      (file-name-directory buffer-file-name))))
+    (list "~/bin/mypylint" (list local-file))))
+
+(add-to-list 'flymake-allowed-file-name-masks
+             '("\\.py\\'" flymake-pylint-init))
+
 ;; Insertion of Dates.
 (defun insert-date-string ()
   "Insert a nicely formated date string."
@@ -245,6 +291,8 @@
   ;; If you edit it by hand, you could mess it up, so be careful.
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
+ '(flymake-errline ((((class color)) (:underline "red"))))
+ '(flymake-warnline ((((class color)) (:underline "orange"))))
  )
 
 (defadvice py-compute-indentation (after py-compute-indentation)

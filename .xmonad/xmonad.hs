@@ -10,16 +10,18 @@ import System.Process
 import XMonad hiding ((|||))
 import XMonad.Actions.CycleSelectedLayouts
 import XMonad.Config.Gnome
-import XMonad.Layout.LayoutCombinators ((|||))
+import XMonad.Layout.LayoutCombinators ((|||), (**|*), (**//*))
 import XMonad.Layout.LayoutModifier
 import XMonad.Layout.NoBorders
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
+import XMonad.Layout.ThreeColumns
 import XMonad.StackSet
 import XMonad.Util.Dmenu
 import XMonad.Util.EZConfig
 import XMonad.Util.Replace
 import XMonad.Actions.CopyWindow
+import XMonad.Core
 
 import qualified Data.Map        as M
 import qualified XMonad.StackSet as W
@@ -65,7 +67,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
      -- Rotate through the available layout algorithms
     , ((modm,               xK_Insert), sendMessage (Toggle MIRROR))
     , ((modm              , xK_F11   ), sendMessage (Toggle FULL))
-    , ((modm              , xK_F12   ), cycleThroughLayouts ["Tall", description myGrid])
+    , ((modm              , xK_F12   ), cycleThroughLayouts [description myTiled
+                                                            ,description myGrid])
 
     --  Reset the layouts on the current workspace to default
     , ((modm .|. shiftMask, xK_Insert), setLayout $ XMonad.layoutHook conf)
@@ -73,8 +76,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- Resize viewed windows to the correct size
     , ((modm,               xK_n     ), refresh)
 
-    -- Move focus to the next window
-    , ((modm,               xK_Tab   ), windows W.focusDown)
+    -- Move focus to the next visible workspace
+    , ((modm,               xK_Tab   ), windows focusNextVisible)
 
     -- Move focus to the next window
     , ((modm,               xK_j     ), windows W.focusDown)
@@ -83,7 +86,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm,               xK_k     ), windows W.focusUp  )
 
     -- Move focus to the previous window
-    , ((modm .|. shiftMask, xK_Tab   ), windows W.focusUp  )
+    , ((modm .|. shiftMask, xK_Tab   ), windows focusPrevVisible  )
 
     -- Move focus to the master window
     , ((modm,               xK_m     ), windows W.focusMaster  )
@@ -125,10 +128,17 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
 -- Workspaces
     [((mod1Mask, key), do
+        focusedScreen <- withWindowSet (return . screen . current)
+        --focus to left
         screenWorkspace 0 >>= flip whenJust (windows . W.view)
+        --set windows on focus to virtual desktop pair's left
         windows $ W.view (screenPair !! 0)
+        --focus to right
         screenWorkspace 1 >>= flip whenJust (windows . W.view)
+        --set windows on focused screen to virtual desktop pair's right
         windows $ W.view (screenPair !! 1)
+        -- focus to original screen
+        screenWorkspace focusedScreen >>= flip whenJust (windows . W.view)
      )
         | (screenPair, key) <- zip (pair $ XMonad.workspaces conf) [xK_1 .. xK_9]
         --, (f, extraMod) <- [(W.greedyView, 0), (W.shift, shiftMask)]
@@ -141,6 +151,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     --    , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
     -- ++
     []
+
+focusNextVisible,focusPrevVisible :: WindowSet -> WindowSet
+focusNextVisible ws = W.view (tag $ workspace $ head $ visible ws ++ [current ws]) ws
+focusPrevVisible ws = W.view (tag $ workspace $ last $ current ws : visible ws) ws
 
 ------------------------------------------------------------------------
 -- Mouse bindings: default actions bound to mouse events
@@ -201,22 +215,14 @@ setBorders ws bw = withDisplay $ \d -> mapM_ (\w -> io $ setWindowBorderWidth d 
 bordersOn classes = ModifiedLayout $ OnlyBordersOn classes []
 
 myGrid = Grid
+myThreeColumn = ThreeColMid 1 (3/100) (1/3)
 myLayout = --noBorders $
            bordersOn [{-"Emacs",-}"Gnome-terminal"] $
            mkToggle (FULL ?? MIRROR ?? EOT) $
-           tiled ||| myGrid
-  where
-    -- default tiling algorithm partitions the screen into two panes
-    tiled   = Tall nmaster delta ratio
+           myTiled ||| myThreeColumn ||| myGrid
 
-    -- The default number of windows in the master pane
-    nmaster = 1
-
-    -- Default proportion of screen occupied by master pane
-    ratio   = 2/3
-
-    -- Percent of screen to increment by when resizing panes
-    delta   = 3/100
+--myTiled   = (Tall 0 1 0 **//* Tall 0 1 0) **|* (Tall 0 1 0)
+myTiled = Tall 1 (3/100) (64/100)
 
 ------------------------------------------------------------------------
 -- Window rules:
@@ -304,22 +310,22 @@ choices alist = do
   when ((not . null) answer) $ maybe (return ()) id $ lookup answer alist
 
 lock,logout,reload :: X ()
-lock = io $ spawn "gnome-screensaver-command -l"
+lock = io $ spawn "xscreensaver-command -lock"
 logout = io $ exitWith ExitSuccess
 reload = io $ spawn "xmonad --restart"
 
 myConfig = defaults
-           `additionalKeysP` [("M-o", runOrCopy "google-chrome" (className =? "Google-chrome"))
+           `additionalKeysP` [("M-o", spawn "google-chrome" {-(className =? "Google-chrome")-})
                              ,("M-e", spawn "emacs")
                              ,("M4-e", spawn "emacs")
-                             ,("M-n", spawn "nautilus ~")
+                             --,("M-n", spawn "nautilus ~")
                              ,("M-`", lock)
                              ,("M-<Esc>", choices [("Lock", lock),
                                                    ("Logout", confirm "Logout?" logout),
                                                    ("Reload", reload)])
                              ,("M-S-<Esc>", confirm "Reload?" reload)
                              ]
-           `removeKeysP` ["M-w", "M-<Space>"]
+           `removeKeysP` ["M-w", "M-<Space>", "M-n"]
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will

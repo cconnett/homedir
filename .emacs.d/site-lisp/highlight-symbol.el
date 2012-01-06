@@ -198,7 +198,14 @@ element in of `highlight-symbol-faces'."
               (set-buffer buffer)
               (highlight-symbol-current-buffer symbol))
             (buffer-list))
+      (push symbol highlight-symbol-list)
       )))
+
+;; (defun getcolor (symbol)
+;;   (let ((hash (mod (sxhash symbol) 195.0)))
+;;     (if (< hash 117.0) (hexrgb-hsv-to-hex (/ (+ 18.0 hash) 360.0) .8 1)
+;;       (if (< hash 147.0) (hexrgb-hsv-to-hex (/ (+ 68.0 hash) 360.0) .8 1)
+;;         (hexrgb-hsv-to-hex (/ (+ 138.0 hash) 360.0) .8 1)))))
 
 (defun highlight-symbol-current-buffer (symbol)
   (let* ((complete-saturation-alist
@@ -218,16 +225,15 @@ element in of `highlight-symbol-faces'."
          (color (hexrgb-hsv-to-hex
                  hue saturation 1.0))
          )
-    (print bottom)
+  ;; (let* ((color (getcolor symbol)))
     (setq color `((background-color . ,color)
                   (foreground-color . "black")))
     ;; highlight
     (with-no-warnings
       (if (< emacs-major-version 22)
           (hi-lock-set-pattern `(,symbol (0 (quote ,color) t)))
-        (hi-lock-set-pattern symbol color))
-      )
-    (push symbol highlight-symbol-list)))
+        (hi-lock-set-pattern symbol color)))
+    ))
 
 ;;;###autoload
 (defun highlight-symbol-remove-all ()
@@ -253,6 +259,18 @@ element in of `highlight-symbol-faces'."
   "Jump to the previous location of the symbol at point within the function."
   (interactive)
   (highlight-symbol-jump -1))
+
+;;;###autoload
+(defun highlight-symbol-next-force ()
+  "Jump to the next location of the symbol last jumped to / highlighted."
+  (interactive)
+  (highlight-symbol-jump 2))
+
+;;;###autoload
+(defun highlight-symbol-prev-force ()
+  "Jump to the previous location of the symbol last jumped to / highlighted."
+  (interactive)
+  (highlight-symbol-jump -2))
 
 ;;;###autoload
 (defun highlight-symbol-next-in-defun ()
@@ -286,7 +304,7 @@ element in of `highlight-symbol-faces'."
   (query-replace-regexp (highlight-symbol-get-symbol) replacement))
 
 (defun highlight-symbol-get-symbol ()
-  "Return a regular expressio dandifying the symbol at point."
+  "Return a regular expression dandifying the symbol at point."
   (let ((symbol (thing-at-point 'symbol)))
     (if symbol
         (progn
@@ -329,8 +347,10 @@ create the new one."
 
 (defun highlight-symbol-jump (dir)
   "Jump to the next or previous occurence of the symbol at point.
-DIR has to be 1 or -1."
-  (let ((symbol (highlight-symbol-get-symbol)))
+DIR has to be 1 or -1 or 2 or -2."
+  (let ((symbol (if (equal (abs dir) 1)
+                    (highlight-symbol-get-symbol)
+                  highlight-symbol-last-symbol)))
     (if symbol
         (let* ((case-fold-search nil)
                (b (bounds-of-thing-at-point 'symbol))
@@ -353,8 +373,8 @@ DIR has to be 1 or -1."
 
 ;;; highlight-symbol.el ends here
 
-(add-hook 'find-file-hook
-          (lambda ()
-            (mapc 'highlight-symbol-current-buffer
-                  highlight-symbol-list
-                  )))
+(defun highlight-symbol-rehighlight-current-buffer ()
+  (interactive)
+  (mapc 'highlight-symbol-current-buffer highlight-symbol-list))
+
+(add-hook 'find-file-hook 'highlight-symbol-rehighlight-current-buffer)
