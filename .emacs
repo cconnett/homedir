@@ -53,6 +53,7 @@
 (global-set-key (kbd "C-c i") 'insert-date-string)
 (global-set-key (kbd "C-c s") 'sort-lines)
 (global-set-key (kbd "C-c #") 'comment-region)
+(global-set-key (kbd "C-c $") 'uncomment-region)
 (global-set-key (kbd "C-x f") 'ido-find-file)
 (global-set-key (kbd "C-x s") 'save-buffer)
 (global-set-key (kbd "RET") 'newline-and-indent)
@@ -138,6 +139,11 @@
           (lambda ()
             (set-face-foreground 'sh-heredoc-face "dark magenta")))
 
+(add-hook 'html-mode-hook
+          (lambda ()
+            (auto-fill-mode nil)
+            (setq truncate-lines t)))
+
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
 (remove-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
 
@@ -159,31 +165,37 @@
             interpreter-mode-alist))
 
 (setq auto-mode-alist
-      (append '(("\\.C$"  . c++-mode)
-                ("\\.cc$" . c++-mode)
-                ("\\.hh$" . c++-mode)
-                ("\\.c$"  . c-mode)
-                ("\\.h$"  . c++-mode)
-                ("\\.gcl$"  . c++-mode)
-                ("\\.model$"  . c++-mode)
-                ("\\.py$" . python-mode)
-                ("\\.PY$" . python-mode)
-                ("\\.pyx$". python-mode)
-                ("\\.m$"  . matlab-mode)
-                ("\\.tex$". latex-mode)
-                ("\\.pl$" . perl-mode)
-                ("\\.pro$" . prolog-mode)
-                ("\\.[hg]s$" . haskell-mode)
-                ("\\.hi$" . haskell-mode)
-                ("\\.l[hg]s$" . literate-haskell-mode)
-                ("\\.ebuild$" . shell-script-mode)
-                ("\\.sp$" . sourcepawn-mode)
-                ("\\.txt$" . text-mode)
-                ("\\.org$" . org-mode)
-                ("todo$" . org-mode)
+      (append '(
+                ("BUILD$"  . python-mode)
                 ("TODO$" . org-mode)
                 ("Tupfile$" . makefile-mode)
+                ("\\.C$"  . c++-mode)
+                ("\\.PY$" . python-mode)
+                ("\\.[hg]s$" . haskell-mode)
+                ("\\.c$"  . c-mode)
+                ("\\.cc$" . c++-mode)
+                ("\\.ebuild$" . shell-script-mode)
+                ("\\.gcl$"  . c++-mode)
+                ("\\.h$"  . c++-mode)
+                ("\\.hh$" . c++-mode)
+                ("\\.hi$" . haskell-mode)
+                ;("\\.js$" . espresso-mode)
+                ;("\\.json$" . espresso-mode)
+                ("\\.l[hg]s$" . literate-haskell-mode)
+                ("\\.m$"  . matlab-mode)
+                ("\\.model$"  . c++-mode)
+                ("\\.org$" . org-mode)
+                ("\\.pl$" . perl-mode)
+                ("\\.pp$"  . c++-mode)
+                ("\\.pro$" . prolog-mode)
+                ("\\.py$" . python-mode)
+                ("\\.pyx$". python-mode)
+                ("\\.sp$" . sourcepawn-mode)
+                ("\\.tex$". latex-mode)
+                ("\\.tpl$"  . html-mode)
+                ("\\.txt$" . text-mode)
                 ("generated_Tupdeps$" . makefile-mode)
+                ("todo$" . org-mode)
                 )
               auto-mode-alist))
 
@@ -196,18 +208,21 @@
   ;; If you edit it by hand, you could mess it up, so be careful.
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
+ '(css-indent-offset 2)
+ '(flymake-start-syntax-check-on-newline nil)
  '(flyspell-issue-welcome-flag nil)
  '(haskell-font-lock-symbols t)
  '(haskell-program-name "ghci -fglasgow-exts")
  '(highlight-symbol-on-navigation-p t)
  '(ido-default-file-method (quote selected-window))
+ '(js2-auto-indent-flag nil)
+ '(js2-mirror-mode t)
+ '(js2-mode-escape-quotes nil)
  '(py-continuation-offset 2)
  '(py-indent-offset 2)
  '(py-smart-indentation nil)
- '(python-continuation-offset 2)
- '(python-guess-indent nil)
- '(python-indent 2)
- '(safe-local-variable-values (quote ((Encoding . utf-8)))))
+ '(safe-local-variable-values (quote ((Encoding . utf-8))))
+ '(sgml-basic-offset 2))
 
 (defun pcl ()
   (interactive)
@@ -292,37 +307,36 @@
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
  '(flymake-errline ((((class color)) (:underline "red"))))
- '(flymake-warnline ((((class color)) (:underline "orange"))))
- )
+ '(flymake-warnline ((((class color)) (:underline "orange")))))
 
-(defadvice py-compute-indentation (after py-compute-indentation)
-  (save-excursion
-    (beginning-of-line)
-    (let* ((bod (py-point 'bod))
-           (pps (parse-partial-sexp bod (point)))
-           (boipps (parse-partial-sexp bod (py-point 'boi)))
-           placeholder)
-      (cond
-       ;; are we on a continuation line?
-       ((py-continuation-line-p)
-        (let ((startpos (point))
-              (open-bracket-pos (py-nesting-level))
-              endpos searching found state cind cline)
-          (if open-bracket-pos
-              (progn
-                (setq endpos (py-point 'bol))
-                (py-goto-initial-line)
-                (setq cind (current-indentation))
-                (setq cline cind)
-                (dolist (bp
-                         (nth 9 (save-excursion
-                                  (parse-partial-sexp (point) endpos)))
-                         cind)
-                  (if (search-forward "\n" bp t) (setq cline cind))
-                  (goto-char (1+ bp))
-                  (skip-chars-forward " \t")
-                  (setq ad-return-value
-                        (+ ad-return-value
-                           (if (memq (following-char) '(?\n ?# ?\\))
-                               py-continuation-offset
-                             0))))))))))))
+;; (defadvice py-compute-indentation (after py-compute-indentation)
+;;   (save-excursion
+;;     (beginning-of-line)
+;;     (let* ((bod (py-point 'bod))
+;;            (pps (parse-partial-sexp bod (point)))
+;;            (boipps (parse-partial-sexp bod (py-point 'boi)))
+;;            placeholder)
+;;       (cond
+;;        ;; are we on a continuation line?
+;;        ((py-continuation-line-p)
+;;         (let ((startpos (point))
+;;               (open-bracket-pos (py-nesting-level))
+;;               endpos searching found state cind cline)
+;;           (if open-bracket-pos
+;;               (progn
+;;                 (setq endpos (py-point 'bol))
+;;                 (py-goto-initial-line)
+;;                 (setq cind (current-indentation))
+;;                 (setq cline cind)
+;;                 (dolist (bp
+;;                          (nth 9 (save-excursion
+;;                                   (parse-partial-sexp (point) endpos)))
+;;                          cind)
+;;                   (if (search-forward "\n" bp t) (setq cline cind))
+;;                   (goto-char (1+ bp))
+;;                   (skip-chars-forward " \t")
+;;                   (setq ad-return-value
+;;                         (+ ad-return-value
+;;                            (if (memq (following-char) '(?\n ?# ?\\))
+;;                                py-continuation-offset
+;;                              0))))))))))))

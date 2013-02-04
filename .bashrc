@@ -4,7 +4,7 @@
 if [[ ${EUID} == 0 ]] ; then
     PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
 else
-    PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w\[\033[01;31m\]$(if [ "$HOME" != "$PWD" ]; then git branch 2> /dev/null | grep -e "* " | cut -d"*" -f2; fi)\[\033[01;34m\]\n$\[\033[00m\] '
+    PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w\[\033[01;31m\]$(if [ $(basename $(dirname "$PWD")) == "review" ]; then echo " *$(basename "$PWD")"; elif [ "$HOME" != "$PWD" ]; then git branch 2> /dev/null | grep -e "* " | cut -d"*" -f2; fi)\[\033[01;34m\]\n$\[\033[00m\] '
 fi
 
 export PATH=~/bin:/usr/local/bin:$PATH
@@ -12,7 +12,7 @@ export EDITOR='emacs -nw --no-splash'
 export LESS='-S -R -F -X'
 
 export HISTCONTROL=ignoreboth
-export HISTIGNORE=ls:ll:la:l:cd:pwd:exit:su:df:clear
+export HISTIGNORE=ls:ll:la:l:cd:pwd:exit:su:df:clear:sl:reset
 export HISTSIZE=15000
 shopt -s histappend
 shopt -s checkwinsize
@@ -26,12 +26,17 @@ export GIT_CEILING_DIRECTORIES=$HOME
 export GIT_EDITOR=$EDITOR
 export GDK_NATIVE_WINDOWS=1 # http://debbugs.gnu.org/cgi-bin/bugreport.cgi?bug=4870
 
+alias sl=ls
 alias d="ls --color"
 alias ls='ls --color=auto -B'
 alias ll="ls -ltr"
 alias lla="ll -A"
 alias la="lla"
 alias locate='locate -i'
+alias gap='git add -p'
+alias gcm='git commit -m'
+alias gcp='git checkout -p'
+alias gdc='git diff --cached'
 alias getack='curl http://betterthangrep.com/ack-standalone > ~/bin/ack && chmod 0755 ~/bin/ack'
 alias gitg='gitg --all >& /dev/null &'
 alias gitkk='gitk $(git branch | tr "\n*" "  ")>& /dev/null &'
