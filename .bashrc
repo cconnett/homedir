@@ -49,7 +49,7 @@ alias please=sudo
 alias math='rlwrap math'
 alias emacs='emacs 2> /dev/null'
 
-if   [ $(hostname -d) == "cs.rit.edu" ]; then
+if   [ "$(hostname -d)" == "cs.rit.edu" ]; then
     export PATH=/usr/gnu/bin:/opt/csw/bin:/bin:/sbin:/usr/bin:/usr/sbin:$PATH
     export VISUAL=$EDITOR
     alias grep='ggrep --color=auto'
