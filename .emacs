@@ -1,6 +1,11 @@
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
-;(load-file "/home/build/public/eng/elisp/google.el")
-(autoload 'python-mode "python-mode" "Python Mode." t)
+(add-to-list 'load-path "~/project/READONLY/google3/configlang/ncl/ide/")
+;(autoload 'python-mode "python-mode" "Python Mode." t)
+(autoload #'espresso-mode "espresso" "Start espresso-mode" t)
+(load-file "/home/build/public/eng/elisp/google.el")
+(load "/usr/lib/clang-format/clang-format.el")
+(require 'google-coding-style)
+(require 'google-pyformat)
 
 ;; XWindows preferences
 (unless (window-system)
@@ -28,7 +33,7 @@
 (column-number-mode t)
 (global-font-lock-mode t)
 (global-auto-revert-mode t)
-(transient-mark-mode nil)
+(setq transient-mark-mode nil)
 (show-paren-mode t)
 (setq inhibit-startup-message t)
 (setq initial-scratch-message nil)
@@ -47,13 +52,20 @@
 (setq mouse-wheel-progressive-speed nil)
 (setq mouse-wheel-follow-mouse 't)
 (setq scroll-step 4)
+;(setq espresso-indent-level 2)
 
 (global-set-key (kbd "C-c SPC") 'just-one-space)
 (global-set-key (kbd "C-c TAB") 'tab-to-tab-stop)
 (global-set-key (kbd "C-c i") 'insert-date-string)
+(global-set-key (kbd "C-c d") 'insert-pydebug-string)
+(global-set-key (kbd "C-c e") 'insert-pydebug-dep-string)
+(global-set-key (kbd "C-c t") 'insert-pdb-string)
 (global-set-key (kbd "C-c s") 'sort-lines)
 (global-set-key (kbd "C-c #") 'comment-region)
 (global-set-key (kbd "C-c $") 'uncomment-region)
+(global-set-key (kbd "C-c <") 'python-shift-left)
+(global-set-key (kbd "C-c >") 'python-shift-right)
+(global-set-key (kbd "C-c l") 'font-lock-fontify-buffer)
 (global-set-key (kbd "C-x f") 'ido-find-file)
 (global-set-key (kbd "C-x s") 'save-buffer)
 (global-set-key (kbd "RET") 'newline-and-indent)
@@ -61,6 +73,9 @@
 (global-set-key (kbd "s-k") 'previous-line)
 (global-set-key (kbd "s-h") 'backward-char)
 (global-set-key (kbd "s-l") 'forward-char)
+; N.B.: Emacs cannot distinguish between these two in -nw mode
+(global-set-key (kbd "C-S-o") 'vi-open-line-above)
+(global-set-key (kbd "C-o") 'vi-open-line-below)
 
 (global-set-key [f4] 'highlight-symbol-at-point)
 (global-set-key [(meta f3)] 'highlight-symbol-prev)
@@ -128,12 +143,13 @@
             (set (make-local-variable 'font-lock-keyword-face) 'py-keyword-face)
             (set-face-foreground 'py-pseudo-keyword-face "dodger blue")
             (flymake-mode t)
+            (add-hook 'before-save-hook 'google-pyformat nil t)
             ))
 
 (add-hook 'text-mode-hook
           (lambda ()
-            (setq truncate-lines nil)
-            (auto-fill-mode)))
+            (setq truncate-lines t)
+            (auto-fill-mode nil)))
 
 (add-hook 'sh-mode-hook
           (lambda ()
@@ -175,15 +191,19 @@
                 ("\\.c$"  . c-mode)
                 ("\\.cc$" . c++-mode)
                 ("\\.ebuild$" . shell-script-mode)
-                ("\\.gcl$"  . c++-mode)
+                ("\\.gcl$"  . borg-mode)
+                ("\\.gss$"  . css-mode)
                 ("\\.h$"  . c++-mode)
                 ("\\.hh$" . c++-mode)
                 ("\\.hi$" . haskell-mode)
+                ("\\.itcnf$" . ncl-mode)
                 ;("\\.js$" . espresso-mode)
                 ;("\\.json$" . espresso-mode)
                 ("\\.l[hg]s$" . literate-haskell-mode)
                 ("\\.m$"  . matlab-mode)
-                ("\\.model$"  . c++-mode)
+                ("\\.model$"  . borg-mode)
+                ("\\.ncl$" . ncl-mode)
+                ("\\.ng$" . html-mode)
                 ("\\.org$" . org-mode)
                 ("\\.pl$" . perl-mode)
                 ("\\.pp$"  . c++-mode)
@@ -247,6 +267,21 @@
   "Insert a nicely formated date string."
   (interactive)
   (insert (format-time-string "[%a %b %d %Y / %H:%M %Z]")))
+
+(defun insert-pydebug-string ()
+  "Insert a python debugger statement."
+  (interactive)
+  (insert "import IPython; IPython.embed()"))
+
+(defun insert-pydebug-dep-string ()
+  "Insert a python debugger build target."
+  (interactive)
+  (insert "\"//third_party/py/IPython:ipython-libs\","))
+
+(defun insert-pdb-string ()
+  "Insert a python debugger build target."
+  (interactive)
+  (insert "import pdb; pdb.set_trace()"))
 
 (defun intelligent-close ()
   "quit a frame the same way no matter what kind of frame you are on"
@@ -340,3 +375,74 @@
 ;;                            (if (memq (following-char) '(?\n ?# ?\\))
 ;;                                py-continuation-offset
 ;;                              0))))))))))))
+
+(defun vi-open-line-above ()
+  "Insert a newline above the current line and put point at beginning."
+  (interactive)
+  (unless (bolp)
+    (beginning-of-line))
+  (newline)
+  (forward-line -1)
+  (indent-according-to-mode))
+
+(defun vi-open-line-below ()
+  "Insert a newline below the current line and put point at beginning."
+  (interactive)
+  (unless (eolp)
+    (end-of-line))
+  (newline-and-indent))
+(put 'downcase-region 'disabled nil)
+
+;; (defun ncl-format-buffer ()
+;;   (interactive)
+;;   (let* ((orig-windows (get-buffer-window-list (current-buffer)))
+;;          (orig-window-starts (mapcar #'window-start orig-windows))
+;;          (orig-point (point))
+;;          (binary "nclfmt")
+;;          )
+;;     (setq beg (point-min)
+;;           end (point-max))
+;;     (call-process-region (point-min) (point-max) binary t t nil "-")
+;;     (goto-char orig-point)
+;;     (dotimes (index (length orig-windows))
+;;       (set-window-start (nth index orig-windows)
+;;                         (nth index orig-window-starts)))))
+;;   )
+;; (add-hook 'ncl-mode-hook
+;;           (lambda ()
+;;             (global-set-key (kbd "C-c 1") 'ncl-format-region)
+;;             (global-set-key (kbd "C-c !") 'ncl-format-buffer)
+;;             ))
+
+(defun clang-format-buffer ()
+  (interactive)
+  (let* ((orig-windows (get-buffer-window-list (current-buffer)))
+         (orig-window-starts (mapcar #'window-start orig-windows))
+         (orig-point (point))
+         ;(binary "clang-format")
+         (binary "git")
+         ;; GOOGLE3
+         (style (if (string-match "/google3/" (buffer-file-name))
+                    "Google"
+                  (if (string-match "/llvm/" (buffer-file-name))
+                      "LLVM"
+                    "Chromium"))))
+    (setq beg (point-min)
+          end (point-max))
+    (call-process-region (point-min) (point-max) binary t t nil "clang-format")
+    (goto-char orig-point)
+    (dotimes (index (length orig-windows))
+      (set-window-start (nth index orig-windows)
+                        (nth index orig-window-starts)))))
+(add-hook 'c++-mode-hook
+          (lambda ()
+            (make-local-variable 'auto-clang-format)
+            (setq auto-clang-format t)
+            (global-set-key [C-M-tab] 'clang-format-buffer)
+            (global-set-key (kbd "C-c 1") 'clang-format-region)
+            (global-set-key (kbd "C-c !") 'clang-format-buffer)
+            (add-hook 'before-save-hook
+                      (lambda ()
+                        (when auto-clang-format (clang-format-buffer)))
+                      nil 'make-it-local)))
+(put 'upcase-region 'disabled nil)
