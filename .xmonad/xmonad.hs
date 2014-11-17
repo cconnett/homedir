@@ -12,9 +12,10 @@ import XMonad.Actions.CopyWindow
 import XMonad.Actions.CycleSelectedLayouts
 import XMonad.Config.Gnome
 import XMonad.Core
+import XMonad.Layout.BoringWindows as B
 import XMonad.Layout.LayoutCombinators ((|||), (**|*), (**//*))
 import XMonad.Layout.LayoutModifier
---import XMonad.Layout.Minimize (minimize, minimizeWindow, RestoreNextMinimizedWin)
+import XMonad.Layout.Minimize
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.NoBorders
@@ -61,6 +62,13 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch gmrun
     , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
 
+    -- launch shutter
+    , ((mod4Mask, xK_s     ), spawn "shutter -s")
+
+    , ((mod4Mask, xK_Up), spawn "amixer -D pulse sset Master 5%+")
+    , ((mod4Mask, xK_Down), spawn "amixer -D pulse sset Master 5%-")
+    , ((mod4Mask, xK_m), spawn "amixer -D pulse sset Master toggle")
+
     -- close focused window
     , ((modm .|. shiftMask, xK_c     ), kill)
 
@@ -77,9 +85,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm,               xK_n     ), refresh)
 
     -- Move focus to the next window
-    , ((modm,               xK_j     ), windows W.focusDown)
+    , ((modm,               xK_j     ), B.focusDown)
     -- Move focus to the previous window
-    , ((modm,               xK_k     ), windows W.focusUp  )
+    , ((modm,               xK_k     ), B.focusUp  )
 
     -- Move focus to the next visible workspace
     , ((modm,               xK_Tab   ), windows focusNextVisible)
@@ -87,9 +95,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask, xK_Tab   ), windows focusPrevVisible  )
 
     -- Minimize the current window
-    --, ((modm,               xK_m     ), withFocused minimizeWindow)
+    , ((modm,               xK_m     ), withFocused minimizeWindow)
     -- Restore next minimized window
-    --, ((modm .|. shiftMask, xK_m     ), sendMessage RestoreNextMinimizedWin)
+    , ((modm .|. shiftMask, xK_m     ), sendMessage RestoreNextMinimizedWin)
 
 
     -- Swap the focused window and the master window
@@ -213,13 +221,15 @@ bordersOn classes = ModifiedLayout $ OnlyBordersOn classes []
 
 myGrid = Grid
 myThreeColumn = ThreeColMid 1 (3/100) (1/3)
-myLayout = bordersOn [{-"Emacs",-}"Gnome-terminal"] $
+myLayout = bordersOn [{-"Emacs",-}"Gnome-terminal", "Xclock"] $
+           B.boringAuto $ minimize $
            mkToggle (FULL ?? MIRROR ?? EOT) $
            myTiled ||| myThreeColumn ||| myGrid
 
 --myTiled   = (Tall 0 1 0 **//* Tall 0 1 0) **|* (Tall 0 1 0)
---myTiled = Tall 1 (3/100) (64/100)
-myTiled = Tall 1 (3/100) (50/100)
+--myTiled = Tall 1 (1/100) (1080/1920)
+myTiled = Tall 1 (3/100) (50/100) -- Default to middle because it
+                                  -- applies to both screens
 
 ------------------------------------------------------------------------
 -- Window rules:
@@ -312,7 +322,7 @@ logout = io $ exitWith ExitSuccess
 reload = io $ spawn "xmonad --restart"
 
 myConfig = defaults
-           `additionalKeysP` [("M-o", spawn "google-chrome" {-(className =? "Google-chrome")-})
+           `additionalKeysP` [("M-o", spawn "google-chrome-beta" {-(className =? "Google-chrome")-})
                              ,("M-e", spawn "emacs")
                              ,("M4-e", spawn "emacs")
                              --,("M-n", spawn "nautilus ~")
