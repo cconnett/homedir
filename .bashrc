@@ -48,6 +48,7 @@ alias gitg='gitg --all >& /dev/null &'
 alias gitkk='gitk $(git branch | tr "\n*" "  ")>& /dev/null &'
 alias gitb='for k in `git branch | sed s/^..//`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k --`\\t"$k";done | sort'
 alias gitbb=gitb
+alias gb=gitb
 alias queeg='ssh -XYCA cxc0117@queeg.cs.rit.edu'
 alias elvis='ssh -XYCA cxc0117@elvis.cs.rit.edu'
 alias doors='ssh -XYCA cxc0117@doors.cs.rit.edu'
@@ -98,8 +99,6 @@ elif [ $(hostname -d) == "nyc.corp.google.com" ]; then
     alias presubmitall='git5 export --sq --tap-project=all'
     alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
     alias cov='blaze coverage --combined_report=html'
-    alias sp=/google/data/ro/projects/sandman/sandman.par
-    alias sandman=sp
     alias sandman-head=blaze-bin/devtools/sandman/sandman
     alias bs='blaze build //devtools/sandman:sandman'
     alias kri=/google/data/ro/projects/sandman/kill_registered_instance.par
@@ -126,3 +125,11 @@ fi
 
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+function adb() {
+  EMU_DEPS=/google/data/ro/teams/mobile_eng_prod/emu/live/google3/
+  ANDROID_SDK=${EMU_DEPS}/third_party/java/android/android_sdk_linux/
+  EMU_SUPPORT=${EMU_DEPS}/tools/android/emulator/support/
+  ANDROID_ADB=${ANDROID_SDK}/platform-tools/adb
+  ANDROID_ADB=${ANDROID_ADB} $EMU_SUPPORT/adb.turbo "$@"
+}

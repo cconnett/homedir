@@ -1,10 +1,33 @@
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path "~/project/READONLY/google3/configlang/ncl/ide/")
 ;(autoload 'python-mode "python-mode" "Python Mode." t)
-(autoload #'espresso-mode "espresso" "Start espresso-mode" t)
-(load-file "/home/build/public/eng/elisp/google.el")
-(load "/usr/lib/clang-format/clang-format.el")
+
+(require 'google)
 (require 'google-coding-style)
+(require 'google-cc-extras)
+(google-cc-extras/bind-default-keys)
+
+(autoload 'js2-mode "js2-mode" "Major mode for editing JavaScript code." :interactive)
+(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+
+(defvar auto-clang-format t)
+(global-set-key [f12] '(lambda ()
+                         (interactive)
+                         (setq auto-clang-format (not auto-clang-format))
+                         (message "Auto-formatting turned %s."
+                                  (if auto-clang-format "on" "off"))
+                         ))
+(defun try-google-clang-format-file()
+  (message "acf %s" auto-clang-format)
+  (message "%s" major-mode)
+  (when auto-clang-format
+    (when (memq major-mode '(c++-mode js-mode js2-mode))
+      (google-clang-format-file))))
+
+(defun try-google-pyformat()
+  (when auto-clang-format (google-pyformat)))
+
+;(load "/usr/lib/clang-format/clang-format.el")
 (require 'google-pyformat)
 
 ;; XWindows preferences
@@ -29,6 +52,7 @@
 (ido-mode t)
 (setq ido-enable-flex-matching t)
 (setq ido-ignore-files '("\\.hi$"))
+(setq pyformat-args "-i -y --force_quote_type single")
 
 (column-number-mode t)
 (global-font-lock-mode t)
@@ -52,7 +76,6 @@
 (setq mouse-wheel-progressive-speed nil)
 (setq mouse-wheel-follow-mouse 't)
 (setq scroll-step 4)
-;(setq espresso-indent-level 2)
 
 (global-set-key (kbd "C-c SPC") 'just-one-space)
 (global-set-key (kbd "C-c TAB") 'tab-to-tab-stop)
@@ -65,7 +88,7 @@
 (global-set-key (kbd "C-c $") 'uncomment-region)
 (global-set-key (kbd "C-c <") 'python-shift-left)
 (global-set-key (kbd "C-c >") 'python-shift-right)
-(global-set-key (kbd "C-c l") 'font-lock-fontify-buffer)
+;(global-set-key (kbd "C-c l") 'font-lock-fontify-buffer)
 (global-set-key (kbd "C-x f") 'ido-find-file)
 (global-set-key (kbd "C-x s") 'save-buffer)
 (global-set-key (kbd "RET") 'newline-and-indent)
@@ -143,7 +166,8 @@
             (set (make-local-variable 'font-lock-keyword-face) 'py-keyword-face)
             (set-face-foreground 'py-pseudo-keyword-face "dodger blue")
             (flymake-mode t)
-            (add-hook 'before-save-hook 'google-pyformat nil t)
+            (unless (eq major-mode 'google3-build-mode)
+              (add-hook 'before-save-hook 'try-google-pyformat nil t))
             ))
 
 (add-hook 'text-mode-hook
@@ -182,7 +206,6 @@
 
 (setq auto-mode-alist
       (append '(
-                ("BUILD$"  . python-mode)
                 ("TODO$" . org-mode)
                 ("Tupfile$" . makefile-mode)
                 ("\\.C$"  . c++-mode)
@@ -197,8 +220,8 @@
                 ("\\.hh$" . c++-mode)
                 ("\\.hi$" . haskell-mode)
                 ("\\.itcnf$" . ncl-mode)
-                ;("\\.js$" . espresso-mode)
-                ;("\\.json$" . espresso-mode)
+                ("\\.js$" . js2-mode)
+                ("\\.json$" . js2-mode)
                 ("\\.l[hg]s$" . literate-haskell-mode)
                 ("\\.m$"  . matlab-mode)
                 ("\\.model$"  . borg-mode)
@@ -223,6 +246,7 @@
 (setq inferior-lisp-program "/usr/bin/sbcl --noinform")
 (setq lisp-indent-fuction 'common-lisp-indent-function)
 
+(setq js-indent-level 2)
 (custom-set-variables
   ;; custom-set-variables was added by Custom.
   ;; If you edit it by hand, you could mess it up, so be careful.
@@ -238,6 +262,7 @@
  '(js2-auto-indent-flag nil)
  '(js2-mirror-mode t)
  '(js2-mode-escape-quotes nil)
+ '(js2-basic-offset 2)
  '(py-continuation-offset 2)
  '(py-indent-offset 2)
  '(py-smart-indentation nil)
@@ -414,35 +439,56 @@
 ;;             (global-set-key (kbd "C-c !") 'ncl-format-buffer)
 ;;             ))
 
-(defun clang-format-buffer ()
-  (interactive)
-  (let* ((orig-windows (get-buffer-window-list (current-buffer)))
-         (orig-window-starts (mapcar #'window-start orig-windows))
-         (orig-point (point))
-         ;(binary "clang-format")
-         (binary "git")
-         ;; GOOGLE3
-         (style (if (string-match "/google3/" (buffer-file-name))
-                    "Google"
-                  (if (string-match "/llvm/" (buffer-file-name))
-                      "LLVM"
-                    "Chromium"))))
-    (setq beg (point-min)
-          end (point-max))
-    (call-process-region (point-min) (point-max) binary t t nil "clang-format")
-    (goto-char orig-point)
-    (dotimes (index (length orig-windows))
-      (set-window-start (nth index orig-windows)
-                        (nth index orig-window-starts)))))
+;; (defun clang-format-buffer ()
+;;   (interactive)
+;;   (let* ((orig-windows (get-buffer-window-list (current-buffer)))
+;;          (orig-window-starts (mapcar #'window-start orig-windows))
+;;          (orig-point (point))
+;;          (binary "clang-format")
+;;          ;(binary "git") ; UWOTM8
+;;          ;; GOOGLE3
+;;          (style (if (string-match "/google3/" (buffer-file-name))
+;;                     "Google"
+;;                   (if (string-match "/llvm/" (buffer-file-name))
+;;                       "LLVM"
+;;                     "Chromium"))))
+;;     (setq beg (point-min)
+;;           end (point-max))
+;;     (call-process-region (point-min) (point-max) binary t t nil "clang-format")
+;;     (goto-char orig-point)
+;;     (dotimes (index (length orig-windows))
+;;       (set-window-start (nth index orig-windows)
+;;                         (nth index orig-window-starts)))))
+;; (add-hook 'c++-mode-hook
+;;           (lambda ()
+;;             (make-local-variable 'auto-clang-format)
+;;             (setq auto-clang-format t)
+;;             (global-set-key [C-M-tab] 'clang-format-buffer)
+;;             (global-set-key (kbd "C-c 1") 'clang-format-region)
+;;             (global-set-key (kbd "C-c !") 'clang-format-buffer)
+;;             (add-hook 'before-save-hook
+;;                       (lambda ()
+;;                         (when auto-clang-format (clang-format-buffer)))
+;;                       nil 'make-it-local)))
+
+(put 'upcase-region 'disabled nil)
 (add-hook 'c++-mode-hook
           (lambda ()
-            (make-local-variable 'auto-clang-format)
-            (setq auto-clang-format t)
-            (global-set-key [C-M-tab] 'clang-format-buffer)
-            (global-set-key (kbd "C-c 1") 'clang-format-region)
-            (global-set-key (kbd "C-c !") 'clang-format-buffer)
-            (add-hook 'before-save-hook
-                      (lambda ()
-                        (when auto-clang-format (clang-format-buffer)))
-                      nil 'make-it-local)))
-(put 'upcase-region 'disabled nil)
+            (add-hook 'before-save-hook 'try-google-clang-format-file)﻿
+            ))
+(add-hook 'js-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'try-google-clang-format-file)﻿
+            ))
+(add-hook 'js2-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'try-google-clang-format-file)﻿
+            ))
+
+(add-hook 'js2-post-parse-callbacks
+	  (lambda ()
+	    (let ((buf (buffer-string))
+		  (index 0))
+	      (while (string-match "\\(goog\\.require\\|goog\\.provide\\)('\\([^'.]*\\)" buf index)
+		(setq index (+ 1 (match-end 0)))
+		(add-to-list 'js2-additional-externs (match-string 2 buf))))))
