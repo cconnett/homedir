@@ -52,7 +52,6 @@
 (setq mouse-wheel-progressive-speed nil)
 (setq mouse-wheel-follow-mouse 't)
 (setq scroll-step 4)
-;(setq espresso-indent-level 2)
 
 (global-set-key (kbd "C-c SPC") 'just-one-space)
 (global-set-key (kbd "C-c TAB") 'tab-to-tab-stop)
@@ -160,6 +159,8 @@
             (auto-fill-mode nil)
             (setq truncate-lines t)))
 
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
 (remove-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
 
@@ -174,6 +175,7 @@
 (setq-default scroll-preserve-screen-position t)
 (setq-default indent-tabs-mode nil)
 (setq-default default-major-mode 'text-mode)
+(setq-default js-indent-level 2)
 ;(setq default-major-mode 'org-mode)
 
 (setq interpreter-mode-alist
@@ -236,7 +238,7 @@
  '(highlight-symbol-on-navigation-p t)
  '(ido-default-file-method (quote selected-window))
  '(js2-auto-indent-flag nil)
- '(js2-mirror-mode t)
+ '(js2-basic-offset 2)
  '(js2-mode-escape-quotes nil)
  '(py-continuation-offset 2)
  '(py-indent-offset 2)

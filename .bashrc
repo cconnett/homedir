@@ -7,7 +7,7 @@ else
     PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w\[\033[01;31m\]$(if [ $(basename $(dirname "$PWD")) == "review" ]; then echo " *$(basename "$PWD")"; elif [ "$HOME" != "$PWD" ]; then git branch 2> /dev/null | grep -e "* " | cut -d"*" -f2; fi)\[\033[01;34m\]\n$\[\033[00m\] '
 fi
 
-export PATH=~/bin:~/.local/bin:~/bin/google_appengine:/usr/local/bin:~/chromium/depot_tools:$PATH
+export PATH=~/bin:/usr/local/bin:$PATH
 export EDITOR='emacs -nw --no-splash'
 export LESS='-S -R -F -X'
 
