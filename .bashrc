@@ -77,12 +77,12 @@ function lastlog {
   less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
 }
 
-if   [ $(hostname -d) == "cs.rit.edu" ]; then
+if [[ $(hostname -d) == "cs.rit.edu" ]]; then
     export PATH=/usr/gnu/bin:/opt/csw/bin:/bin:/sbin:/usr/bin:/usr/sbin:$PATH
     export VISUAL=$EDITOR
     alias grep='ggrep --color=auto'
     alias emacs='emacs -nw --no-splash'
-elif [ $(hostname -d) == "nyc.corp.google.com" ]; then
+elif [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
     export P4CONFIG=.p4config
     #export P4DIFF="/home/build/public/google/tools/p4diff -w"
     export P4MERGE=/home/build/public/eng/perforce/mergep4.tcl
@@ -108,7 +108,7 @@ elif [ $(hostname -d) == "nyc.corp.google.com" ]; then
     alias b='blaze build'
     alias t='blaze test'
     alias r='blaze run'
-elif [ $(hostname) == "scruffy" ]; then
+elif [[ $(hostname) == "scruffy" ]]; then
     alias zfslist='zfs list -t filesystem -r mpool'
     alias emacs='emacs -nw --no-splash'
 else
