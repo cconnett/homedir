@@ -1,17 +1,32 @@
-(add-to-list 'load-path "~/.emacs.d/site-lisp/")
+(defun string-suffix-p (str1 str2 &optional ignore-case)
+  (let ((begin2 (- (length str2) (length str1)))
+        (end2 (length str2)))
+    (when (< begin2 0) (setq begin2 0))
+    (eq t (compare-strings str1 nil nil
+                           str2 begin2 end2
+                           ignore-case))))
 
+(add-to-list 'load-path "~/.emacs.d/site-lisp/")
+(setq at-google (string-suffix-p system-name "corp.google.com"))
 ;; Home only
-(autoload 'python-mode "python-mode" "Python Mode." t)
+(unless at-google
+  (autoload 'python-mode "python-mode" "Python Mode." t)
+  (require 'clang-format)
+  (defun clang-format-file()
+    (interactive)
+    (clang-format-region (point-min) (point-max))
+  )
 
 ;; Google only
-(add-to-list 'load-path "~/project/READONLY/google3/configlang/ncl/ide/")
-(require 'google)
-(require 'google-coding-style)
-(require 'google-cc-extras)
-(google-cc-extras/bind-default-keys)
+(when at-google
+  (add-to-list 'load-path "~/project/READONLY/google3/configlang/ncl/ide/")
+  (require 'google)
+  (require 'google-coding-style)
+  (require 'google-cc-extras)
+  (google-cc-extras/bind-default-keys)
+  )
 
 (autoload 'js2-mode "js2-mode" "Major mode for editing JavaScript code." :interactive)
-(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
 
 (defvar auto-clang-format t)
 (global-set-key [f12] '(lambda ()
@@ -25,13 +40,14 @@
   (message "%s" major-mode)
   (when auto-clang-format
     (when (memq major-mode '(c++-mode js-mode js2-mode))
-      (google-clang-format-file))))
+      (when at-google (google-clang-format-file))
+      (unless at-google (clang-format-file))
+              ))))
 
+(when at-google (require 'google-pyformat))
 (defun try-google-pyformat()
   (when auto-clang-format (google-pyformat)))
 
-;(load "/usr/lib/clang-format/clang-format.el")
-(require 'google-pyformat)
 
 ;; XWindows preferences
 (unless (window-system)
