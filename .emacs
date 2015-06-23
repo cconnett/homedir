@@ -1,7 +1,10 @@
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
+
+;; Home only
+(autoload 'python-mode "python-mode" "Python Mode." t)
+
+;; Google only
 (add-to-list 'load-path "~/project/READONLY/google3/configlang/ncl/ide/")
-;(autoload 'python-mode "python-mode" "Python Mode." t)
-(autoload #'espresso-mode "espresso" "Start espresso-mode" t)
 (load-file "/home/build/public/eng/elisp/google.el")
 (load "/usr/lib/clang-format/clang-format.el")
 (require 'google-coding-style)
