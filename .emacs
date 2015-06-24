@@ -107,7 +107,7 @@
 (global-set-key (kbd "C-c $") 'uncomment-region)
 (global-set-key (kbd "C-c <") 'python-shift-left)
 (global-set-key (kbd "C-c >") 'python-shift-right)
-;(global-set-key (kbd "C-c l") 'font-lock-fontify-buffer)
+(global-set-key (kbd "C-c l") 'font-lock-fontify-buffer)
 (global-set-key (kbd "C-x f") 'ido-find-file)
 (global-set-key (kbd "C-x s") 'save-buffer)
 (global-set-key (kbd "RET") 'newline-and-indent)
