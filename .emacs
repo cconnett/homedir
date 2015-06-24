@@ -506,6 +506,8 @@
 (add-hook 'js2-mode-hook
           (lambda ()
             (add-hook 'before-save-hook 'try-google-clang-format-file)﻿
+            (add-to-list 'js2-additional-externs "goog")﻿
+            (add-to-list 'js2-additional-externs "angular")﻿
             ))
 
 (add-hook 'js2-post-parse-callbacks
