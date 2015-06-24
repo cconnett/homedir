@@ -7,7 +7,7 @@
                            ignore-case))))
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
-(setq at-google (string-suffix-p system-name "corp.google.com"))
+(setq at-google (string-suffix-p "corp.google.com" system-name))
 ;; Home only
 (unless at-google
   (autoload 'python-mode "python-mode" "Python Mode." t)
