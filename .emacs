@@ -84,7 +84,7 @@
 (setq org-support-shift-select nil)
 (setq-default show-trailing-whitespace t)
 (setq-default truncate-lines t)
-(setq-default fill-column 72)
+(setq-default fill-column (if at-google 80 72))
 (setq-default resize-mini-windows nil)
 (set-face-background 'column-marker-1 "magenta")
 (add-hook 'find-file-hook (lambda () (column-marker-1 80)))
