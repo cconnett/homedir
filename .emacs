@@ -269,10 +269,11 @@
 
 (setq js-indent-level 2)
 (custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(clang-format-style "google")
  '(css-indent-offset 2)
  '(flymake-start-syntax-check-on-newline nil)
  '(flyspell-issue-welcome-flag nil)
@@ -283,7 +284,6 @@
  '(js2-auto-indent-flag nil)
  '(js2-basic-offset 2)
  '(js2-mode-escape-quotes nil)
- '(js2-basic-offset 2)
  '(py-continuation-offset 2)
  '(py-indent-offset 2)
  '(py-smart-indentation nil)
@@ -383,10 +383,10 @@
 (global-set-key (kbd "C-c y") 'insert-scc-at-point)
 (global-set-key (kbd "C-c k") 'kill-scc-at-point)
 (custom-set-faces
-  ;; custom-set-faces was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(flymake-errline ((((class color)) (:underline "red"))))
  '(flymake-warnline ((((class color)) (:underline "orange")))))
 
