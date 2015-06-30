@@ -290,7 +290,8 @@
  '(py-indent-offset 2 t)
  '(py-smart-indentation nil)
  '(safe-local-variable-values (quote ((Encoding . utf-8))))
- '(sgml-basic-offset 2))
+ '(sgml-basic-offset 2)
+ '(vc-follow-symlinks nil))
 
 (defun pcl ()
   (interactive)
