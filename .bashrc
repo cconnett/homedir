@@ -36,6 +36,7 @@ alias lla="ll -A"
 alias la="ls -A"
 alias locate='locate -i'
 alias gap='git add -p'
+alias gcca='git commit -CHEAD --amend'
 alias gcm='git commit -m'
 alias gcp='git checkout -p'
 alias gd='git diff'
