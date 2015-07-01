@@ -15,7 +15,7 @@
   (defun clang-format-file()
     (interactive)
     (clang-format-region (point-min) (point-max))
-  )
+  ))
 
 ;; Google only
 (when at-google
@@ -42,7 +42,7 @@
     (when (memq major-mode '(c++-mode js-mode js2-mode))
       (when at-google (google-clang-format-file))
       (unless at-google (clang-format-file))
-              ))))
+              )))
 
 (when at-google (require 'google-pyformat))
 (defun try-google-pyformat()
