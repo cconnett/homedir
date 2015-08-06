@@ -84,13 +84,8 @@ if [[ $(hostname -d) == "cs.rit.edu" ]]; then
     alias grep='ggrep --color=auto'
     alias emacs='emacs -nw --no-splash'
 elif [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
-    export P4CONFIG=.p4config
-    #export P4DIFF="/home/build/public/google/tools/p4diff -w"
-    export P4MERGE=/home/build/public/eng/perforce/mergep4.tcl
-    export P4EDITOR=$EDITOR
-    #alias ipython='/usr/local/bin/ipython'
-    #alias ipython="python -c 'import IPython; IPython.Shell.start().mainloop()'"
-    alias buildifier=/google/data/ro/projects/devtools/buildifier/buildifier
+    export PROD=/bigtable/mix-io/devtools-sandman.dashboard.instances.sandman-dashboard
+    export CJC=/bigtable/mix-pb/devtools-sandman-testing.dashboard.instances.cjc-dev-instance
     alias g3python=/google/data/ro/projects/g3python/g3python
     alias submit='git5 submit --sq --tap-project=sandman'
     alias submit2='git5 submit --sq --tap-project=sandman,sandman_clients'
