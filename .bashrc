@@ -38,6 +38,7 @@ alias locate='locate -i'
 alias gap='git add -p'
 alias gcca='git commit -CHEAD --amend'
 alias gcm='git commit -m'
+alias gc='git checkout'
 alias gcp='git checkout -p'
 alias gd='git diff'
 alias gdc='git diff --cached'
@@ -48,7 +49,6 @@ alias getack='curl http://beyondgrep.com/ack-2.14-single-file > ~/bin/ack && chm
 alias gitg='gitg --all >& /dev/null &'
 alias gitkk='gitk $(git branch | tr "\n*" "  ")>& /dev/null &'
 alias gitb='for k in `git branch | sed s/^..//`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k --`\\t"$k";done | sort'
-alias gitbb=gitb
 alias gb=gitb
 alias queeg='ssh -XYCA cxc0117@queeg.cs.rit.edu'
 alias elvis='ssh -XYCA cxc0117@elvis.cs.rit.edu'
@@ -122,6 +122,8 @@ fi
 # Activate bash-completion. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
     [ -f /etc/bash_completion ] && source /etc/bash_completion
+    __git_complete gc _git_checkout
+    __git_complete gl _git_log
 fi
 
 # make less more friendly for non-text input files, see lesspipe(1)
