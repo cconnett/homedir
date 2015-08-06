@@ -289,7 +289,7 @@
  '(py-continuation-offset 2)
  '(py-indent-offset 2 t)
  '(py-smart-indentation nil)
- '(safe-local-variable-values (quote ((Encoding . utf-8))))
+ '(safe-local-variable-values (quote ((encoding . utf-8) (Encoding . utf-8))))
  '(sgml-basic-offset 2)
  '(vc-follow-symlinks nil))
 
