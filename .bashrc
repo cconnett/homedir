@@ -68,7 +68,7 @@ function find-parent-google3 {
   fi
 }
 
-function branch-or-switch {
+function current-git-branch {
   if [[ "$HOME" != "$PWD" ]]; then
     branch=$(git branch 2> /dev/null | grep -e "* " | cut -d"*" -f2)
     if [[ -n $branch ]]; then
@@ -76,7 +76,8 @@ function branch-or-switch {
       return
     fi
   fi
-
+}
+function current-switch-target {
   g3=$(find-parent-google3)
   if [[ -n $g3 ]]; then
     target=$(cat ${g3}/../.citc/target_of_switch_client 2> /dev/null)
@@ -85,6 +86,10 @@ function branch-or-switch {
       return
     fi
   fi
+}
+
+function pointed-dir {
+  echo "$PWD" | sed -e "s!$HOME!~!" | sed -e "s/emacs/$(current-switch-target)/"
 }
 
 function g4s {
@@ -116,7 +121,7 @@ function g4s {
 if [[ ${EUID} == 0 ]] ; then
     PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
 else
-    PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w\[\033[01;31m\] $(branch-or-switch)\[\033[01;34m\]\n$\[\033[00m\] '
+    PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] '
 fi
 
 
@@ -129,18 +134,20 @@ function lastlog {
 }
 
 function make-completion-wrapper () {
-    local function_name="$2"
-    local arg_count=$(($#-3))
-    local comp_function_name="$1"
-    shift 2
-    local function="
+  # make-completion-wrapper _p4_completion::base _g4_switch g4d
+  # complete -o default -o nospace -F _g4d_bash::g4d_completion g4s
+  local function_name="$2"
+  local arg_count=$(($#-3))
+  local comp_function_name="$1"
+  shift 2
+  local function="
 function $function_name {
     ((COMP_CWORD+=$arg_count))
     COMP_WORDS=( "$@" \${COMP_WORDS[@]:1} )
     "$comp_function_name"
     return 0
 }"
-    eval "$function"
+  eval "$function"
 }
 
 if [[ $(hostname -d) == "cs.rit.edu" ]]; then
@@ -188,8 +195,7 @@ if [[ $- == *i* ]] ; then
     __git_complete gl _git_log
     complete -F _blaze::complete_build_target_wrapper -o nospace b
     complete -F _blaze::complete_test_target_wrapper -o nospace t
-    make-completion-wrapper _p4_completion::base _g4_switch g4 switch
-    complete -o default -o nospace -F _g4_switch g4s
+    complete -o default -o nospace -F _g4d_bash::g4d_completion g4s
 
     _blaze::complete_run_target_wrapper() {
       _blaze::complete_target_wrapper "run"
