@@ -250,6 +250,7 @@ myManageHook = composeAll
     [ className =? "MPlayer"        --> doFloat
     , className =? "Gimp"           --> doFloat
     , className =? "pidgin"         --> doFloat
+    , stringProperty "WM_WINDOW_ROLE" =? "bubble" --> doFloat
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore ]
 
@@ -323,6 +324,7 @@ reload = io $ spawn "xmonad --restart"
 
 myConfig = defaults
            `additionalKeysP` [("M-o", spawn "google-chrome-beta" {-(className =? "Google-chrome")-})
+                             ,("<XF86WWW>", spawn "google-chrome-beta --show-app-list")
                              ,("M-e", spawn "emacs")
                              ,("M4-e", spawn "emacs")
                              --,("M-n", spawn "nautilus ~")
