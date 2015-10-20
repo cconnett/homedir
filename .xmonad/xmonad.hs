@@ -44,7 +44,7 @@ pair = chunk 2
 -- Border colors for unfocused and focused windows, respectively.
 --
 --myNormalBorderColor  = "#dddddd"
-myNormalBorderColor = "#aaaaaa"
+myNormalBorderColor = "#666666"
 --myFocusedBorderColor = "#1e90ff"
 myFocusedBorderColor = "#ff0000"
 
