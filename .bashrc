@@ -54,7 +54,6 @@ alias serve='python -m SimpleHTTPServer'
 alias please=sudo
 alias math='rlwrap math'
 alias emacs='emacs 2> /dev/null'
-alias g4s='g4 switch'
 function jump {
   g4d $(hostname -s)-$(whoami)-$(basename $(dirname $(pwd)))-$(git symbolic-ref --short HEAD)-git5
 }
@@ -87,6 +86,32 @@ function branch-or-switch {
     fi
   fi
 }
+
+function g4s {
+  force=
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -f)
+        force=$1
+        shift
+        ;;
+      *)
+        client=$1
+        shift
+        ;;
+    esac
+  done
+
+  output=$(g4 switch -s emacs $client 2>&1)
+  if [[ $? -ne 0 && -n $force ]]; then
+    g4d -f $client
+    g4d emacs
+    g4 switch -s emacs $client
+  else
+    echo $output
+  fi
+}
+
 
 if [[ ${EUID} == 0 ]] ; then
     PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
