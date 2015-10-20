@@ -1,12 +1,6 @@
 # This file is sourced by all *interactive* bash shells on startup.  This
 # file *should generate no output* or it will break the scp and rcp commands.
 
-if [[ ${EUID} == 0 ]] ; then
-    PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
-else
-    PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w\[\033[01;31m\]$(if [ $(basename $(dirname "$PWD")) == "review" ]; then echo " *$(basename "$PWD")"; elif [ "$HOME" != "$PWD" ]; then git branch 2> /dev/null | grep -e "* " | cut -d"*" -f2; fi)\[\033[01;34m\]\n$\[\033[00m\] '
-fi
-
 export PATH=~/bin:/usr/local/bin:$PATH
 export EDITOR='emacs -nw --no-splash'
 export LESS='-S -R -F -X'
@@ -65,15 +59,43 @@ function jump {
   g4d $(hostname -s)-$(whoami)-$(basename $(dirname $(pwd)))-$(git symbolic-ref --short HEAD)-git5
 }
 
-function tapp {
+function find-parent-google3 {
   g3=$PWD
-  until [ $(basename $g3) == "google3" ]; do
+  until [[ $(basename $g3) == "google3" || $g3 == "/" ]]; do
     g3=$(dirname $g3)
   done
-  echo $g3
-  CL="$(cat $g3/../review/$(cut -d' '  -f2 $g3/../.git/HEAD | cut -d/ -f3-).git5_perforce_config/CL)"
-  current="$(pwd)"
-  g4d "$(hostname -s)-$(whoami)-code-$(cut -d' '  -f2 $g3/../.git/HEAD | cut -d/ -f3-)-git5"
+  if [[ $g3 != "/" ]]; then
+    echo $g3
+  fi
+}
+
+function branch-or-switch {
+  if [[ "$HOME" != "$PWD" ]]; then
+    branch=$(git branch 2> /dev/null | grep -e "* " | cut -d"*" -f2)
+    if [[ -n $branch ]]; then
+      echo $branch
+      return
+    fi
+  fi
+
+  g3=$(find-parent-google3)
+  if [[ -n $g3 ]]; then
+    target=$(cat ${g3}/../.citc/target_of_switch_client 2> /dev/null)
+    if [[ -n $target ]]; then
+      echo $target
+      return
+    fi
+  fi
+}
+
+if [[ ${EUID} == 0 ]] ; then
+    PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
+else
+    PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w\[\033[01;31m\] $(branch-or-switch)\[\033[01;34m\]\n$\[\033[00m\] '
+fi
+
+
+function tapp {
   tap_presubmit -p sandman -c $(cat .git4_perforce_config/CL) "$@"
   cd "$PWD"
 }
