@@ -107,7 +107,7 @@ elif [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
     export EM=/google/src/cloud/cjc/emacs/google3
     alias g3python=/google/data/ro/projects/g3python/g3python
     alias submit='git5 submit --sq --tap-project=sandman'
-    alias submit2='git5 submit --sq --tap-project=sandman,sandman_clients'
+    alias submit2='git5 submit --sq --tap-project=sandman,integrate'
     alias submitall='git5 submit --sq --tap-project=all'
     alias presubmit='git5 export --sq --tap-project=sandman'
     alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
