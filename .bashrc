@@ -26,6 +26,7 @@ export ACK_COLOR_LINENO='bold blue'
 export GIT_CEILING_DIRECTORIES=$HOME
 export GIT_EDITOR=$EDITOR
 export GDK_NATIVE_WINDOWS=1 # http://debbugs.gnu.org/cgi-bin/bugreport.cgi?bug=4870
+export P4DIFF='git diff'
 
 alias sl=ls
 alias d="date"
@@ -58,6 +59,7 @@ alias serve='python -m SimpleHTTPServer'
 alias please=sudo
 alias math='rlwrap math'
 alias emacs='emacs 2> /dev/null'
+alias g4s='g4 switch'
 function jump {
   g4d $(hostname -s)-$(whoami)-$(basename $(dirname $(pwd)))-$(git symbolic-ref --short HEAD)-git5
 }
@@ -78,6 +80,21 @@ function lastlog {
   less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
 }
 
+function make-completion-wrapper () {
+    local function_name="$2"
+    local arg_count=$(($#-3))
+    local comp_function_name="$1"
+    shift 2
+    local function="
+function $function_name {
+    ((COMP_CWORD+=$arg_count))
+    COMP_WORDS=( "$@" \${COMP_WORDS[@]:1} )
+    "$comp_function_name"
+    return 0
+}"
+    eval "$function"
+}
+
 if [[ $(hostname -d) == "cs.rit.edu" ]]; then
     export PATH=/usr/gnu/bin:/opt/csw/bin:/bin:/sbin:/usr/bin:/usr/sbin:$PATH
     export VISUAL=$EDITOR
@@ -86,6 +103,7 @@ if [[ $(hostname -d) == "cs.rit.edu" ]]; then
 elif [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
     export PROD=/bigtable/mix-io/devtools-sandman.dashboard.instances.sandman-dashboard
     export CJC=/bigtable/mix-pb/devtools-sandman-testing.dashboard.instances.cjc-dev-instance
+    export EM=/google/src/cloud/cjc/emacs/google3
     alias g3python=/google/data/ro/projects/g3python/g3python
     alias submit='git5 submit --sq --tap-project=sandman'
     alias submit2='git5 submit --sq --tap-project=sandman,sandman_clients'
@@ -118,7 +136,22 @@ fi
 if [[ $- == *i* ]] ; then
     [ -f /etc/bash_completion ] && source /etc/bash_completion
     __git_complete gc _git_checkout
+    __git_complete gco _git_checkout
     __git_complete gl _git_log
+    complete -F _blaze::complete_build_target_wrapper -o nospace b
+    complete -F _blaze::complete_test_target_wrapper -o nospace t
+    make-completion-wrapper _p4_completion::base _g4_switch g4 switch
+    complete -o default -o nospace -F _g4_switch g4s
+
+    _blaze::complete_run_target_wrapper() {
+      _blaze::complete_target_wrapper "run"
+    }
+    complete -F _blaze::complete_run_target_wrapper -o nospace r
+
+    _blaze::complete_coverage_target_wrapper() {
+      _blaze::complete_target_wrapper "coverage"
+    }
+    complete -F _blaze::complete_coverage_target_wrapper -o nospace cov
 fi
 
 # make less more friendly for non-text input files, see lesspipe(1)
