@@ -39,7 +39,7 @@
   (message "acf %s" auto-clang-format)
   (message "%s" major-mode)
   (when auto-clang-format
-    (when (memq major-mode '(c++-mode js-mode js2-mode))
+    (when (memq major-mode '(c++-mode js-mode js2-mode protobuf-mode))
       (when at-google (google-clang-format-file))
       (unless at-google (clang-format-file))
               )))
@@ -235,8 +235,10 @@
                 ("\\.[hg]s$" . haskell-mode)
                 ("\\.c$"  . c-mode)
                 ("\\.cc$" . c++-mode)
+                ("\\.css$" . css-mode)
+                ("\\.gss$" . css-mode)
                 ("\\.ebuild$" . shell-script-mode)
-                ("\\.gcl$"  . c++-mode)
+                ("\\.gcl$"  . borg-mode)
                 ("\\.h$"  . c++-mode)
                 ("\\.hh$" . c++-mode)
                 ("\\.hi$" . haskell-mode)
@@ -245,6 +247,7 @@
                 ("\\.json$" . js2-mode)
                 ("\\.l[hg]s$" . literate-haskell-mode)
                 ("\\.m$"  . matlab-mode)
+                ("\\.md$"  . markdown-mode)
                 ("\\.model$"  . borg-mode)
                 ("\\.ncl$" . ncl-mode)
                 ("\\.ng$" . html-mode)
@@ -390,6 +393,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(default ((t (:inherit nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 90 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
  '(flymake-errline ((((class color)) (:underline "red"))))
  '(flymake-warnline ((((class color)) (:underline "orange")))))
 
@@ -500,6 +504,10 @@
           (lambda ()
             (add-hook 'before-save-hook 'try-google-clang-format-file)﻿
             ))
+(add-hook 'protobuf-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'try-google-clang-format-file)﻿
+            ))
 (add-hook 'js-mode-hook
           (lambda ()
             (add-hook 'before-save-hook 'try-google-clang-format-file)﻿
@@ -509,7 +517,11 @@
             (add-hook 'before-save-hook 'try-google-clang-format-file)﻿
             (add-to-list 'js2-additional-externs "goog")﻿
             (add-to-list 'js2-additional-externs "angular")﻿
-            ))
+            (add-to-list 'js2-additional-externs "describe")﻿
+            (add-to-list 'js2-additional-externs "it")﻿
+            (add-to-list 'js2-additional-externs "expect")﻿
+            (add-to-list 'js2-additional-externs "beforeEach")﻿
+           ))
 
 (add-hook 'js2-post-parse-callbacks
 	  (lambda ()
