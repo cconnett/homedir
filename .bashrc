@@ -58,16 +58,6 @@ function jump {
   g4d $(hostname -s)-$(whoami)-$(basename $(dirname $(pwd)))-$(git symbolic-ref --short HEAD)-git5
 }
 
-function find-parent-google3 {
-  g3=$PWD
-  until [[ $(basename $g3) == "google3" || $g3 == "/" ]]; do
-    g3=$(dirname $g3)
-  done
-  if [[ $g3 != "/" ]]; then
-    echo $g3
-  fi
-}
-
 function current-git-branch {
   if [[ "$HOME" != "$PWD" ]]; then
     branch=$(git branch 2> /dev/null | grep -e "* " | cut -d"*" -f2)
@@ -77,46 +67,10 @@ function current-git-branch {
     fi
   fi
 }
-function current-switch-target {
-  g3=$(find-parent-google3)
-  if [[ -n $g3 ]]; then
-    target=$(cat ${g3}/../.citc/target_of_switch_client 2> /dev/null)
-    if [[ -n $target ]]; then
-      echo $target
-      return
-    fi
-  fi
-}
 
 function pointed-dir {
   echo "$PWD" | sed -e "s!$HOME!~!" | sed -e "s/emacs/$(current-switch-target)/"
 }
-
-function g4s {
-  force=
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      -f)
-        force=$1
-        shift
-        ;;
-      *)
-        client=$1
-        shift
-        ;;
-    esac
-  done
-
-  output=$(g4 switch -s emacs $client 2>&1)
-  if [[ $? -ne 0 && -n $force ]]; then
-    g4d -f $client
-    g4d emacs
-    g4 switch -s emacs $client
-  else
-    echo $output
-  fi
-}
-
 
 if [[ ${EUID} == 0 ]] ; then
     PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
@@ -186,6 +140,9 @@ else
     export SAT_PATHS=~/bin/sat/clasp/bin:~/bin/sat/minisat/simp:~/bin/sat/rsat_SAT-Race08_final_bin:~/bin/sat/zchaff64
     [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 fi
+
+export SWITCH_CLIENT='emacs'
+[[ -s "$HOME/g4s.bash" ]] && source "$HOME/g4s.bash"
 
 # Activate bash-completion. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
