@@ -150,7 +150,7 @@
 (global-set-key (kbd "C-<f12>")
                 (lambda ()
                   (interactive)
-                  (load-file "~/.emacs")))
+                  (load-file user-init-file)))
 (global-set-key (kbd "C-c SPC")
                 'just-one-space)
 (global-set-key (kbd "C-c TAB")
@@ -527,9 +527,9 @@
 (add-hook 'before-save-hook 'try-format-file)
 (add-hook 'after-save-hook
           (lambda ()
-            (when (equal (expand-file-name "~/.emacs") (buffer-file-name))
+            (when (equal user-init-file (buffer-file-name))
               (condition-case e
-                  (load-file "~/.emacs")
+                  (load-file user-init-file)
                 ((debug error)
                  (message "Error loading .emacs! %s"
                           (error-message-string e)))))))
