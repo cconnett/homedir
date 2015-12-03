@@ -70,7 +70,6 @@
   (interactive)
   (reformat-file "/usr/bin/gclfmt -w" "gcl"
                  ".gcl"))
-
 (defun lispfmt ()
   "Run lispfmt.el on the current file."
   (interactive)
@@ -82,8 +81,8 @@
   "Machine format the buffer before saving."
   :lighter " Format"
   (if (member 'try-format-file before-save-hook)
-      (remove-hook 'before-save-hook 'try-format-file)
-    (add-hook 'before-save-hook 'try-format-file)))
+      (remove-hook 'before-save-hook #'try-format-file)
+    (add-hook 'before-save-hook #'try-format-file)))
 
 (global-set-key [f12]
                 #'fmt-mode)
@@ -92,23 +91,25 @@
   "Format the current buffer with a machine formatter for the major mode."
   (interactive)
   (message "Machine formatting for %s" major-mode)
-  (when (memq major-mode
-              '(c++-mode js-mode js2-mode protobuf-mode))
+  (cond
+   ((memq major-mode
+          '(c++-mode js-mode js2-mode protobuf-mode))
     (if at-google
         (google-clang-format-file)
       (clang-format-file)))
-  (when (memq major-mode
-              '(python-mode))
+   ((memq major-mode
+          '(python-mode))
     (google-pyformat))
-  (when (memq major-mode
-              '(markdown-mode))
+   ((memq major-mode
+          '(markdown-mode))
     (google-mdformat))
-  (when (memq major-mode
-              '(gcl-mode borg-mode))
+   ((memq major-mode
+          '(gcl-mode borg-mode))
     (google-gclfmt))
-  (when (memq major-mode
-              '(emacs-lisp-mode lisp-mode))
-    (lispfmt)))
+   ((memq major-mode
+          '(emacs-lisp-mode lisp-mode))
+    (lispfmt))
+   (t (message "No formatter found for %s" major-mode))))
 
 
 ;; XWindows preferences
