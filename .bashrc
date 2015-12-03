@@ -155,23 +155,23 @@ export SWITCH_CLIENT='emacs'
 
 # Activate bash-completion. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
-    [ -f /etc/bash_completion ] && source /etc/bash_completion
-    __git_complete gc _git_checkout
-    __git_complete gco _git_checkout
-    __git_complete gl _git_log
-    complete -F _blaze::complete_build_target_wrapper -o nospace b
-    complete -F _blaze::complete_test_target_wrapper -o nospace t
-    complete -o default -o nospace -F _g4d_bash::g4d_completion g4s
+  [ -f /etc/bash_completion ] && source /etc/bash_completion
+  __git_complete gc _git_checkout
+  __git_complete gco _git_checkout
+  __git_complete gl _git_log
+  complete -F _blaze::complete_build_target_wrapper -o nospace b
+  complete -F _blaze::complete_test_target_wrapper -o nospace t
+  complete -o default -o nospace -F _g4d_bash::g4d_completion g4s
 
-    _blaze::complete_run_target_wrapper() {
-      _blaze::complete_target_wrapper "run"
-    }
-    complete -F _blaze::complete_run_target_wrapper -o nospace r
+  _blaze::complete_run_target_wrapper() {
+    _blaze::complete_target_wrapper "run"
+  }
+  complete -F _blaze::complete_run_target_wrapper -o nospace r
 
-    _blaze::complete_coverage_target_wrapper() {
-      _blaze::complete_target_wrapper "coverage"
-    }
-    complete -F _blaze::complete_coverage_target_wrapper -o nospace cov
+  _blaze::complete_coverage_target_wrapper() {
+    _blaze::complete_target_wrapper "coverage"
+  }
+  complete -F _blaze::complete_coverage_target_wrapper -o nospace cov
 fi
 
 # make less more friendly for non-text input files, see lesspipe(1)
