@@ -115,8 +115,8 @@
 (unless (window-system)
   (menu-bar-mode -1))
 (when (window-system)
-  (setq default-frame-alist '((left-fringe .0)
-                              (right-fringe .0)))
+  (setq default-frame-alist '((left-fringe . 0)
+                              (right-fringe . 0)))
   (set-scroll-bar-mode 'right)
   (setq confirm-kill-emacs 'y-or-n-p))
 
@@ -144,7 +144,7 @@
           (lambda ()
             (column-marker-1 80)))
 (setq mouse-wheel-scroll-amount '(1
-                                  ((shift) .4)))
+                                  ((shift) . 4)))
 (setq mouse-wheel-progressive-speed nil)
 (setq mouse-wheel-follow-mouse 't)
 (setq scroll-step 4)
