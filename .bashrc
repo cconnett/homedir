@@ -1,7 +1,7 @@
 # This file is sourced by all *interactive* bash shells on startup.  This
 # file *should generate no output* or it will break the scp and rcp commands.
 
-export PATH=~/bin:/usr/local/bin:$PATH
+export PATH=~/bin:/usr/local/bin:/opt/emacs/bin:$PATH
 export EDITOR='emacs -nw --no-splash'
 export LESS='-S -R -F -X'
 
@@ -14,6 +14,7 @@ shopt -s checkwinsize
 export PROMPT_COMMAND='history -a  ~/.bash_history; $PROMPT_COMMAND'
 
 #export PYTHONPATH=~/Python:$PYTHONPATH
+export PYTHONSTARTUP=~/.pythonrc
 export ACK_COLOR_MATCH='red'
 export ACK_COLOR_FILENAME='on_cyan'
 export ACK_COLOR_LINENO='bold blue'
@@ -126,6 +127,8 @@ elif [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
     alias bs='blaze build //devtools/sandman:sandman'
     alias kri=/google/data/ro/projects/sandman/kill_registered_instance.par
     alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
+    alias sgcl2='gcl2 --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
+    alias sgcl2db='gcl2db -- --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
     alias sbc=/google/data/ro/projects/sandman/sandman_borgcfg.par
     alias pa='glogin && prodaccess'
     alias b='blaze build'
