@@ -70,13 +70,19 @@ function current-git-branch {
 }
 
 function pointed-dir {
-  echo "$PWD" | sed -e "s!$HOME!~!" | sed -e "s/emacs/$(current-switch-target)/"
+  red_target_blue='\\[\\033[01;31m\\]'
+  red_target_blue+=$(current-switch-target)
+  red_target_blue+='\\[\\033[01;34m\\]'
+  echo "$PWD" | \
+    sed -e "s!$HOME!~!" | \
+    sed -e 's!/google/src/cloud/cjc!/cloud!' | \
+    sed -e "s/emacs/${red_target_blue}/"
 }
 
 if [[ ${EUID} == 0 ]] ; then
     PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
 else
-    PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] '
+    PROMPT_COMMAND=$PROMPT_COMMAND';PS1="\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] "'
 fi
 
 
