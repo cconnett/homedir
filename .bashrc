@@ -94,23 +94,6 @@ function lastlog {
   less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
 }
 
-function make-completion-wrapper () {
-  # make-completion-wrapper _p4_completion::base _g4_switch g4d
-  # complete -o default -o nospace -F _g4d_bash::g4d_completion g4s
-  local function_name="$2"
-  local arg_count=$(($#-3))
-  local comp_function_name="$1"
-  shift 2
-  local function="
-function $function_name {
-    ((COMP_CWORD+=$arg_count))
-    COMP_WORDS=( "$@" \${COMP_WORDS[@]:1} )
-    "$comp_function_name"
-    return 0
-}"
-  eval "$function"
-}
-
 if [[ $(hostname -d) == "cs.rit.edu" ]]; then
     export PATH=/usr/gnu/bin:/opt/csw/bin:/bin:/sbin:/usr/bin:/usr/sbin:$PATH
     export VISUAL=$EDITOR
