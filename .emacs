@@ -396,9 +396,9 @@
   (interactive)
   (flymake-easy-load (lambda (filename)
                        `("~/bin/mypylint" ,filename))
-                     '(("^1:0:F: \\(.*line \\([0-9]+\\))\\)$" nil
+                     '(("^1:0:F: \\(.*line \\([0-9]+\\))\\)" nil
                         2 nil 1)
-                       ("^\\([0-9]+\\):\\([0-9]+\\):\\([FCREW]: .*\\)$"
+                       ("^\\([0-9]+\\):\\([0-9]+\\):\\([FCREW]: .*\\)"
                         nil 1 2 3))
                      'inplace
                      "py"
