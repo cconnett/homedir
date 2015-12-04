@@ -79,39 +79,43 @@
                  "lispfmt"
                  "el"))
 
+(defvar fmt/machine-format nil)
+
 (define-minor-mode fmt-mode
   "Machine format the buffer before saving."
   :lighter " Format"
-  (if (member 'try-format-file before-save-hook)
-      (remove-hook 'before-save-hook #'try-format-file)
-    (add-hook 'before-save-hook #'try-format-file)))
+  (set (make-local-variable 'fmt/machine-format)
+       (not fmt/machine-format))
+  (unless (member 'fmt-format-file before-save-hook)
+    (add-hook 'before-save-hook #'fmt-format-file)))
 
 (global-set-key [f12]
                 #'fmt-mode)
 
-(defun try-format-file ()
+(defun fmt-format-file ()
   "Format the current buffer with a machine formatter for the major mode."
   (interactive)
-  (message "Machine formatting for %s" major-mode)
-  (cond
-   ((memq major-mode
-          '(c++-mode js-mode js2-mode protobuf-mode))
-    (if at-google
-        (google-clang-format-file)
-      (clang-format-file)))
-   ((memq major-mode
-          '(python-mode))
-    (google-pyformat))
-   ((memq major-mode
-          '(markdown-mode))
-    (google-mdformat))
-   ((memq major-mode
-          '(gcl-mode borg-mode))
-    (google-gclfmt))
-   ((memq major-mode
-          '(emacs-lisp-mode lisp-mode))
-    (lispfmt))
-   (t (message "No formatter found for %s" major-mode))))
+  (when fmt/machine-format
+    (message "Machine formatting for %s" major-mode)
+    (cond
+     ((memq major-mode
+            '(c++-mode js-mode js2-mode protobuf-mode))
+      (if at-google
+          (google-clang-format-file)
+        (clang-format-file)))
+     ((memq major-mode
+            '(python-mode))
+      (google-pyformat))
+     ((memq major-mode
+            '(markdown-mode))
+      (google-mdformat))
+     ((memq major-mode
+            '(gcl-mode borg-mode))
+      (google-gclfmt))
+     ((memq major-mode
+            '(emacs-lisp-mode lisp-mode))
+      (lispfmt))
+     (t (message "No formatter found for %s" major-mode)))))
 
 
 ;; XWindows preferences
