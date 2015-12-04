@@ -206,7 +206,7 @@
                 'vi-open-line-below)
 
 (global-set-key [f4]
-                'highlight-symbol-at-point)
+                'highlight-symbol)
 (global-set-key [(meta f3)]
                 'highlight-symbol-prev)
 (global-set-key [(shift f3)]
