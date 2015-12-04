@@ -9,7 +9,6 @@
                          ("marmalade" . "https://marmalade-repo.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")))
 
-(add-hook 'after-init-hook #'global-flycheck-mode)
 
 (defun string-suffix-p (str1 str2 &optional ignore-case)
   "Python: STR1.endswith(STR2).  IGNORE-CASE passed through."
@@ -23,6 +22,7 @@
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path "~/.emacs.d/elpa/")
+
 (defvar at-google (string-suffix-p system-name "corp.google.com")
   "Whether the current machine is a Google corp workstation.")
 
@@ -30,9 +30,11 @@
 (require 'pp)
 (require 'font-lock)
 (require 'ido)
+(require 'flymake)
+(require 'flymake-cursor)
+(require 'flymake-easy)
 (require 'highlight-symbol)
 (require 'column-marker)
-(require 'flycheck)
 (require 'srefactor)
 (require 'srefactor-lisp)
 (require 'clang-format)
@@ -223,33 +225,27 @@
                 'scroll-bar-drag)
 (global-set-key [vertical-scroll-bar drag-mouse-1]
                 'scroll-bar-drag)
-(global-set-key (kbd "M-p")
-                'flycheck-previous-error)
-(global-set-key (kbd "M-n")
-                'flycheck-next-error)
 
-;; (global-set-key (kbd "M-p")
-;;                 (lambda ()
-;;                   (interactive)
-;;                   (flycheck-previous-error)
-;;                   (let ((err-info (flymake-find-err-info
-;;                                    flymake-err-info
-;;                                    (flymake-current-line-no))))
-;;                     (if (car err-info)
-;;                         (message "%s"
-;;                                  (flymake-ler-text (caar err-info)))
-;;                       (message "No lint errors.")))))
-;; (global-set-key (kbd "M-n")
-;;                 (lambda ()
-;;                   (interactive)
-;;                   (flycheck-next-error)
-;;                   (let ((err-info (flymake-find-err-info
-;;                                    flymake-err-info
-;;                                    (flymake-current-line-no))))
-;;                     (if (car err-info)
-;;                         (message "%s"
-;;                                  (flymake-ler-text (caar err-info)))
-;;                       (message "No lint errors.")))))
+(global-set-key (kbd "M-p")
+                (lambda ()
+                  (interactive)
+                  (flymake-goto-prev-error)
+                  (let ((err-info (flymake-find-err-info flymake-err-info
+                                                         (line-number-at-pos))))
+                    (if (car err-info)
+                        (message "%s"
+                                 (flymake-ler-text (caar err-info)))
+                      (message "No lint errors.")))))
+(global-set-key (kbd "M-n")
+                (lambda ()
+                  (interactive)
+                  (flymake-goto-next-error)
+                  (let ((err-info (flymake-find-err-info flymake-err-info
+                                                         (line-number-at-pos))))
+                    (if (car err-info)
+                        (message "%s"
+                                 (flymake-ler-text (caar err-info)))
+                      (message "No lint errors.")))))
 
 (global-unset-key (kbd "<insert>"))
                                         ;(global-unset-key [f2])
@@ -280,6 +276,7 @@
 (set-face-foreground 'py-type-face "steel blue")
 (add-hook 'python-mode-hook
           (lambda ()
+            (flymake-python-load)
             (set (make-local-variable 'font-lock-type-face)
                  'py-type-face)
             (set (make-local-variable 'font-lock-comment-face)
@@ -361,46 +358,48 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(js-indent-level 2)
- '(lisp-indent-fuction 'common-lisp-indent-function)
- '(inferior-lisp-program "/usr/bin/sbcl --noinform")
- '(ilisp-*use-fsf-compliant-keybindings* t)
- '(pyformat-args "-i -y --force_quote_type single --binpack_named_arguments")
- '(org-support-shift-select nil)
  '(clang-format-style "google")
  '(css-indent-offset 2)
- '(flycheck-python-pylint-executable "~/bin/mypylint")
+ '(flymake-info-line-regexp ":[RC]:")
+ '(flymake-warn-line-regexp ":W:")
  '(flyspell-issue-welcome-flag nil)
- '(global-flycheck-mode t)
  '(haskell-font-lock-symbols t)
  '(haskell-program-name "ghci -fglasgow-exts")
  '(highlight-symbol-on-navigation-p t)
  '(ido-default-file-method (quote selected-window))
+ '(ilisp-*use-fsf-compliant-keybindings* t)
+ '(inferior-lisp-program "/usr/bin/sbcl --noinform")
  '(js-indent-level 2 t)
  '(js2-auto-indent-flag nil)
  '(js2-basic-offset 2)
  '(js2-mirror-mode t)
  '(js2-mode-escape-quotes nil)
+ '(lisp-indent-fuction (quote common-lisp-indent-function))
  '(markdown-enable-math t)
+ '(org-support-shift-select nil)
  '(py-continuation-offset 2)
  '(py-indent-offset 2 t)
  '(py-smart-indentation nil)
- '(safe-local-variable-values (quote ((encoding .utf-8)
-                                      (Encoding .utf-8))))
+ '(pyformat-args "-i -y --force_quote_type single --binpack_named_arguments"
+                 t)
+ '(safe-local-variable-values (quote ((encoding . utf-8)
+                                      (Encoding . utf-8))))
  '(sgml-basic-offset 2)
  '(standard-indent 2)
  '(vc-follow-symlinks t))
 
-;; (defun flymake-pylint-init ()
-;;   (let* ((temp-file (flymake-init-create-temp-buffer-copy
-;;                      'flymake-create-temp-inplace))
-;;          (local-file (file-relative-name
-;;                       temp-file
-;;                       (file-name-directory buffer-file-name))))
-;;     (list "~/bin/mypylint" (list local-file))))
-
-;; (add-to-list 'flymake-allowed-file-name-masks
-;;              '("\\.py\\'" flymake-pylint-init))
+(defun flymake-python-load ()
+  (interactive)
+  (flymake-easy-load (lambda (filename)
+                       `("~/bin/mypylint" ,filename))
+                     '(("^1:0:F: \\(.*line \\([0-9]+\\))\\)$" nil
+                        2 nil 1)
+                       ("^\\([0-9]+\\):\\([0-9]+\\):\\([FCREW]: .*\\)$"
+                        nil 1 2 3))
+                     'inplace
+                     "py"
+                     "^W:"
+                     "^[RC]:"))
 
 ;; Insertion of Dates.
 (defun insert-date-string ()
@@ -507,7 +506,9 @@
  '(flymake-errline ((((class color))
                      (:underline "red"))))
  '(flymake-warnline ((((class color))
-                      (:underline "orange")))))
+                      (:underline "orange"))))
+ '(flymake-infoline ((((class color))
+                      (:underline "gray")))))
 
 (defun vi-open-line-above ()
   "Insert a newline above the current line and put point at beginning."
