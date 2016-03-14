@@ -25,7 +25,7 @@ export P4DIFF='git diff'
 
 alias sl=ls
 alias d="date"
-alias c="cal -3"
+alias c="cal -3; d"
 alias ls='ls --color=auto -B'
 alias ll="ls -ltr"
 alias lla="ll -A"
