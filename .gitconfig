@@ -7,5 +7,9 @@
         excludesfile=~/.gitignore
 [push]
 	default = simple
+[pull]
+	rebase = true
+[rebase]
+	autostash = true
 [clangformat]
 	style = Google
