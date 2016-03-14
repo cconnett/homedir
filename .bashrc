@@ -92,47 +92,43 @@ function lastlog {
   less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
 }
 
-if [[ $(hostname -d) == "cs.rit.edu" ]]; then
-    export PATH=/usr/gnu/bin:/opt/csw/bin:/bin:/sbin:/usr/bin:/usr/sbin:$PATH
-    export VISUAL=$EDITOR
-    alias grep='ggrep --color=auto'
-    alias emacs='emacs -nw --no-splash'
-elif [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
-    export PROD=/bigtable/mix-io/devtools-sandman.dashboard.instances.sandman-dashboard
-    export CJC=/bigtable/mix-pb/devtools-sandman-testing.dashboard.instances.cjc-dev-instance
-    export EM=/google/src/cloud/cjc/emacs/google3
-    alias g3python=/google/data/ro/projects/g3python/g3python
-    alias submit='git5 submit --sq --tap-project=sandman'
-    alias submit2='git5 submit --sq --tap-project=sandman,integrate'
-    alias submitall='git5 submit --sq --tap-project=all'
-    alias presubmit='git5 export --sq --tap-project=sandman'
-    alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
-    alias presubmitall='git5 export --sq --tap-project=all'
-    alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
-    alias cov='blaze coverage --combined_report=html'
-    alias sandman-head=blaze-bin/devtools/sandman/sandman
-    alias bs='blaze build //devtools/sandman:sandman'
-    alias kri=/google/data/ro/projects/sandman/kill_registered_instance.par
-    alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
-    alias sgcl2='gcl2 --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
-    alias sgcl2db='gcl2db -- --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
-    alias sbc=/google/data/ro/projects/sandman/sandman_borgcfg.par
-    alias pa='glogin && prodaccess'
-    alias b='blaze build'
-    alias t='blaze test'
-    alias r='blaze run'
+if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
+  alias g3python=/google/data/ro/projects/g3python/g3python
+  alias submit='git5 submit --sq --tap-project=sandman'
+  alias submit2='git5 submit --sq --tap-project=sandman,integrate'
+  alias submitall='git5 submit --sq --tap-project=all'
+  alias presubmit='git5 export --sq --tap-project=sandman'
+  alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
+  alias presubmitall='git5 export --sq --tap-project=all'
+  alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
+  alias cov='blaze coverage --combined_report=html'
+  alias sandmanh=blaze-bin/devtools/sandman/sandman
+  alias bs='blaze build //devtools/sandman:sandman'
+  alias kri=/google/data/ro/projects/sandman/kill_registered_instance.par
+  alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
+  alias sgcl2='gcl2 --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
+  alias sgcl2db='gcl2db -- --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
+  alias sbc=/google/data/ro/projects/sandman/sandman_borgcfg.par
+  alias pa='glogin && prodaccess'
+  alias csearch='csearch --context=1'
+  alias b='blaze build'
+  alias t='blaze test'
+  alias r='blaze run'
+  alias iblaze=/google/data/ro/teams/iblaze/iblaze
+  alias ib='iblaze build'
+  alias it='iblaze test'
+  alias ir='iblaze run'
+  [[ -s "$HOME/g4s.bash" ]] && source "$HOME/g4s.bash"
 elif [[ $(hostname) == "scruffy" ]]; then
-    alias zfslist='zfs list -t filesystem -r mpool'
-    alias emacs='emacs -nw --no-splash'
+  alias zfslist='zfs list -t filesystem -r mpool'
+  alias emacs=$EDITOR
 else
-    export VISUAL='emacs'
-    alias zfslist='ssh scruffy zfs list -t filesystem -r mpool'
-    export SAT_PATHS=~/bin/sat/clasp/bin:~/bin/sat/minisat/simp:~/bin/sat/rsat_SAT-Race08_final_bin:~/bin/sat/zchaff64
-    [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+  export VISUAL='emacs'
+  alias zfslist='ssh scruffy zfs list -t filesystem -r mpool'
+  [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 fi
 
 export SWITCH_CLIENT='emacs'
-[[ -s "$HOME/g4s.bash" ]] && source "$HOME/g4s.bash"
 
 # Activate bash-completion. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
