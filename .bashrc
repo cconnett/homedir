@@ -55,6 +55,7 @@ alias serve='python -m SimpleHTTPServer'
 alias please=sudo
 alias math='rlwrap math'
 alias emacs='emacs 2> /dev/null'
+alias z3='ipython -i -c "from z3 import *"'
 function jump {
   g4d $(hostname -s)-$(whoami)-$(basename $(dirname $(pwd)))-$(git symbolic-ref --short HEAD)-git5
 }
@@ -85,11 +86,8 @@ else
     PROMPT_COMMAND=$PROMPT_COMMAND';PS1="\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] "'
 fi
 
+alias tapp='tap_presubmit -cb sandman,integrate'
 
-function tapp {
-  tap_presubmit -p sandman -c $(cat .git4_perforce_config/CL) "$@"
-  cd "$PWD"
-}
 function lastlog {
   less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
 }
