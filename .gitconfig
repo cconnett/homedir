@@ -1,0 +1,11 @@
+[user]
+	name = Chris Connett
+	email = cjc@google.com
+[color]
+	ui = true
+[core]
+        excludesfile=~/.gitignore
+[push]
+	default = simple
+[clangformat]
+	style = Google
