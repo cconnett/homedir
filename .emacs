@@ -141,13 +141,15 @@
   (set-scroll-bar-mode 'right)
   (setq confirm-kill-emacs 'y-or-n-p))
 
+;; ido mode settings
 (ido-mode t)
 (setq ido-enable-flex-matching t)
 (setq ido-ignore-files '("\\.hi$"))
 
+;; General preferences
+(global-auto-revert-mode t)
 (column-number-mode t)
 (global-font-lock-mode t)
-(global-auto-revert-mode t)
 (setq transient-mark-mode nil)
 (show-paren-mode t)
 (setq inhibit-startup-message t)
@@ -174,6 +176,9 @@
                 (lambda ()
                   (interactive)
                   (load-file user-init-file)))
+(global-set-key (kbd "C-M-s-<f12>")
+                (lambda ()
+                  (save-buffers-kill-emacs)))
 (global-set-key (kbd "C-c SPC")
                 'just-one-space)
 (global-set-key (kbd "C-c TAB")
@@ -294,7 +299,8 @@
 (set-face-foreground 'py-type-face "steel blue")
 (add-hook 'python-mode-hook
           (lambda ()
-            (flymake-python-load)
+            (unless (equal major-mode 'google3-build-mode)
+              (flymake-python-load))
             (set (make-local-variable 'font-lock-type-face)
                  'py-type-face)
             (set (make-local-variable 'font-lock-comment-face)
@@ -320,6 +326,7 @@
 
 (setq frame-title-format '("%b - " "emacs@" system-name))
 
+(set-face-attribute 'region nil :background "#ddd")
 (setq-default font-lock-use-fonts t)
 (setq-default font-lock-use-colors t)
 (setq-default font-lock-maximum-decoration
@@ -327,6 +334,7 @@
 (setq-default scroll-preserve-screen-position
               t)
 (setq-default indent-tabs-mode nil)
+(setq-default format-mode t)
 (setq-default default-major-mode 'text-mode)
 (setq-default js-indent-level 2)
 ;;(setq default-major-mode 'org-mode)
@@ -347,14 +355,12 @@
                                 ("\\.h$" . c++-mode)
                                 ("\\.hh$" . c++-mode)
                                 ("\\.hi$" . haskell-mode)
-                                ("\\.itcnf$" . ncl-mode)
                                 ("\\.js$" . js2-mode)
                                 ("\\.json$" . js2-mode)
                                 ("\\.l[hg]s$" . literate-haskell-mode)
                                 ("\\.m$" . matlab-mode)
                                 ("\\.md$" . markdown-mode)
                                 ("\\.model$" . borg-mode)
-                                ("\\.ncl$" . ncl-mode)
                                 ("\\.ng$" . html-mode)
                                 ("\\.org$" . org-mode)
                                 ("\\.pl$" . perl-mode)
@@ -376,8 +382,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(c-basic-offset 2)
  '(clang-format-style "google")
  '(css-indent-offset 2)
+ '(desktop-save-mode t)
  '(flymake-info-line-regexp ":[RC]:")
  '(flymake-warn-line-regexp ":W:")
  '(flyspell-issue-welcome-flag nil)
@@ -403,6 +411,8 @@
  '(safe-local-variable-values (quote ((encoding . utf-8)
                                       (Encoding . utf-8))))
  '(sgml-basic-offset 2)
+ '(sh-basic-offset 2)
+ '(sh-indentation 2)
  '(standard-indent 2)
  '(vc-follow-symlinks t))
 
@@ -414,7 +424,7 @@
                         2 nil 1)
                        ("^\\([0-9]+\\):\\([0-9]+\\):\\([FCREW]: .*\\)"
                         nil 1 2 3))
-                     'inplace
+                     'temp-with-folder
                      "py"
                      "^W:"
                      "^[RC]:"))
@@ -523,10 +533,10 @@
                          :family "DejaVu Sans Mono"))))
  '(flymake-errline ((((class color))
                      (:underline "red"))))
- '(flymake-warnline ((((class color))
-                      (:underline "orange"))))
  '(flymake-infoline ((((class color))
-                      (:underline "gray")))))
+                      (:underline "gray"))))
+ '(flymake-warnline ((((class color))
+                      (:underline "orange")))))
 
 (defun vi-open-line-above ()
   "Insert a newline above the current line and put point at beginning."
