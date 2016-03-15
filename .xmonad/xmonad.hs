@@ -250,6 +250,7 @@ myManageHook = composeAll
     [ className =? "MPlayer"        --> doFloat
     , className =? "Gimp"           --> doFloat
     , className =? "pidgin"         --> doFloat
+    , className =? "InputOutput"    --> doFloat
     , stringProperty "WM_WINDOW_ROLE" =? "bubble" --> doFloat
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore ]
