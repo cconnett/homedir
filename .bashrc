@@ -10,10 +10,8 @@ export HISTIGNORE=ls:ll:la:l:cd:pwd:exit:su:df:clear:sl:reset:gd:gdc:gcp:gs:gl:d
 export HISTSIZE=150000
 shopt -s histappend
 shopt -s checkwinsize
-#export PROMPT_COMMAND='history -a  ~/.bash_history; history -c; history -r; $PROMPT_COMMAND'
-export PROMPT_COMMAND='history -a  ~/.bash_history; $PROMPT_COMMAND'
+export PROMPT_COMMAND="history -a  ~/.bash_history"
 
-#export PYTHONPATH=~/Python:$PYTHONPATH
 export PYTHONSTARTUP=~/.pythonrc
 export ACK_COLOR_MATCH='red'
 export ACK_COLOR_FILENAME='on_cyan'
@@ -83,7 +81,7 @@ function pointed-dir {
 if [[ ${EUID} == 0 ]] ; then
     PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
 else
-    PROMPT_COMMAND=$PROMPT_COMMAND';PS1="\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] "'
+    PROMPT_COMMAND="$PROMPT_COMMAND"';PS1="\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] "'
 fi
 
 alias tapp='tap_presubmit -cb sandman,integrate'
@@ -137,13 +135,15 @@ if [[ $- == *i* ]] ; then
   __git_complete gco _git_checkout
   __git_complete gl _git_log
   complete -F _blaze::complete_build_target_wrapper -o nospace b
+  complete -F _blaze::complete_build_target_wrapper -o nospace ib
   complete -F _blaze::complete_test_target_wrapper -o nospace t
-  complete -o default -o nospace -F _g4d_bash::g4d_completion g4s
+  complete -F _blaze::complete_test_target_wrapper -o nospace it
 
   _blaze::complete_run_target_wrapper() {
     _blaze::complete_target_wrapper "run"
   }
   complete -F _blaze::complete_run_target_wrapper -o nospace r
+  complete -F _blaze::complete_run_target_wrapper -o nospace ir
 
   _blaze::complete_coverage_target_wrapper() {
     _blaze::complete_target_wrapper "coverage"
