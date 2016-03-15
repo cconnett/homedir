@@ -116,7 +116,7 @@ if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias ib='iblaze build'
   alias it='iblaze test'
   alias ir='iblaze run'
-  [[ -s "$HOME/g4s.bash" ]] && source "$HOME/g4s.bash"
+  [[ -s "~/g4s.bash" ]] && source "~/g4s.bash"
 elif [[ $(hostname) == "scruffy" ]]; then
   alias zfslist='zfs list -t filesystem -r mpool'
   alias emacs=$EDITOR
