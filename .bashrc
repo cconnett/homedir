@@ -68,16 +68,6 @@ function current-git-branch {
   fi
 }
 
-function pointed-dir {
-  red_target_blue='\\[\\033[01;31m\\]'
-  red_target_blue+=$(current-switch-target)
-  red_target_blue+='\\[\\033[01;34m\\]'
-  echo "$PWD" | \
-    sed -e "s!$HOME!~!" | \
-    sed -e 's!/google/src/cloud/cjc!/cloud!' | \
-    sed -e "s/emacs/${red_target_blue}/"
-}
-
 if [[ ${EUID} == 0 ]] ; then
     PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
 else
@@ -117,6 +107,16 @@ if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias it='iblaze test'
   alias ir='iblaze run'
   [[ -s "~/g4s.bash" ]] && source "~/g4s.bash"
+
+  function pointed-dir {
+    red_target_blue='\\[\\033[01;31m\\]'
+    red_target_blue+=$(current-switch-target)
+    red_target_blue+='\\[\\033[01;34m\\]'
+    echo "$PWD" | \
+      sed -e "s!$HOME!~!" | \
+      sed -e 's!/google/src/cloud/cjc!/cloud!' | \
+      sed -e "s/emacs/${red_target_blue}/"
+  }
 elif [[ $(hostname) == "scruffy" ]]; then
   alias zfslist='zfs list -t filesystem -r mpool'
   alias emacs=$EDITOR
