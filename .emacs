@@ -50,7 +50,8 @@
   (require 'google-coding-style)
   (require 'google-cc-extras)
   (require 'google-pyformat)
-  (google-cc-extras/bind-default-keys))
+  (google-cc-extras/bind-default-keys)
+  (setq create-lockfiles nil))
 
 (autoload 'js2-mode "js2-mode" "Major mode for editing JavaScript code."
   :interactive)
