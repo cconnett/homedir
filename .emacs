@@ -85,23 +85,23 @@
                  "lispfmt"
                  "el"))
 
-(defvar fmt/machine-format nil)
+;; (unless (boundp 'format-mode/machine-format)
+;;   (defvar format-mode/machine-format nil)
+;;   (make-variable-buffer-local 'format-mode/machine-format))
 
-(define-minor-mode fmt-mode
+(define-minor-mode format-mode
   "Machine format the buffer before saving."
   :lighter " Format"
-  (set (make-local-variable 'fmt/machine-format)
-       (not fmt/machine-format))
-  (unless (member 'fmt-format-file before-save-hook)
-    (add-hook 'before-save-hook #'fmt-format-file)))
+  (unless (member 'format-mode-format-file before-save-hook)
+    (add-hook 'before-save-hook #'format-mode-format-file)))
 
 (global-set-key [f12]
-                #'fmt-mode)
+                #'format-mode)
 
-(defun fmt-format-file ()
+(defun format-mode-format-file ()
   "Format the current buffer with a machine formatter for the major mode."
   (interactive)
-  (when fmt/machine-format
+  (when (symbol-value 'format-mode)
     (message "Machine formatting for %s" major-mode)
     (cond
      ((memq major-mode
@@ -124,7 +124,9 @@
      ((memq major-mode
             '(emacs-lisp-mode lisp-mode))
       (lispfmt))
-     (t (message "No formatter found for %s" major-mode)))))
+     (t (message "No formatter found for %s" major-mode)))
+    (when (symbol-value 'flymake-mode)
+      (flymake-restart-syntax-check))))
 
 
 ;; XWindows preferences
