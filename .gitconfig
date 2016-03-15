@@ -13,3 +13,5 @@
 	autostash = true
 [clangformat]
 	style = Google
+[diff]
+	algorithm = minimal
