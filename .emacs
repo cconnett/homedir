@@ -73,6 +73,11 @@
   (interactive)
   (reformat-file "/usr/bin/gclfmt -w" "gcl"
                  ".gcl"))
+(defun google-nclfmt ()
+  "Run http://go/nclfmt on the current file."
+  (interactive)
+  (reformat-file "/usr/bin/nclfmt --in_place"
+                 "ncl" ".ncl"))
 (defun lispfmt ()
   "Run lispfmt.el on the current file."
   (interactive)
@@ -113,6 +118,9 @@
      ((memq major-mode
             '(gcl-mode borg-mode))
       (google-gclfmt))
+     ((memq major-mode
+            '(ncl-mode))
+      (google-nclfmt))
      ((memq major-mode
             '(emacs-lisp-mode lisp-mode))
       (lispfmt))
