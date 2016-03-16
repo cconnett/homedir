@@ -117,7 +117,8 @@ if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
     echo "$PWD" | \
       sed -e "s!$HOME!~!" | \
       sed -e 's!/google/src/cloud/cjc!/cloud!' | \
-      sed -e "s/emacs/${red_target_blue}/"
+      sed -e "s!/cloud/emacs/google3!/cloud/${red_target_blue}/google3!" | \
+      cat
   }
 elif [[ $(hostname) == "scruffy" ]]; then
   alias zfslist='zfs list -t filesystem -r mpool'
