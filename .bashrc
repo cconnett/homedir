@@ -40,7 +40,6 @@ alias gdc='git diff --cached'
 alias ge='git5 export'
 alias gl='git log'
 alias gs='git status'
-alias getack='curl http://beyondgrep.com/ack-2.14-single-file > ~/bin/ack && chmod 0755 ~/bin/ack'
 alias gitg='gitg --all >& /dev/null &'
 alias gitkk='gitk $(git branch | tr "\n*" "  ")>& /dev/null &'
 alias gitb='for k in `git branch | sed s/^..//`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k --`\\t"$k";done | sort'
@@ -54,6 +53,15 @@ alias please=sudo
 alias math='rlwrap math'
 alias emacs='emacs 2> /dev/null'
 alias z3='ipython -i -c "from z3 import *"'
+
+function getack {
+  curl http://beyondgrep.com/ack-2.14-single-file > ~/bin/ack
+  chmod 0755 ~/bin/ack
+}
+if [[ ! -x ~/bin/ack ]]; then
+  getack
+fi
+
 function jump {
   g4d $(hostname -s)-$(whoami)-$(basename $(dirname $(pwd)))-$(git symbolic-ref --short HEAD)-git5
 }
