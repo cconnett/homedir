@@ -1,11 +1,12 @@
 function find-parent-google3 {
   g3="$1"
   shift
-  until [[ $(basename "$g3") == 'google3' || "$g3" == '/' || "$g3" == '.' ]]; do
+  until [[ $(basename "$g3") == 'google3' ||
+             $(basename "$g3") == '/' ||
+             $(basename "$g3") == '.' ]]; do
     g3=$(dirname "$g3")
-    echo "$g3"
   done
-  if [[ "$g3" == 'google3' ]]; then
+  if [[ $(basename "$g3") == 'google3' ]]; then
     echo "$g3"
   fi
 }
@@ -13,7 +14,7 @@ function find-parent-google3 {
 function current-switch-target {
   g3=$(find-parent-google3 "$PWD")
   if [[ -n "$g3" ]]; then
-    target=$(cat "${g3}/../.citc/target_of_switch_client" 2> /dev/null)
+    target=$(cat "$g3/../.citc/target_of_switch_client")
     if [[ -n "$target" ]]; then
       echo "$target"
       return
@@ -36,7 +37,6 @@ function g4s {
         ;;
       *)
         client="$1"
-        shift
         ;;
     esac
   done
