@@ -393,7 +393,7 @@
  '(ido-default-file-method (quote selected-window))
  '(ilisp-*use-fsf-compliant-keybindings* t)
  '(inferior-lisp-program "/usr/bin/sbcl --noinform")
- '(js-indent-level 2 t)
+ '(js-indent-level 2)
  '(js2-auto-indent-flag nil)
  '(js2-basic-offset 2)
  '(js2-global-externs (quote ("chrome" "angular")))
@@ -402,13 +402,14 @@
  '(lisp-indent-fuction (quote common-lisp-indent-function))
  '(markdown-enable-math t)
  '(org-support-shift-select nil)
+ '(package-selected-packages
+   (quote
+    (srefactor flymake-easy flymake-cursor json-mode js2-mode)))
  '(py-continuation-offset 2)
  '(py-indent-offset 2 t)
  '(py-smart-indentation nil)
- '(pyformat-args "-i -y --force_quote_type single --binpack_named_arguments"
-                 t)
- '(safe-local-variable-values (quote ((encoding . utf-8)
-                                      (Encoding . utf-8))))
+ '(pyformat-args "-i -y --force_quote_type single --binpack_named_arguments" t)
+ '(safe-local-variable-values (quote ((encoding . utf-8) (Encoding . utf-8))))
  '(sgml-basic-offset 2)
  '(sh-basic-offset 2)
  '(sh-indentation 2)
@@ -516,26 +517,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil
-                         :background "white"
-                         :foreground "black"
-                         :inverse-video nil
-                         :box nil
-                         :strike-through nil
-                         :overline nil
-                         :underline nil
-                         :slant normal
-                         :weight normal
-                         :height 90
-                         :width normal
-                         :foundry "unknown"
-                         :family "DejaVu Sans Mono"))))
- '(flymake-errline ((((class color))
-                     (:underline "red"))))
- '(flymake-infoline ((((class color))
-                      (:underline "gray"))))
- '(flymake-warnline ((((class color))
-                      (:underline "orange")))))
+ '(default ((t (:inherit nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 90 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
+ '(flymake-errline ((((class color)) (:underline "red"))))
+ '(flymake-infoline ((((class color)) (:underline "gray"))))
+ '(flymake-warnline ((((class color)) (:underline "orange")))))
 
 (defun vi-open-line-above ()
   "Insert a newline above the current line and put point at beginning."
