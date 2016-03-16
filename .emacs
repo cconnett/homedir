@@ -287,6 +287,7 @@
  '(js-indent-level 2 t)
  '(js2-auto-indent-flag nil)
  '(js2-basic-offset 2)
+ '(js2-global-externs (quote ("chrome" "angular")))
  '(js2-mirror-mode t)
  '(js2-mode-escape-quotes nil)
  '(py-continuation-offset 2)
