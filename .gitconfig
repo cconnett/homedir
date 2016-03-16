@@ -1,0 +1,17 @@
+[user]
+	name = Chris Connett
+	email = cjc@google.com
+[color]
+	ui = true
+[core]
+        excludesfile=~/.gitignore
+[push]
+	default = simple
+[pull]
+	rebase = true
+[rebase]
+	autostash = true
+[clangformat]
+	style = Google
+[diff]
+	algorithm = minimal

@@ -1,8 +1,8 @@
 # This file is sourced by all *interactive* bash shells on startup.  This
 # file *should generate no output* or it will break the scp and rcp commands.
 
-export PATH=~/bin:/usr/local/bin:$PATH
-export EDITOR='emacs -nw --no-splash'
+export PATH=~/bin:/usr/local/bin:/opt/emacs/bin:$PATH
+export EDITOR='emacs -nw --no-splash --no-desktop'
 export LESS='-S -R -F -X'
 
 export HISTCONTROL=ignoreboth:erasedups
@@ -10,10 +10,9 @@ export HISTIGNORE=ls:ll:la:l:cd:pwd:exit:su:df:clear:sl:reset:gd:gdc:gcp:gs:gl:d
 export HISTSIZE=150000
 shopt -s histappend
 shopt -s checkwinsize
-#export PROMPT_COMMAND='history -a  ~/.bash_history; history -c; history -r; $PROMPT_COMMAND'
-export PROMPT_COMMAND='history -a  ~/.bash_history; $PROMPT_COMMAND'
+export PROMPT_COMMAND="history -a  ~/.bash_history"
 
-#export PYTHONPATH=~/Python:$PYTHONPATH
+export PYTHONSTARTUP=~/.pythonrc
 export ACK_COLOR_MATCH='red'
 export ACK_COLOR_FILENAME='on_cyan'
 export ACK_COLOR_LINENO='bold blue'
@@ -24,7 +23,7 @@ export P4DIFF='git diff'
 
 alias sl=ls
 alias d="date"
-alias c="cal -3"
+alias c="cal -3; d"
 alias ls='ls --color=auto -B'
 alias ll="ls -ltr"
 alias lla="ll -A"
@@ -33,7 +32,7 @@ alias locate='locate -i'
 alias gap='git add -p'
 alias gcne='git commit --amend --no-edit'
 alias gcm='git commit -m'
-alias gco='git checkout'
+alias gco='git checkout -m'
 alias gc=gco
 alias gcp='git checkout -p'
 alias gd='git diff'
@@ -54,6 +53,7 @@ alias serve='python -m SimpleHTTPServer'
 alias please=sudo
 alias math='rlwrap math'
 alias emacs='emacs 2> /dev/null'
+alias z3='ipython -i -c "from z3 import *"'
 function jump {
   g4d $(hostname -s)-$(whoami)-$(basename $(dirname $(pwd)))-$(git symbolic-ref --short HEAD)-git5
 }
@@ -68,101 +68,87 @@ function current-git-branch {
   fi
 }
 
-function pointed-dir {
-  echo "$PWD" | sed -e "s!$HOME!~!" | sed -e "s/emacs/$(current-switch-target)/"
-}
-
 if [[ ${EUID} == 0 ]] ; then
     PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
 else
-    PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] '
+    PROMPT_COMMAND="$PROMPT_COMMAND"';PS1="\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] "'
 fi
 
+alias tapp='tap_presubmit -cb sandman,integrate'
 
-function tapp {
-  tap_presubmit -p sandman -c $(cat .git4_perforce_config/CL) "$@"
-  cd "$PWD"
-}
 function lastlog {
   less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
 }
 
-function make-completion-wrapper () {
-  # make-completion-wrapper _p4_completion::base _g4_switch g4d
-  # complete -o default -o nospace -F _g4d_bash::g4d_completion g4s
-  local function_name="$2"
-  local arg_count=$(($#-3))
-  local comp_function_name="$1"
-  shift 2
-  local function="
-function $function_name {
-    ((COMP_CWORD+=$arg_count))
-    COMP_WORDS=( "$@" \${COMP_WORDS[@]:1} )
-    "$comp_function_name"
-    return 0
-}"
-  eval "$function"
-}
+if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
+  alias g3python=/google/data/ro/projects/g3python/g3python
+  alias submit='git5 submit --sq --tap-project=sandman'
+  alias submit2='git5 submit --sq --tap-project=sandman,integrate'
+  alias submitall='git5 submit --sq --tap-project=all'
+  alias presubmit='git5 export --sq --tap-project=sandman'
+  alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
+  alias presubmitall='git5 export --sq --tap-project=all'
+  alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
+  alias cov='blaze coverage --combined_report=html'
+  alias sandmanh=blaze-bin/devtools/sandman/sandman
+  alias bs='blaze build //devtools/sandman:sandman'
+  alias kri=/google/data/ro/projects/sandman/kill_registered_instance.par
+  alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
+  alias sgcl2='gcl2 --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
+  alias sgcl2db='gcl2db -- --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
+  alias sbc=/google/data/ro/projects/sandman/sandman_borgcfg.par
+  alias pa='glogin && prodaccess'
+  alias csearch='csearch --context=1'
+  alias b='blaze build'
+  alias t='blaze test'
+  alias r='blaze run'
+  alias iblaze=/google/data/ro/teams/iblaze/iblaze
+  alias ib='iblaze build'
+  alias it='iblaze test'
+  alias ir='iblaze run'
+  [[ -s "~/g4s.bash" ]] && source "~/g4s.bash"
 
-if [[ $(hostname -d) == "cs.rit.edu" ]]; then
-    export PATH=/usr/gnu/bin:/opt/csw/bin:/bin:/sbin:/usr/bin:/usr/sbin:$PATH
-    export VISUAL=$EDITOR
-    alias grep='ggrep --color=auto'
-    alias emacs='emacs -nw --no-splash'
-elif [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
-    export PROD=/bigtable/mix-io/devtools-sandman.dashboard.instances.sandman-dashboard
-    export CJC=/bigtable/mix-pb/devtools-sandman-testing.dashboard.instances.cjc-dev-instance
-    export EM=/google/src/cloud/cjc/emacs/google3
-    alias g3python=/google/data/ro/projects/g3python/g3python
-    alias submit='git5 submit --sq --tap-project=sandman'
-    alias submit2='git5 submit --sq --tap-project=sandman,integrate'
-    alias submitall='git5 submit --sq --tap-project=all'
-    alias presubmit='git5 export --sq --tap-project=sandman'
-    alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
-    alias presubmitall='git5 export --sq --tap-project=all'
-    alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
-    alias cov='blaze coverage --combined_report=html'
-    alias sandman-head=blaze-bin/devtools/sandman/sandman
-    alias bs='blaze build //devtools/sandman:sandman'
-    alias kri=/google/data/ro/projects/sandman/kill_registered_instance.par
-    alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
-    alias sbc=/google/data/ro/projects/sandman/sandman_borgcfg.par
-    alias pa='glogin && prodaccess'
-    alias b='blaze build'
-    alias t='blaze test'
-    alias r='blaze run'
+  function pointed-dir {
+    red_target_blue='\\[\\033[01;31m\\]'
+    red_target_blue+=$(current-switch-target)
+    red_target_blue+='\\[\\033[01;34m\\]'
+    echo "$PWD" | \
+      sed -e "s!$HOME!~!" | \
+      sed -e 's!/google/src/cloud/cjc!/cloud!' | \
+      sed -e "s/emacs/${red_target_blue}/"
+  }
 elif [[ $(hostname) == "scruffy" ]]; then
-    alias zfslist='zfs list -t filesystem -r mpool'
-    alias emacs='emacs -nw --no-splash'
+  alias zfslist='zfs list -t filesystem -r mpool'
+  alias emacs=$EDITOR
 else
-    export VISUAL='emacs'
-    alias zfslist='ssh scruffy zfs list -t filesystem -r mpool'
-    export SAT_PATHS=~/bin/sat/clasp/bin:~/bin/sat/minisat/simp:~/bin/sat/rsat_SAT-Race08_final_bin:~/bin/sat/zchaff64
-    [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+  export VISUAL='emacs'
+  alias zfslist='ssh scruffy zfs list -t filesystem -r mpool'
+  [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 fi
 
 export SWITCH_CLIENT='emacs'
-[[ -s "$HOME/g4s.bash" ]] && source "$HOME/g4s.bash"
 
 # Activate bash-completion. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
-    [ -f /etc/bash_completion ] && source /etc/bash_completion
-    __git_complete gc _git_checkout
-    __git_complete gco _git_checkout
-    __git_complete gl _git_log
-    complete -F _blaze::complete_build_target_wrapper -o nospace b
-    complete -F _blaze::complete_test_target_wrapper -o nospace t
-    complete -o default -o nospace -F _g4d_bash::g4d_completion g4s
+  [ -f /etc/bash_completion ] && source /etc/bash_completion
+  __git_complete gc _git_checkout
+  __git_complete gco _git_checkout
+  __git_complete gl _git_log
+  complete -F _blaze::complete_build_target_wrapper -o nospace b
+  complete -F _blaze::complete_build_target_wrapper -o nospace ib
+  complete -F _blaze::complete_test_target_wrapper -o nospace t
+  complete -F _blaze::complete_test_target_wrapper -o nospace it
 
-    _blaze::complete_run_target_wrapper() {
-      _blaze::complete_target_wrapper "run"
-    }
-    complete -F _blaze::complete_run_target_wrapper -o nospace r
+  _blaze::complete_run_target_wrapper() {
+    _blaze::complete_target_wrapper "run"
+  }
+  complete -F _blaze::complete_run_target_wrapper -o nospace r
+  complete -F _blaze::complete_run_target_wrapper -o nospace ir
 
-    _blaze::complete_coverage_target_wrapper() {
-      _blaze::complete_target_wrapper "coverage"
-    }
-    complete -F _blaze::complete_coverage_target_wrapper -o nospace cov
+  _blaze::complete_coverage_target_wrapper() {
+    _blaze::complete_target_wrapper "coverage"
+  }
+  complete -F _blaze::complete_coverage_target_wrapper -o nospace cov
 fi
 
 # make less more friendly for non-text input files, see lesspipe(1)
