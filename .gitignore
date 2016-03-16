@@ -1,0 +1,8 @@
+.srcfs_workspace
+READONLY
+VERSION_MAP
+.svn
+sandman-genfiles/
+.citc_workspace_id_cache/
+deps.js
+*~
