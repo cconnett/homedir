@@ -76,18 +76,6 @@ function current-git-branch {
   fi
 }
 
-if [[ ${EUID} == 0 ]] ; then
-    PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
-else
-    PROMPT_COMMAND="$PROMPT_COMMAND"';PS1="\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] "'
-fi
-
-alias tapp='tap_presubmit -cb sandman,integrate'
-
-function lastlog {
-  less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
-}
-
 if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias g3python=/google/data/ro/projects/g3python/g3python
   alias submit='git5 submit --sq --tap-project=sandman'
@@ -114,8 +102,14 @@ if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias ib='iblaze build'
   alias it='iblaze test'
   alias ir='iblaze run'
-  [[ -s "~/g4s.bash" ]] && source "~/g4s.bash"
+  alias tapp='tap_presubmit -cb sandman,integrate'
+  export SWITCH_CLIENT='emacs'
 
+  [ -e ~/homedir/g4s.bash ] && source ~/homedir/g4s.bash
+
+  function lastlog {
+    less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
+  }
   function pointed-dir {
     red_target_blue='\\[\\033[01;31m\\]'
     red_target_blue+=$(current-switch-target)
@@ -131,10 +125,13 @@ elif [[ $(hostname) == "scruffy" ]]; then
 else
   export VISUAL='emacs'
   alias zfslist='ssh scruffy zfs list -t filesystem -r mpool'
-  [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 fi
 
-export SWITCH_CLIENT='emacs'
+if [[ ${EUID} == 0 ]] ; then
+    PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
+else
+    PROMPT_COMMAND="$PROMPT_COMMAND"';PS1="\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] "'
+fi
 
 # Activate bash-completion. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
