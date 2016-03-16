@@ -85,10 +85,6 @@
                  "lispfmt"
                  "el"))
 
-;; (unless (boundp 'format-mode/machine-format)
-;;   (defvar format-mode/machine-format nil)
-;;   (make-variable-buffer-local 'format-mode/machine-format))
-
 (define-minor-mode format-mode
   "Machine format the buffer before saving."
   :lighter " Format"
