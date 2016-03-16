@@ -109,6 +109,8 @@
       (if at-google
           (google-clang-format-file)
         (clang-format-file)))
+     ((memq major-mode '(json-mode))
+      (json-mode-beautify))
      ((memq major-mode
             '(python-mode))
       (google-pyformat))
@@ -356,7 +358,7 @@
                                 ("\\.hh$" . c++-mode)
                                 ("\\.hi$" . haskell-mode)
                                 ("\\.js$" . js2-mode)
-                                ("\\.json$" . js2-mode)
+                                ("\\.json$" . json-mode)
                                 ("\\.l[hg]s$" . literate-haskell-mode)
                                 ("\\.m$" . matlab-mode)
                                 ("\\.md$" . markdown-mode)
