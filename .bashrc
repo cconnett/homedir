@@ -32,11 +32,20 @@ alias locate='locate -i'
 alias gap='git add -p'
 alias gcne='git commit --amend --no-edit'
 alias gcm='git commit -m'
-alias gco='git checkout -m'
+function gco {
+  branch="$1"
+  shift
+  if [[ -z "$branch" ]]; then
+    branch='master'
+  fi
+  git checkout -m "$branch"
+}
 alias gc=gco
+alias gcb='gco -b'
 alias gcp='git checkout -p'
 alias gd='git diff'
 alias gdc='git diff --cached'
+alias gdcl='git diff $(gl --grep "synced with perforce" | head -n 1 | cut -f2 -d" ")'
 alias ge='git5 export'
 alias gl='git log'
 alias gs='git status'
@@ -84,6 +93,7 @@ if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias presubmit='git5 export --sq --tap-project=sandman'
   alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
   alias presubmitall='git5 export --sq --tap-project=all'
+  alias gsy='git5 sync'
   alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
   alias cov='blaze coverage --combined_report=html'
   alias sandmanh=blaze-bin/devtools/sandman/sandman
