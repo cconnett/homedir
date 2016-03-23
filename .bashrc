@@ -37,12 +37,17 @@ function gco {
   branch="$1"
   shift
   if [[ -z "$branch" ]]; then
-    branch='master'
+    branch=master
   fi
-  git checkout -m "$branch"
+  git checkout -m -b "$branch" 2> >(grep -v 'already exists' 1>&2) || \
+    git checkout -m "$branch"
+}
+function gitsplit {
+  gco "$1"
+  shift
+  git cherry-pick $*
 }
 alias gc=gco
-alias gcb='gco -b'
 alias gcp='git checkout -p'
 alias gd='git diff'
 alias gdc='git diff --cached'
