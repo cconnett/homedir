@@ -14,7 +14,7 @@ function find-parent-google3 {
 function current-switch-target {
   g3=$(find-parent-google3 "$PWD")
   if [[ -n "$g3" ]]; then
-    target=$(cat "$g3/../.citc/target_of_switch_client")
+    target=$(cat "$g3/../.citc/target_of_switch_client" 2> /dev/null)
     if [[ -n "$target" ]]; then
       echo "$target"
       return
