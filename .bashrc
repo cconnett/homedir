@@ -4,14 +4,12 @@
 export PATH=~/bin:/usr/local/bin:/opt/emacs/bin:$PATH
 export EDITOR='emacs -nw --no-splash --no-desktop'
 export LESS='-S -R -F -X'
-
 export HISTCONTROL=ignoreboth:erasedups
 export HISTIGNORE=ls:ll:la:l:cd:pwd:exit:su:df:clear:sl:reset:gd:gdc:gcp:gs:gl:d:c:gap
 export HISTSIZE=150000
 shopt -s histappend
 shopt -s checkwinsize
 export PROMPT_COMMAND="history -a  ~/.bash_history"
-
 export PYTHONSTARTUP=~/.pythonrc
 export ACK_COLOR_MATCH='red'
 export ACK_COLOR_FILENAME='on_cyan'
@@ -80,6 +78,21 @@ function lastlog {
   less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
 }
 
+function current-switch-target {
+  true
+}
+
+function pointed-dir {
+  red_target_blue='\\[\\033[01;31m\\]'
+  red_target_blue+=$(current-switch-target)
+  red_target_blue+='\\[\\033[01;34m\\]'
+  echo "$PWD" | \
+    sed -e "s!$HOME!~!" | \
+    sed -e 's!/google/src/cloud/cjc!/cloud!' | \
+    sed -e "s/emacs/${red_target_blue}/"
+}
+
+
 if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias g3python=/google/data/ro/projects/g3python/g3python
   alias submit='git5 submit --sq --tap-project=sandman'
@@ -108,15 +121,6 @@ if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias ir='iblaze run'
   [[ -s "~/g4s.bash" ]] && source "~/g4s.bash"
 
-  function pointed-dir {
-    red_target_blue='\\[\\033[01;31m\\]'
-    red_target_blue+=$(current-switch-target)
-    red_target_blue+='\\[\\033[01;34m\\]'
-    echo "$PWD" | \
-      sed -e "s!$HOME!~!" | \
-      sed -e 's!/google/src/cloud/cjc!/cloud!' | \
-      sed -e "s/emacs/${red_target_blue}/"
-  }
 elif [[ $(hostname) == "scruffy" ]]; then
   alias zfslist='zfs list -t filesystem -r mpool'
   alias emacs=$EDITOR
@@ -131,9 +135,10 @@ export SWITCH_CLIENT='emacs'
 # Activate bash-completion. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
   [ -f /etc/bash_completion ] && source /etc/bash_completion
-  __git_complete gc _git_checkout
-  __git_complete gco _git_checkout
-  __git_complete gl _git_log
+  [ -f /etc/bash_completion.d/git-prompt ] && source /etc/bash_completion.d/git-prompt
+  __git_complete gc _git_checkout 2> /dev/null
+  __git_complete gco _git_checkout 2> /dev/null
+  __git_complete gl _git_log 2> /dev/null
   complete -F _blaze::complete_build_target_wrapper -o nospace b
   complete -F _blaze::complete_build_target_wrapper -o nospace ib
   complete -F _blaze::complete_test_target_wrapper -o nospace t
