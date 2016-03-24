@@ -33,15 +33,23 @@ alias locate='locate -i'
 alias gap='git add -p'
 alias gcne='git commit --amend --no-edit'
 alias gcm='git commit -m'
-alias gco='git checkout -m'
+function gco {
+  branch="$1"
+  shift
+  if [[ -z "$branch" ]]; then
+    branch='master'
+  fi
+  git checkout -m "$branch"
+}
 alias gc=gco
+alias gcb='gco -b'
 alias gcp='git checkout -p'
 alias gd='git diff'
 alias gdc='git diff --cached'
+alias gdcl='git diff $(gl --grep "synced with perforce" | head -n 1 | cut -f2 -d" ")'
 alias ge='git5 export'
 alias gl='git log'
 alias gs='git status'
-alias getack='curl http://beyondgrep.com/ack-2.14-single-file > ~/bin/ack && chmod 0755 ~/bin/ack'
 alias gitg='gitg --all >& /dev/null &'
 alias gitkk='gitk $(git branch | tr "\n*" "  ")>& /dev/null &'
 alias gitb='for k in `git branch | sed s/^..//`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k --`\\t"$k";done | sort'
@@ -55,6 +63,15 @@ alias please=sudo
 alias math='rlwrap math'
 alias emacs='emacs 2> /dev/null'
 alias z3='ipython -i -c "from z3 import *"'
+
+function getack {
+  curl http://beyondgrep.com/ack-2.14-single-file > ~/bin/ack
+  chmod 0755 ~/bin/ack
+}
+if [[ ! -x ~/bin/ack ]]; then
+  getack
+fi
+
 function jump {
   g4d $(hostname -s)-$(whoami)-$(basename $(dirname $(pwd)))-$(git symbolic-ref --short HEAD)-git5
 }
@@ -95,7 +112,6 @@ function pointed-dir {
     sed -e "s/emacs/${red_target_blue}/"
 }
 
-
 if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias g3python=/google/data/ro/projects/g3python/g3python
   alias submit='git5 submit --sq --tap-project=sandman'
@@ -104,6 +120,7 @@ if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias presubmit='git5 export --sq --tap-project=sandman'
   alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
   alias presubmitall='git5 export --sq --tap-project=all'
+  alias gsy='git5 sync'
   alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
   alias cov='blaze coverage --combined_report=html'
   alias sandmanh=blaze-bin/devtools/sandman/sandman
@@ -122,18 +139,37 @@ if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias ib='iblaze build'
   alias it='iblaze test'
   alias ir='iblaze run'
-  [[ -s "~/g4s.bash" ]] && source "~/g4s.bash"
+  alias tapp='tap_presubmit -cb sandman,integrate'
+  export SWITCH_CLIENT='emacs'
 
+  [ -e ~/homedir/g4s.bash ] && source ~/homedir/g4s.bash
+
+  function lastlog {
+    less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
+  }
+  function pointed-dir {
+    red_target_blue='\\[\\033[01;31m\\]'
+    red_target_blue+=$(current-switch-target)
+    red_target_blue+='\\[\\033[01;34m\\]'
+    echo "$PWD" | \
+      sed -e "s!$HOME!~!" | \
+      sed -e 's!/google/src/cloud/cjc!/cloud!' | \
+      sed -e "s!/cloud/emacs/google3!/cloud/${red_target_blue}/google3!" | \
+      cat
+  }
 elif [[ $(hostname) == "scruffy" ]]; then
   alias zfslist='zfs list -t filesystem -r mpool'
   alias emacs=$EDITOR
 else
   export VISUAL='emacs'
   alias zfslist='ssh scruffy zfs list -t filesystem -r mpool'
-  [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 fi
 
-export SWITCH_CLIENT='emacs'
+if [[ ${EUID} == 0 ]] ; then
+    PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
+else
+    PROMPT_COMMAND="$PROMPT_COMMAND"';PS1="\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] "'
+fi
 
 # Activate bash-completion. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
