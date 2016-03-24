@@ -19,6 +19,9 @@ export GIT_EDITOR=$EDITOR
 export GDK_NATIVE_WINDOWS=1 # http://debbugs.gnu.org/cgi-bin/bugreport.cgi?bug=4870
 export P4DIFF='git diff'
 
+bind '"\e[A":history-search-backward'
+bind '"\e[B":history-search-forward'
+
 alias sl=ls
 alias d="date"
 alias c="cal -3; d"
