@@ -69,6 +69,17 @@ alias math='rlwrap math'
 alias emacs='emacs 2> /dev/null'
 alias z3='ipython -i -c "from z3 import *"'
 
+function ack {
+  test_flag='--notest'
+  for arg in "$*"; do
+    case "$arg" in
+      --test)
+        test_flag=''
+        ;;
+    esac
+  done
+  command ack $* $testflag
+}
 function getack {
   curl http://beyondgrep.com/ack-2.14-single-file > ~/bin/ack
   chmod 0755 ~/bin/ack
