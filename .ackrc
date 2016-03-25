@@ -1,0 +1,4 @@
+--type-set=gcl=.gcl,.borg,.borg_template
+--type-set=test:match:/_test\b/
+--type-set=doc:ext:md
+--smart-case
