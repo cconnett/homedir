@@ -33,14 +33,23 @@ alias locate='locate -i'
 alias gap='git add -p'
 alias gcne='git commit --amend --no-edit'
 alias gcm='git commit -m'
+function gitnew {
+  branch="$1"
+  shift
+  if [[ -z "$branch" ]]; then
+    branch=master
+  fi
+  git checkout -m -b "$branch" master \
+      2> >(egrep -v "already exists|'-' is not" 1>&2) || \
+    git checkout -m "$branch"
+}
 function gco {
   branch="$1"
   shift
   if [[ -z "$branch" ]]; then
     branch=master
   fi
-  git checkout -m -b "$branch" 2> >(grep -v 'already exists' 1>&2) || \
-    git checkout -m "$branch"
+  git checkout -m "$branch"
 }
 function gitsplit {
   gco "$1"
