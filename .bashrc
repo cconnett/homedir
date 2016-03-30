@@ -55,7 +55,7 @@ function gco {
 function gitsplit {
   gco "$1"
   shift
-  git cherry-pick $*
+  git cherry-pick "$@"
 }
 alias gc=gco
 alias gcp='git checkout -p'
@@ -81,14 +81,14 @@ alias z3='ipython -i -c "from z3 import *"'
 
 function ack {
   test_flag='--notest'
-  for arg in "$*"; do
+  for arg in "$@"; do
     case "$arg" in
       --test)
         test_flag=''
         ;;
     esac
   done
-  command ack $* $testflag
+  command ack "$@" $testflag
 }
 function getack {
   curl http://beyondgrep.com/ack-2.14-single-file > ~/bin/ack
