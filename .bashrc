@@ -37,7 +37,8 @@ function gitnew {
   branch="$1"
   shift
   if [[ -z "$branch" ]]; then
-    branch=master
+    echo 1>&2 "Must specify a new branch."
+    return 1
   fi
   git checkout -m -b "$branch" master \
       2> >(egrep -v "already exists|'-' is not" 1>&2) || \
