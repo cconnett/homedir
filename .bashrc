@@ -45,12 +45,26 @@ function gitnew {
     git checkout -m "$branch"
 }
 function gco {
+  function message {
+    echo 'gco!WIP on branch' "$1"
+  }
   branch="$1"
   shift
   if [[ -z "$branch" ]]; then
     branch=master
   fi
+  if [[ -n $(git status --porcelain) ]]; then
+    current=$(git rev-parse --abbrev-ref HEAD)
+    git stash save --all --keep-index --quiet $(message $current)
+  fi
   git checkout -m "$branch"
+
+  branch=$(git rev-parse --abbrev-ref HEAD)
+  stash=$(git stash list --grep "$(message "$branch")" | cut -f1 -d:)
+  if [[ -n "$stash" ]]; then
+    git stash apply --index --quiet "$stash" &&
+      git stash drop --quiet "$stash"
+  fi
 }
 function gitsplit {
   gco "$1"
