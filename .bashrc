@@ -162,6 +162,7 @@ if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
   alias presubmitall='git5 export --sq --tap-project=all'
   alias gsy='git5 sync'
+  alias gy='gsy'
   alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
   alias cov='blaze coverage --combined_report=html'
   alias sandmanh=blaze-bin/devtools/sandman/sandman
