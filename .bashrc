@@ -43,6 +43,7 @@ function gitnew {
   git checkout -m -b "$branch" master \
       2> >(egrep -v "already exists|'-' is not" 1>&2) || \
     git checkout -m "$branch"
+  git5 sync 2> /dev/null
 }
 function gco {
   function message {
