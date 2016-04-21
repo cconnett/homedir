@@ -2,4 +2,6 @@
 --type-set=test:match:/_test\b/
 --type-set=doc:ext:md
 --type-set=md:ext:md
+--type-set=svg:ext:svg
+--nosvg
 --smart-case
