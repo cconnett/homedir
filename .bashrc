@@ -24,7 +24,7 @@ bind '"\e[B":history-search-forward'
 
 alias sl=ls
 alias d="date"
-alias c="cal -3; d"
+alias c="ncal -b -M -3; d"
 alias ls='ls --color=auto -B'
 alias ll="ls -ltr"
 alias lla="ll -A"
