@@ -45,6 +45,7 @@ function gitnew {
   gco "$branch"
   git5 sync 2> /dev/null
 }
+alias gn=gitnew
 function gco {
   function message {
     echo 'gco!WIP on branch' "$1"
