@@ -181,34 +181,36 @@ function pointed-dir {
 }
 
 if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
+  alias b='blaze build'
+  alias bs='blaze build //devtools/sandman:sandman'
+  alias cov='blaze coverage --combined_report=html'
+  alias csearch='csearch --context=1'
   alias g3python=/google/data/ro/projects/g3python/g3python
-  alias submit='git5 submit --sq --tap-project=sandman'
-  alias submit2='git5 submit --sq --tap-project=sandman,integrate'
-  alias submitall='git5 submit --sq --tap-project=all'
-  alias presubmit='git5 export --sq --tap-project=sandman'
-  alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
-  alias presubmitall='git5 export --sq --tap-project=all'
   alias gsy='git5 sync'
   alias gy='gsy'
-  alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
-  alias cov='blaze coverage --combined_report=html'
-  alias sandmanh=blaze-bin/devtools/sandman/sandman
-  alias bs='blaze build //devtools/sandman:sandman'
+  alias ib='iblaze build'
+  alias iblaze=/google/data/ro/teams/iblaze/iblaze
+  alias ir='iblaze run'
+  alias it='iblaze test'
   alias kri=/google/data/ro/projects/sandman/kill_registered_instance.par
-  alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
+  alias pa='glogin && prodaccess'
+  alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
+  alias presubmit='git5 export --sq --tap-project=sandman'
+  alias presubmitall='git5 export --sq --tap-project=all'
+  alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
+  alias r='blaze run'
+  alias sandmanh=blaze-bin/devtools/sandman/sandman
+  alias sbc=/google/data/ro/projects/sandman/sandman_borgcfg.par
   alias sgcl2='gcl2 --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
   alias sgcl2db='gcl2db -- --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
-  alias sbc=/google/data/ro/projects/sandman/sandman_borgcfg.par
-  alias pa='glogin && prodaccess'
-  alias csearch='csearch --context=1'
-  alias b='blaze build'
+  alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
+  alias submit2='git5 submit --sq --tap-project=sandman,integrate'
+  alias submit='git5 submit --sq --tap-project=sandman'
+  alias submitall='git5 submit --sq --tap-project=all'
   alias t='blaze test'
-  alias r='blaze run'
-  alias iblaze=/google/data/ro/teams/iblaze/iblaze
-  alias ib='iblaze build'
-  alias it='iblaze test'
-  alias ir='iblaze run'
   alias tapp='tap_presubmit -cb sandman,integrate'
+  alias writeme=/google/data/ro/teams/writeme/writeme
+
   export SWITCH_CLIENT='emacs'
 
   [ -e ~/homedir/g4s.bash ] && source ~/homedir/g4s.bash
