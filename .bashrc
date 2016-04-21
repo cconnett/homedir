@@ -40,9 +40,9 @@ function gitnew {
     echo 1>&2 "Must specify a new branch."
     return 1
   fi
-  git checkout -m -b "$branch" master \
-      2> >(egrep -v "already exists|'-' is not" 1>&2) || \
-    git checkout -m "$branch"
+  git branch "$branch" master \
+      2> >(egrep -v "already exists|'-' is not" 1>&2)
+  gco "$branch"
   git5 sync 2> /dev/null
 }
 function gco {
