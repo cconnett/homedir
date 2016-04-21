@@ -106,6 +106,7 @@ alias gdcl='git diff $(gl --grep "synced with perforce" | head -n 1 | cut -f2 -d
 alias ge='git5 export'
 alias gl='git log'
 alias gs='git status'
+alias gsl='git stash list'
 alias gitg='gitg --all >& /dev/null &'
 alias gitkk='gitk $(git branch | tr "\n*" "  ")>& /dev/null &'
 alias gitb='for k in `git branch | sed s/^..//`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k --`\\t"$k";done | sort'
