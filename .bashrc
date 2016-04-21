@@ -55,23 +55,48 @@ function gco {
   if [[ -z "$branch" ]]; then
     branch=master
   fi
-  if [[ -n $(git status --porcelain) ]]; then
-    current=$(git rev-parse --abbrev-ref HEAD)
-    git stash save --all --keep-index --quiet $(message $current)
+  if [[ -n "$(git status --porcelain)" ]]; then
+    current="$(git rev-parse --abbrev-ref HEAD)"
+    git stash save --include-untracked --keep-index --quiet \
+        "$(message $current)"
   fi
   git checkout -m "$branch"
 
-  branch=$(git rev-parse --abbrev-ref HEAD)
-  stash=$(git stash list --grep "$(message "$branch")" | cut -f1 -d:)
+  branch="$(git rev-parse --abbrev-ref HEAD)"
+  stash="$(git stash list --grep "$(message "$branch")" | cut -f1 -d:)"
   if [[ -n "$stash" ]]; then
-    git stash apply --index --quiet "$stash" &&
-      git stash drop --quiet "$stash"
+    git reset --hard --quiet &&
+      git stash pop --index --quiet "$stash"
   fi
 }
+
 function gitsplit {
-  gco "$1"
-  shift
-  git cherry-pick "$@"
+  function available {
+    ! git reflog "$1" 1> /dev/null 2> /dev/null
+  }
+
+  # Default to splitting current HEAD commit if no commits given.
+  if [[ -z "$@" ]]; then
+    commits="$(git rev-parse --abbrev-ref HEAD)"
+  else
+    commits="$@"
+  fi
+
+  # Invent a name for the new branch based on the first commit message.
+  basename=python -c 'import re,sys; print "-".join(word.lower() for word in re.split(r"[^a-zA-Z0-9]+", sys.argv[1] if word)[:8] if word)' \
+          $(git log "$commits" -1 --pretty=oneline | cut -d' ' -f 2-)
+  name="$basename"
+  if ! available "$basename"; then
+    n=1
+    until $(available "${basename}-${n}"); do
+      n=$(($n + 1))
+      name="${basename}-${n}"
+    done
+  fi
+
+  # Switch to the new branch and cherry-pick.
+  git checkout -b "$name" || return 1
+  git cherry-pick "$commits"
 }
 alias gc=gco
 alias gcp='git checkout -p'
