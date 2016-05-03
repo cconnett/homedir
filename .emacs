@@ -105,7 +105,8 @@
       (if at-google
           (google-clang-format-file)
         (clang-format-file)))
-     ((memq major-mode '(json-mode))
+     ((memq major-mode
+            '(json-mode))
       (json-mode-beautify))
      ((memq major-mode
             '(python-mode))
@@ -176,6 +177,7 @@
                   (load-file user-init-file)))
 (global-set-key (kbd "C-M-s-<f12>")
                 (lambda ()
+                  (interactive)
                   (save-buffers-kill-emacs)))
 (global-set-key (kbd "C-c SPC")
                 'just-one-space)
@@ -191,6 +193,7 @@
                 'insert-pdb-string)
 (global-set-key (kbd "C-c s")
                 'sort-lines)
+(bind-key* "C-c C-s" 'sort-lines)
 (global-set-key (kbd "C-c #")
                 'comment-region)
 (global-set-key (kbd "C-c $")
@@ -404,12 +407,14 @@
  '(org-support-shift-select nil)
  '(package-selected-packages
    (quote
-    (js2-mode srefactor flymake-easy flymake-cursor json-mode)))
+    (srefactor flymake-easy flymake-cursor json-mode js2-mode)))
  '(py-continuation-offset 2)
  '(py-indent-offset 2)
  '(py-smart-indentation nil)
- '(pyformat-args "-i -y --force_quote_type single --binpack_named_arguments" t)
- '(safe-local-variable-values (quote ((encoding . utf-8) (Encoding . utf-8))))
+ '(pyformat-args "-i -y --force_quote_type single --binpack_named_arguments"
+                 t)
+ '(safe-local-variable-values (quote ((encoding . utf-8)
+                                      (Encoding . utf-8))))
  '(sgml-basic-offset 2)
  '(sh-basic-offset 2)
  '(sh-indentation 2)
@@ -517,10 +522,26 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 90 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
- '(flymake-errline ((((class color)) (:underline "red"))))
- '(flymake-infoline ((((class color)) (:underline "gray"))))
- '(flymake-warnline ((((class color)) (:underline "orange")))))
+ '(default ((t (:inherit nil :stipple nil
+                         :background "white"
+                         :foreground "black"
+                         :inverse-video nil
+                         :box nil
+                         :strike-through nil
+                         :overline nil
+                         :underline nil
+                         :slant normal
+                         :weight normal
+                         :height 90
+                         :width normal
+                         :foundry "unknown"
+                         :family "DejaVu Sans Mono"))))
+ '(flymake-errline ((((class color))
+                     (:underline "red"))))
+ '(flymake-infoline ((((class color))
+                      (:underline "gray"))))
+ '(flymake-warnline ((((class color))
+                      (:underline "orange")))))
 
 (defun vi-open-line-above ()
   "Insert a newline above the current line and put point at beginning."
@@ -553,7 +574,7 @@
 
 (setq js2-additional-externs '("goog" "angular" "describe" "it" "xit" "inject"
                                "module" "expect" "beforeEach" "exports" "guitar"
-                               "sandman" "FileReader" "Mousetrap"))
+                               "sandman"))
 
 
 (add-hook 'js2-post-parse-callbacks
