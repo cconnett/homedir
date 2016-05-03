@@ -404,9 +404,9 @@
  '(org-support-shift-select nil)
  '(package-selected-packages
    (quote
-    (srefactor flymake-easy flymake-cursor json-mode js2-mode)))
+    (js2-mode srefactor flymake-easy flymake-cursor json-mode)))
  '(py-continuation-offset 2)
- '(py-indent-offset 2 t)
+ '(py-indent-offset 2)
  '(py-smart-indentation nil)
  '(pyformat-args "-i -y --force_quote_type single --binpack_named_arguments" t)
  '(safe-local-variable-values (quote ((encoding . utf-8) (Encoding . utf-8))))
@@ -553,7 +553,7 @@
 
 (setq js2-additional-externs '("goog" "angular" "describe" "it" "xit" "inject"
                                "module" "expect" "beforeEach" "exports" "guitar"
-                               "sandman"))
+                               "sandman" "FileReader" "Mousetrap"))
 
 
 (add-hook 'js2-post-parse-callbacks
