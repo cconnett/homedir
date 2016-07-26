@@ -50,6 +50,7 @@
   (require 'google-coding-style)
   (require 'google-cc-extras)
   (require 'google-pyformat)
+  (require 'flymake-jslint)
   (google-cc-extras/bind-default-keys)
   (setq create-lockfiles nil))
 
@@ -62,12 +63,29 @@
   (interactive)
   (clang-format-region (point-min)
                        (point-max)))
+(defun local-google-pyformat ()
+  (interactive)
+  (let* ((getlines (format "gdcl --unified=0 %s | grep @@ |
+cut -d' ' -f3 |
+perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" \"'"
+                           buffer-file-name))
+         (lines (shell-command-to-string getlines))
+         (cmd (format "%s %s %s" "/usr/bin/pyformat" pyformat-args
+                      lines)))
+    (unless (zerop (length lines))
+      (message "Formatting lines %s" lines)
+      (reformat-file cmd "pyformat" ".py"))))
 
 (defun google-mdformat ()
   "Run http://go/mdformat on the current file."
   (interactive)
   (reformat-file "/google/data/ro/teams/g3doc/mdformat --in_place"
                  "mdformat" ".md"))
+(defun google-sqlformat ()
+  "Run http://go/googlesql_format on the current file."
+  (interactive)
+  (reformat-file "/google/data/ro/projects/storage/googlesql/format_sql"
+                 "googlesql" ".sql"))
 (defun google-gclfmt ()
   "Run http://go/gclfmt on the current file."
   (interactive)
@@ -101,7 +119,8 @@
     (message "Machine formatting for %s" major-mode)
     (cond
      ((memq major-mode
-            '(c++-mode js-mode js2-mode protobuf-mode))
+            '(c-mode c++-mode js-mode js2-mode protobuf-mode
+                     typescript-mode))
       (if at-google
           (google-clang-format-file)
         (clang-format-file)))
@@ -110,10 +129,13 @@
       (json-mode-beautify))
      ((memq major-mode
             '(python-mode))
-      (google-pyformat))
+      (local-google-pyformat))
      ((memq major-mode
             '(markdown-mode))
       (google-mdformat))
+     ((memq major-mode
+            '(sql-mode))
+      (google-sqlformat))
      ((memq major-mode
             '(gcl-mode borg-mode))
       (google-gclfmt))
@@ -315,6 +337,19 @@
           (lambda ()
             (set-face-foreground 'sh-heredoc-face "dark magenta")))
 
+(defun flymake-jslint-load ()
+  (interactive)
+  ;; (REGEXP FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX)
+  (flymake-easy-load (lambda (filename)
+                       `("~/bin/myjslint" ,filename))
+                     '(("^\\([^:]+\\):\\([^:]+\\):\\([^:]+\\):\\([^:]+\\)$"
+                        1 2 4 3))
+                     'temp-with-folder
+                     "js"
+                     ""))
+
+(add-hook 'js2-mode-hook 'flymake-jslint-load)
+
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
@@ -396,7 +431,7 @@
  '(ido-default-file-method (quote selected-window))
  '(ilisp-*use-fsf-compliant-keybindings* t)
  '(inferior-lisp-program "/usr/bin/sbcl --noinform")
- '(js-indent-level 2)
+ '(js-indent-level 2 t)
  '(js2-auto-indent-flag nil)
  '(js2-basic-offset 2)
  '(js2-global-externs (quote ("chrome" "angular")))
@@ -418,6 +453,7 @@
  '(sh-basic-offset 2)
  '(sh-indentation 2)
  '(standard-indent 2)
+ '(typescript-indent-level 2)
  '(vc-follow-symlinks t))
 
 (defun flymake-python-load ()
@@ -569,7 +605,11 @@
                  (message "Error loading .emacs! %s"
                           (error-message-string e)))))))
 
-(add-hook 'markdown-mode-hook 'turn-off-auto-fill)
+(make-variable-buffer-local 'auto-hscroll-mode)
+(add-hook 'markdown-mode-hook
+          (lambda ()
+            (setq auto-hscroll-mode nil)
+            (auto-fill-mode t)))
 
 (setq js2-additional-externs '("goog" "angular" "describe" "it" "xit" "inject"
                                "module" "expect" "beforeEach" "exports" "guitar"
