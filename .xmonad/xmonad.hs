@@ -73,7 +73,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask, xK_c     ), kill)
 
      -- Rotate through the available layout algorithms
-    , ((modm,               xK_Insert), sendMessage (Toggle MIRROR))
+    --, ((modm,               xK_Insert), sendMessage (Toggle MIRROR))
     , ((modm              , xK_F11   ), sendMessage (Toggle FULL))
     , ((modm              , xK_F12   ), cycleThroughLayouts [description myTiled
                                                             ,description myGrid])
@@ -250,7 +250,7 @@ myManageHook = composeAll
     [ className =? "MPlayer"        --> doFloat
     , className =? "Gimp"           --> doFloat
     , className =? "pidgin"         --> doFloat
-    , className =? "InputOutput"    --> doFloat
+    --, className =? "InputOutput"    --> doFloat
     , stringProperty "WM_WINDOW_ROLE" =? "bubble" --> doFloat
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore ]

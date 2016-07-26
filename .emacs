@@ -296,7 +296,7 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
                       (message "No lint errors.")))))
 
 (global-unset-key (kbd "<insert>"))
-                                        ;(global-unset-key [f2])
+;; (global-unset-key [f2])
 (global-unset-key [C-z])
 (global-unset-key [(control z)])
 (global-unset-key [(control x)
@@ -420,6 +420,7 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(auto-hscroll-mode t)
  '(c-basic-offset 2)
  '(clang-format-style "google")
  '(css-indent-offset 2)
@@ -441,13 +442,14 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
  '(js2-mode-escape-quotes nil)
  '(lisp-indent-fuction (quote common-lisp-indent-function))
  '(markdown-enable-math t)
+ '(mouse-yank-at-point t)
  '(org-support-shift-select nil)
  '(package-selected-packages (quote (srefactor flymake-easy flymake-cursor json-mode
                                                js2-mode)))
  '(py-continuation-offset 2)
  '(py-indent-offset 2 t)
  '(py-smart-indentation nil)
- '(pyformat-args "-i -y --force_quote_type single --binpack_named_arguments"
+ '(pyformat-args "-i --force_quote_type single --binpack_named_arguments"
                  t)
  '(safe-local-variable-values (quote ((encoding . utf-8)
                                       (Encoding . utf-8))))
