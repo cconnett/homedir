@@ -232,6 +232,8 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
                 'save-buffer)
 (global-set-key (kbd "RET")
                 'newline-and-indent)
+(global-set-key (kbd "C-x C-i")
+                'insert-char)
 ;; These don't work in -nw mode.
 (global-set-key (kbd "s-j")
                 'next-line)
