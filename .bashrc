@@ -209,51 +209,9 @@ function pointed-dir {
     sed -e "s/emacs/${red_target_blue}/"
 }
 
-if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
-  alias b='blaze build'
-  alias bs='blaze build //devtools/sandman:sandman'
-  alias cov='blaze coverage --combined_report=html'
-  alias csearch='csearch --context=1'
-  alias g3python=/google/data/ro/projects/g3python/g3python
-  alias gsy='git5 sync'
-  alias gy='gsy'
-  alias kri=/google/data/ro/projects/sandman/kill_registered_instance.par
-  alias pa='glogin && prodaccess'
-  alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
-  alias presubmit='git5 export --sq --tap-project=sandman'
-  alias presubmitall='git5 export --sq --tap-project=all'
-  alias pubsub='/google/data/ro/buildstatic/projects/goops/pubsub'
-  alias r='blaze run'
-  alias sandmanh=blaze-bin/devtools/sandman/sandman
-  alias sbc=/google/data/ro/projects/sandman/sandman_borgcfg.par
-  alias sgcl2='gcl2 --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
-  alias sgcl2db='gcl2db -- --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
-  alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
-  alias submit2='git5 submit --sq --tap-project=sandman,integrate'
-  alias submit='git5 submit --sq --tap-project=sandman'
-  alias submitall='git5 submit --sq --tap-project=all'
-  alias t='blaze test'
-  alias tapp='tap_presubmit -cb sandman,integrate'
-  alias writeme=/google/data/ro/teams/writeme/writeme
+[ -e ~/homedir/at-google.bash ] && source ~/homedir/at-google.bash
 
-  export SWITCH_CLIENT='emacs'
-
-  [ -e ~/homedir/g4s.bash ] && source ~/homedir/g4s.bash
-
-  function lastlog {
-    less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
-  }
-  function pointed-dir {
-    red_target_blue='\\[\\033[01;31m\\]'
-    red_target_blue+=$(current-switch-target)
-    red_target_blue+='\\[\\033[01;34m\\]'
-    echo "$PWD" | \
-      sed -e "s!$HOME!~!" | \
-      sed -e 's!/google/src/cloud/cjc!/cloud!' | \
-      sed -e "s!/cloud/emacs/google3!/cloud/${red_target_blue}/google3!" | \
-      cat
-  }
-elif [[ $(hostname) == "scruffy" ]]; then
+if [[ $(hostname) == "scruffy" ]]; then
   alias zfslist='zfs list -t filesystem -r mpool'
   alias emacs=$EDITOR
 else
