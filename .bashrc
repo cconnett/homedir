@@ -34,6 +34,11 @@ alias sha3='rhash --sha3-224'
 alias gap='git add -p'
 alias gcne='git commit --amend --no-edit'
 alias gcm='git commit -m'
+
+function available {
+  ! git reflog "$1" 1> /dev/null 2> /dev/null
+}
+
 function gitnew {
   branch="$1"
   shift
@@ -51,17 +56,35 @@ function gco {
   function message {
     echo 'gco!WIP on branch' "$1"
   }
+
+  force="$1"
+  if [[ "$force" == "-f" ]]; then
+    shift
+  fi
+
   branch="$1"
   shift
   if [[ -z "$branch" ]]; then
-    branch=master
+    branch=-
   fi
+
   if [[ -n "$(git status --porcelain)" ]]; then
     current="$(git rev-parse --abbrev-ref HEAD)"
     git stash save --include-untracked --keep-index --quiet \
         "$(message $current)"
   fi
-  git checkout -m "$branch"
+
+  if [[ "$branch" != "-" ]] && available "$branch"; then
+    if [[ "$force" == "-f" ]]; then
+      echo "Creating new branch $branch."
+      gitnew "$branch"
+    else
+      echo "$branch does not exist. Use -f to create."
+      return 1
+    fi
+  else
+    git checkout -m "$branch"
+  fi
 
   branch="$(git rev-parse --abbrev-ref HEAD)"
   stash="$(git stash list --grep "$(message "$branch")" | cut -f1 -d:)"
@@ -72,10 +95,6 @@ function gco {
 }
 
 function gitsplit {
-  function available {
-    ! git reflog "$1" 1> /dev/null 2> /dev/null
-  }
-
   # Default to splitting current HEAD commit if no commits given.
   if [[ -z "$@" ]]; then
     commits="$(git rev-parse --abbrev-ref HEAD)"
@@ -83,9 +102,12 @@ function gitsplit {
     commits="$@"
   fi
 
+  current="$(git rev-parse --abbrev-ref HEAD)"
+  tracked=$(git5 tracked "$current" | grep "//depot/" | cut -d/ -f4-)
+
   # Invent a name for the new branch based on the first commit message.
-  basename=python -c 'import re,sys; print "-".join(word.lower() for word in re.split(r"[^a-zA-Z0-9]+", sys.argv[1] if word)[:8] if word)' \
-          $(git log "$commits" -1 --pretty=oneline | cut -d' ' -f 2-)
+  basename=$(python -c 'import re,sys; print "-".join(re.sub(r"\W", "", word.lower()) for word in sys.argv[1:9])' \
+                    $(git log "$commits" -1 --pretty=oneline | cut -d' ' -f 2-))
   name="$basename"
   if ! available "$basename"; then
     n=1
@@ -96,14 +118,20 @@ function gitsplit {
   fi
 
   # Switch to the new branch and cherry-pick.
+  gco master
+  git5 sync
   git checkout -b "$name" || return 1
+  for path in $tracked; do
+    git5 track "$path" --no-package-check --dir-file-overlap --import-empty
+  done
   git cherry-pick "$commits"
+  gco "$current"
+  gco -
 }
 alias gc=gco
 alias gcp='git checkout -p'
 alias gd='git diff'
 alias gdc='git diff --cached'
-alias gdcl='git diff $(gl --grep "synced with perforce" | head -n 1 | cut -f2 -d" ")'
 alias ge='git5 export'
 alias gl='git log'
 alias gs='git status'
