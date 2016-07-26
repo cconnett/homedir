@@ -217,10 +217,6 @@ if [[ $(hostname -d) == "nyc.corp.google.com" ]]; then
   alias g3python=/google/data/ro/projects/g3python/g3python
   alias gsy='git5 sync'
   alias gy='gsy'
-  alias ib='iblaze build'
-  alias iblaze=/google/data/ro/teams/iblaze/iblaze
-  alias ir='iblaze run'
-  alias it='iblaze test'
   alias kri=/google/data/ro/projects/sandman/kill_registered_instance.par
   alias pa='glogin && prodaccess'
   alias presubmit2='git5 export --sq --tap-project=sandman,sandman_clients'
@@ -274,25 +270,8 @@ fi
 # Activate bash-completion. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
   [ -f /etc/bash_completion ] && source /etc/bash_completion
-  [ -f /etc/bash_completion.d/git-prompt ] && source /etc/bash_completion.d/git-prompt
-  __git_complete gc _git_checkout 2> /dev/null
-  __git_complete gco _git_checkout 2> /dev/null
-  __git_complete gl _git_log 2> /dev/null
-  complete -F _blaze::complete_build_target_wrapper -o nospace b
-  complete -F _blaze::complete_build_target_wrapper -o nospace ib
-  complete -F _blaze::complete_test_target_wrapper -o nospace t
-  complete -F _blaze::complete_test_target_wrapper -o nospace it
-
-  _blaze::complete_run_target_wrapper() {
-    _blaze::complete_target_wrapper "run"
-  }
-  complete -F _blaze::complete_run_target_wrapper -o nospace r
-  complete -F _blaze::complete_run_target_wrapper -o nospace ir
-
-  _blaze::complete_coverage_target_wrapper() {
-    _blaze::complete_target_wrapper "coverage"
-  }
-  complete -F _blaze::complete_coverage_target_wrapper -o nospace cov
+  [ -f ~/homedir/git5.sh ] && source ~/homedir/git5.sh
+  [ -f ~/homedir/iblaze.sh ] && source ~/homedir/iblaze.sh
 fi
 
 # make less more friendly for non-text input files, see lesspipe(1)
