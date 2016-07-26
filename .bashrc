@@ -1,7 +1,7 @@
 # This file is sourced by all *interactive* bash shells on startup.  This
 # file *should generate no output* or it will break the scp and rcp commands.
 
-export PATH=~/bin:/usr/local/bin:/opt/emacs/bin:$PATH
+export PATH=~/bin:/usr/local/bin:/opt/emacs/bin:/opt/ghc/bin:$PATH
 export EDITOR='emacs -nw --no-splash --no-desktop'
 export LESS='-S -R -F -X'
 export HISTCONTROL=ignoreboth:erasedups
