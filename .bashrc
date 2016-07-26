@@ -30,6 +30,7 @@ alias ll="ls -ltr"
 alias lla="ll -A"
 alias la="ls -A"
 alias locate='locate -i'
+alias sha3='rhash --sha3-224'
 alias gap='git add -p'
 alias gcne='git commit --amend --no-edit'
 alias gcm='git commit -m'
