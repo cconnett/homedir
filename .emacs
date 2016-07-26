@@ -23,8 +23,7 @@
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path "~/.emacs.d/elpa/")
 
-(defvar at-google (string-suffix-p system-name "corp.google.com")
-  "Whether the current machine is a Google corp workstation.")
+(defvar at-google nil)
 
 ;; Requires
 (require 'pp)
