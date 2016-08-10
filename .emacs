@@ -61,7 +61,8 @@
   "Format the whole buffer with clang."
   (interactive)
   (clang-format-region (point-min)
-                       (point-max)))
+                       (point-max)
+                       "file"))
 (defun local-google-pyformat ()
   (interactive)
   (let* ((getlines (format "gdcl --unified=0 %s | grep @@ |
@@ -421,7 +422,7 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
  ;; If there is more than one, they won't work right.
  '(auto-hscroll-mode t)
  '(c-basic-offset 2)
- '(clang-format-style "google")
+ '(clang-format-style "file")
  '(css-indent-offset 2)
  '(desktop-save-mode t)
  '(flymake-info-line-regexp ":[RC]:")
