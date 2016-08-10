@@ -65,11 +65,11 @@
                        "file"))
 (defun local-google-pyformat ()
   (interactive)
-  (let* ((getlines (format "gdcl --unified=0 %s | grep @@ |
+  (let* ((get-changed-lines-command (format "gdcl --unified=0 %s | grep @@ |
 cut -d' ' -f3 |
 perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" \"'"
-                           buffer-file-name))
-         (lines (shell-command-to-string getlines))
+                                            buffer-file-name))
+         (lines (shell-command-to-string get-changed-lines-command))
          (cmd (format "%s %s %s" "/usr/bin/pyformat" pyformat-args
                       lines)))
     (unless (zerop (length lines))
