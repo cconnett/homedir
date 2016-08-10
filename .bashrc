@@ -46,12 +46,13 @@ function gitnew {
     echo 1>&2 "Must specify a new branch."
     return 1
   fi
-  git branch "$branch" master \
-      2> >(egrep -v "already exists|'-' is not" 1>&2)
+  git branch "$branch" master 2> >(egrep -v "already exists|'-' is not" 1>&2)
   gco "$branch"
   git5 sync 2> /dev/null
 }
+
 alias gn=gitnew
+
 function gco {
   function message {
     echo 'gco!WIP on branch' "$1"
