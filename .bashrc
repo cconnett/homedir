@@ -9,6 +9,8 @@ export HISTIGNORE=ls:ll:la:l:cd:pwd:exit:su:df:clear:sl:reset:gd:gdc:gcp:gs:gl:d
 export HISTSIZE=150000
 shopt -s histappend
 shopt -s checkwinsize
+shopt -s globstar
+shopt -s extglob
 export PROMPT_COMMAND="history -a  ~/.bash_history"
 export PYTHONSTARTUP=~/.pythonrc
 export ACK_COLOR_MATCH='red'
