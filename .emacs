@@ -65,10 +65,12 @@
                        "file"))
 (defun local-google-pyformat ()
   (interactive)
-  (let* ((get-changed-lines-command (format "gdcl --unified=0 %s | grep @@ |
+  (let* ((diff-command (if (zerop (call-process-shell-command "citctools info"))
+                           "g4 diff -f "
+                         "gdcl --unified=0 "))
+         (get-changed-lines-command (concat diff-command buffer-file-name " | grep @@ |
 cut -d' ' -f3 |
-perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" \"'"
-                                            buffer-file-name))
+perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" \"'"))
          (lines (shell-command-to-string get-changed-lines-command))
          (cmd (format "%s %s %s" "/usr/bin/pyformat" pyformat-args
                       lines)))
