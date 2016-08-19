@@ -4,6 +4,7 @@ if [[ $- == *i* ]] ; then
   alias iblaze=/google/data/ro/teams/iblaze/iblaze
   alias ir='iblaze run'
   alias it='iblaze test'
+  alias icov='iblaze coverage --combined_report=html'
 
   complete -F _blaze::complete_build_target_wrapper -o nospace b
   complete -F _blaze::complete_build_target_wrapper -o nospace ib
@@ -20,4 +21,5 @@ if [[ $- == *i* ]] ; then
     _blaze::complete_target_wrapper "coverage"
   }
   complete -F _blaze::complete_coverage_target_wrapper -o nospace cov
+  complete -F _blaze::complete_coverage_target_wrapper -o nospace icov
 fi
