@@ -20,6 +20,23 @@
     (eq t (compare-strings str2 nil nil str1 begin1
                            end1 ignore-case))))
 
+(defun stopwatch-region ()
+  "Enclose the region in stopwatch timing commands."
+  (interactive)
+  (let ((name (read-string "description: ")))
+    (save-excursion
+      (move-beginning-of-line nil)
+      (indent-for-tab-command)
+      (insert (format "sw.stop('%s')" name))
+      (newline-and-indent)
+      (exchange-point-and-mark)
+      (move-beginning-of-line nil)
+      (indent-for-tab-command)
+      (insert (format "sw.start('%s')\n" name))
+      (indent-for-tab-command))))
+(global-set-key (kbd "C-c n")
+                'stopwatch-region)
+
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path "~/.emacs.d/elpa/")
 
@@ -65,18 +82,25 @@
                        "file"))
 (defun local-google-pyformat ()
   (interactive)
-  (let* ((diff-command (if (zerop (call-process-shell-command "citctools info"))
-                           "g4 diff -f "
-                         "gdcl --unified=0 "))
+  (let* ((diff-command (cond
+                        ((zerop (call-process-shell-command "citctools info")) "g4 diff -f ")
+                        ((zerop (call-process-shell-command "git status")) "git diff HEAD --unified=0 -- ")
+                        (t nil)))
          (get-changed-lines-command (concat diff-command buffer-file-name " | grep @@ |
 cut -d' ' -f3 |
 perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" \"'"))
-         (lines (shell-command-to-string get-changed-lines-command))
-         (cmd (format "%s %s %s" "/usr/bin/pyformat" pyformat-args
-                      lines)))
-    (unless (zerop (length lines))
-      (message "Formatting lines %s" lines)
-      (reformat-file cmd "pyformat" ".py"))))
+         (lines (if (null diff-command)
+                    " "
+                  (shell-command-to-string get-changed-lines-command)))
+         (cmd (concat "/usr/bin/pyformat " pyformat-args
+                      " " lines)))
+    (if (zerop (length lines))
+        (message "No changes. Skipping formatting.")
+      (progn
+        (if (equal lines " ")
+            (message "Formatting entire file.")
+          (message "Formatting lines %s" lines))
+        (reformat-file cmd "pyformat" ".py")))))
 
 (defun google-mdformat ()
   "Run http://go/mdformat on the current file."
@@ -105,6 +129,15 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
                  "lispfmt"
                  "el"))
 
+(defun save-buffer-without-format ()
+  (interactive)
+  (let ((b (current-buffer)))
+    (with-temp-buffer
+      (let ((before-save-hook (remove #'format-mode-format-file before-save-hook)))
+        (with-current-buffer b
+          (let ((before-save-hook (remove #'format-mode-format-file before-save-hook)))
+            (save-buffer)))))))
+
 (define-minor-mode format-mode
   "Machine format the buffer before saving."
   :lighter " Format"
@@ -117,6 +150,7 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
 (defun format-mode-format-file ()
   "Format the current buffer with a machine formatter for the major mode."
   (interactive)
+  (save-buffer-without-format)
   (when (symbol-value 'format-mode)
     (message "Machine formatting for %s" major-mode)
     (cond
