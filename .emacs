@@ -407,6 +407,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(c-basic-offset 2)
+ '(clang-format-executable "~/bin/clang-format")
  '(clang-format-style "google")
  '(css-indent-offset 2)
  '(desktop-save-mode t)
