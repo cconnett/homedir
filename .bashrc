@@ -10,7 +10,6 @@ export HISTSIZE=150000
 shopt -s histappend
 shopt -s checkwinsize
 export PROMPT_COMMAND="history -a  ~/.bash_history"
-export PYTHONSTARTUP=~/.pythonrc
 export ACK_COLOR_MATCH='red'
 export ACK_COLOR_FILENAME='on_cyan'
 export ACK_COLOR_LINENO='bold blue'

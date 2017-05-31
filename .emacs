@@ -38,6 +38,7 @@
 (require 'srefactor)
 (require 'srefactor-lisp)
 (require 'clang-format)
+(require 'paren)
 
 ;; Home only
 (unless at-google
@@ -55,6 +56,25 @@
 
 (autoload 'js2-mode "js2-mode" "Major mode for editing JavaScript code."
   :interactive)
+
+;; Typescript
+(add-hook 'typescript-mode-hook
+          (lambda ()
+            (tide-setup)
+            (flycheck-mode +1)
+            (setq flycheck-check-syntax-automatically '(save mode-enabled))
+            (eldoc-mode +1)
+            ;; company is an optional dependency. You have to
+            ;; install it separately via package-install
+            (company-mode-on)))
+
+(add-hook 'js2-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c d") 'insert-jasmine-describe)
+            (local-set-key (kbd "C-c i") 'insert-jasmine-it)))
+
+;; aligns annotation to the right hand side
+(setq company-tooltip-align-annotations t)
 
 ;; Machine formatting
 (defun clang-format-file ()
@@ -101,13 +121,16 @@
     (message "Machine formatting for %s" major-mode)
     (cond
      ((memq major-mode
-            '(c++-mode js-mode js2-mode protobuf-mode))
+            '(c++-mode js-mode js2-mode protobuf-mode typescript-mode))
       (if at-google
           (google-clang-format-file)
         (clang-format-file)))
      ((memq major-mode
             '(json-mode))
       (json-mode-beautify))
+     ;; ((memq major-mode
+     ;;        '(typescript-mode))
+     ;;  (tide-format-before-save))
      ((memq major-mode
             '(python-mode))
       (google-pyformat))
@@ -291,7 +314,7 @@
 (make-face 'py-keyword-face)
 (make-face 'py-pseudo-keyword-face)
 (make-face 'py-type-face)
-(set-face-background 'show-paren-match-face
+(set-face-background 'show-paren-match
                      "cornflower blue")
 (set-face-foreground 'font-lock-string-face
                      "forest green")
@@ -402,12 +425,13 @@
  '(js2-global-externs (quote ("chrome" "angular")))
  '(js2-mirror-mode t)
  '(js2-mode-escape-quotes nil)
+ '(js2-strict-trailing-comma-warning nil)
  '(lisp-indent-fuction (quote common-lisp-indent-function))
  '(markdown-enable-math t)
  '(org-support-shift-select nil)
  '(package-selected-packages
    (quote
-    (srefactor flymake-easy flymake-cursor json-mode js2-mode)))
+    (tide js2-mode srefactor flymake-easy flymake-cursor json-mode)))
  '(py-continuation-offset 2)
  '(py-indent-offset 2)
  '(py-smart-indentation nil)
@@ -439,6 +463,16 @@
   "Insert a nicely formated date string."
   (interactive)
   (insert (format-time-string "[%a %b %d %Y / %H:%M %Z]")))
+
+(defun insert-jasmine-describe ()
+  "Insert a Jasmine describe block."
+  (interactive)
+  (insert "describe(``, function () {
+});"))
+(defun insert-jasmine-it ()
+  "Insert a nicely formated date string."
+  (interactive)
+  (insert "it(`should`, function() {});"))
 
 (defun insert-pydebug-string ()
   "Insert a python debugger statement."
@@ -572,9 +606,14 @@
 
 (add-hook 'markdown-mode-hook 'turn-off-auto-fill)
 
-(setq js2-additional-externs '("goog" "angular" "describe" "it" "xit" "inject"
+(setq js2-additional-externs '("goog" "angular"
+                               "describe" "fdescribe" "xdescribe"
+                               "it" "fit" "xit" "inject"
                                "module" "expect" "beforeEach" "exports" "guitar"
-                               "sandman"))
+                               "sandman" "chrome" "Mousetrap" "$" "jQuery"
+                               "require" "spyOn" "beforeEach" "jasmine"
+                               "setInterval" "setTimeout" "clearInterval" "Intl"
+                               ))
 
 
 (add-hook 'js2-post-parse-callbacks
