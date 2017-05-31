@@ -51,6 +51,7 @@
   (require 'google-coding-style)
   (require 'google-cc-extras)
   (require 'google-pyformat)
+  (require 'flymake-jslint)
   (google-cc-extras/bind-default-keys)
   (setq create-lockfiles nil))
 
@@ -81,13 +82,33 @@
   "Format the whole buffer with clang."
   (interactive)
   (clang-format-region (point-min)
-                       (point-max)))
+                       (point-max)
+                       "file"))
+(defun local-google-pyformat ()
+  (interactive)
+  (let* ((diff-command (if (zerop (call-process-shell-command "citctools info"))
+                           "g4 diff -f "
+                         "gdcl --unified=0 "))
+         (get-changed-lines-command (concat diff-command buffer-file-name " | grep @@ |
+cut -d' ' -f3 |
+perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" \"'"))
+         (lines (shell-command-to-string get-changed-lines-command))
+         (cmd (format "%s %s %s" "/usr/bin/pyformat" pyformat-args
+                      lines)))
+    (unless (zerop (length lines))
+      (message "Formatting lines %s" lines)
+      (reformat-file cmd "pyformat" ".py"))))
 
 (defun google-mdformat ()
   "Run http://go/mdformat on the current file."
   (interactive)
   (reformat-file "/google/data/ro/teams/g3doc/mdformat --in_place"
                  "mdformat" ".md"))
+(defun google-sqlformat ()
+  "Run http://go/googlesql_format on the current file."
+  (interactive)
+  (reformat-file "/google/data/ro/projects/storage/googlesql/format_sql"
+                 "googlesql" ".sql"))
 (defun google-gclfmt ()
   "Run http://go/gclfmt on the current file."
   (interactive)
@@ -121,7 +142,8 @@
     (message "Machine formatting for %s" major-mode)
     (cond
      ((memq major-mode
-            '(c++-mode js-mode js2-mode protobuf-mode typescript-mode))
+            '(c-mode c++-mode js-mode js2-mode protobuf-mode
+                     typescript-mode))
       (if at-google
           (google-clang-format-file)
         (clang-format-file)))
@@ -133,10 +155,13 @@
      ;;  (tide-format-before-save))
      ((memq major-mode
             '(python-mode))
-      (google-pyformat))
+      (local-google-pyformat))
      ((memq major-mode
             '(markdown-mode))
       (google-mdformat))
+     ((memq major-mode
+            '(sql-mode))
+      (google-sqlformat))
      ((memq major-mode
             '(gcl-mode borg-mode))
       (google-gclfmt))
@@ -198,7 +223,7 @@
                 (lambda ()
                   (interactive)
                   (load-file user-init-file)))
-(global-set-key (kbd "C-M-s-<f12>")
+(global-set-key (kbd "C-s-<f12>")
                 (lambda ()
                   (interactive)
                   (save-buffers-kill-emacs)))
@@ -233,6 +258,8 @@
                 'save-buffer)
 (global-set-key (kbd "RET")
                 'newline-and-indent)
+(global-set-key (kbd "C-x C-i")
+                'insert-char)
 ;; These don't work in -nw mode.
 (global-set-key (kbd "s-j")
                 'next-line)
@@ -295,7 +322,7 @@
                       (message "No lint errors.")))))
 
 (global-unset-key (kbd "<insert>"))
-                                        ;(global-unset-key [f2])
+;; (global-unset-key [f2])
 (global-unset-key [C-z])
 (global-unset-key [(control z)])
 (global-unset-key [(control x)
@@ -337,6 +364,19 @@
 (add-hook 'sh-mode-hook
           (lambda ()
             (set-face-foreground 'sh-heredoc-face "dark magenta")))
+
+(defun flymake-jslint-load ()
+  (interactive)
+  ;; (REGEXP FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX)
+  (flymake-easy-load (lambda (filename)
+                       `("~/bin/myjslint" ,filename))
+                     '(("^\\([^:]+\\):\\([^:]+\\):\\([^:]+\\):\\([^:]+\\)$"
+                        1 2 4 3))
+                     'temp-with-folder
+                     "js"
+                     ""))
+
+(add-hook 'js2-mode-hook 'flymake-jslint-load)
 
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
@@ -406,6 +446,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(auto-hscroll-mode t)
  '(c-basic-offset 2)
  '(clang-format-executable "~/bin/clang-format")
  '(clang-format-style "google")
@@ -420,23 +461,23 @@
  '(ido-default-file-method (quote selected-window))
  '(ilisp-*use-fsf-compliant-keybindings* t)
  '(inferior-lisp-program "/usr/bin/sbcl --noinform")
- '(js-indent-level 2)
+ '(js-indent-level 2 t)
  '(js2-auto-indent-flag nil)
  '(js2-basic-offset 2)
- '(js2-global-externs (quote ("chrome" "angular")))
+ '(js2-global-externs (quote ("chrome" "angular" "require")))
  '(js2-mirror-mode t)
  '(js2-mode-escape-quotes nil)
  '(js2-strict-trailing-comma-warning nil)
  '(lisp-indent-fuction (quote common-lisp-indent-function))
  '(markdown-enable-math t)
+ '(mouse-yank-at-point t)
  '(org-support-shift-select nil)
- '(package-selected-packages
-   (quote
-    (tide js2-mode srefactor flymake-easy flymake-cursor json-mode)))
+ '(package-selected-packages (quote (srefactor flymake-easy flymake-cursor json-mode
+                                               js2-mode tide)))
  '(py-continuation-offset 2)
- '(py-indent-offset 2)
+ '(py-indent-offset 2 t)
  '(py-smart-indentation nil)
- '(pyformat-args "-i -y --force_quote_type single --binpack_named_arguments"
+ '(pyformat-args "-i -y --force_quote_type single"
                  t)
  '(safe-local-variable-values (quote ((encoding . utf-8)
                                       (Encoding . utf-8))))
@@ -444,6 +485,7 @@
  '(sh-basic-offset 2)
  '(sh-indentation 2)
  '(standard-indent 2)
+ '(typescript-indent-level 2)
  '(vc-follow-symlinks t))
 
 (defun flymake-python-load ()
@@ -605,7 +647,11 @@
                  (message "Error loading .emacs! %s"
                           (error-message-string e)))))))
 
-(add-hook 'markdown-mode-hook 'turn-off-auto-fill)
+(make-variable-buffer-local 'auto-hscroll-mode)
+(add-hook 'markdown-mode-hook
+          (lambda ()
+            (setq auto-hscroll-mode nil)
+            (auto-fill-mode t)))
 
 (setq js2-additional-externs '("goog" "angular"
                                "describe" "fdescribe" "xdescribe"
