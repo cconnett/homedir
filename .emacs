@@ -8,7 +8,7 @@
 (setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
                          ("marmalade" . "https://marmalade-repo.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")))
-
+(setq text-quoting-style 'straight)
 
 (defun string-suffix-p (str1 str2 &optional ignore-case)
   "Python: STR1.endswith(STR2).  IGNORE-CASE passed through."
@@ -20,6 +20,23 @@
     (eq t (compare-strings str2 nil nil str1 begin1
                            end1 ignore-case))))
 
+(defun stopwatch-region ()
+  "Enclose the region in stopwatch timing commands."
+  (interactive)
+  (let ((name (read-string "description: ")))
+    (save-excursion
+      (move-beginning-of-line nil)
+      (indent-for-tab-command)
+      (insert (format "sw.stop('%s')" name))
+      (newline-and-indent)
+      (exchange-point-and-mark)
+      (move-beginning-of-line nil)
+      (indent-for-tab-command)
+      (insert (format "sw.start('%s')\n" name))
+      (indent-for-tab-command))))
+(global-set-key (kbd "C-c n")
+                'stopwatch-region)
+
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path "~/.emacs.d/elpa/")
 
@@ -29,7 +46,8 @@
 ;; Requires
 (require 'pp)
 (require 'font-lock)
-(require 'ido)
+                                        ;(require 'ido)
+(require 'ivy)
 (require 'flymake)
 (require 'flymake-cursor)
 (require 'flymake-easy)
@@ -84,21 +102,37 @@
   (clang-format-region (point-min)
                        (point-max)
                        "file"))
+
 (defun local-google-pyformat ()
   (interactive)
-  (let* ((diff-command (if (zerop (call-process-shell-command "citctools info"))
-                           "g4 diff -f "
-                         "gdcl --unified=0 "))
-         (get-changed-lines-command (concat diff-command buffer-file-name " | grep @@ |
-cut -d' ' -f3 |
-perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" \"'"))
-         (lines (shell-command-to-string get-changed-lines-command))
-         (cmd (format "%s %s %s" "/usr/bin/pyformat" pyformat-args
-                      lines)))
-    (unless (zerop (length lines))
-      (message "Formatting lines %s" lines)
-      (reformat-file cmd "pyformat" ".py"))))
+  (let* ((new-file-name (make-temp-file "emacs"))
+         (get-changed-lines-command (concat "diff -U0 " buffer-file-name " " new-file-name
+                                            " | grep @@ | " " cut -d' ' -f3 | " " perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; "
+                                            "print \"-l \" . $1 . \"-\" . ($1+$2) . \" \"'"))
+         (lines (progn
+                  (append-to-file nil nil new-file-name)
+                  (if (file-exists-p buffer-file-name)
+                      (shell-command-to-string get-changed-lines-command)
+                    "")))
+         (formatter-command (concat "/usr/local/bin/yapf " pyformat-args
+                                    " " lines)))
+    (message "%s" formatter-command)
+    (if (and (zerop (length lines))
+             (file-exists-p buffer-file-name))
+        (message "No changes. Skipping formatting.")
+      (progn
+        (if (zerop (length lines))
+            (message "Formatting entire file.")
+          (message "Formatting lines %s" lines))
+        (reformat-file formatter-command "pyformat"
+                       ".py")
+        (delete-file new-file-name)))))
 
+(defun google-pyformat-all ()
+  (interactive)
+  (reformat-file (concat "/usr/local/bin/yapf " pyformat-args)
+                 "pyformat"
+                 ".py"))
 (defun google-mdformat ()
   "Run http://go/mdformat on the current file."
   (interactive)
@@ -125,6 +159,22 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
   (reformat-file (expand-file-name "~/bin/lispfmt.el")
                  "lispfmt"
                  "el"))
+(defun hsfmt ()
+  "Run hindent on the current file."
+  (interactive)
+  (reformat-file (expand-file-name "~/bin/hindent --sort-imports --line-length 80 --indent-size 2")
+                 "hs"
+                 ".hs"))
+
+(defun save-buffer-without-format ()
+  (interactive)
+  (let ((b (current-buffer)))
+    (with-temp-file (format "/tmp/%s"
+                            (buffer-name b))
+      (let ((before-save-hook (remove #'format-mode-format-file before-save-hook)))
+        (with-current-buffer b
+          (let ((before-save-hook (remove #'format-mode-format-file before-save-hook)))
+            (save-buffer)))))))
 
 (define-minor-mode format-mode
   "Machine format the buffer before saving."
@@ -169,6 +219,9 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
             '(ncl-mode))
       (google-nclfmt))
      ((memq major-mode
+            '(haskell-mode))
+      (hsfmt))
+     ((memq major-mode
             '(emacs-lisp-mode lisp-mode))
       (lispfmt))
      (t (message "No formatter found for %s" major-mode)))
@@ -178,6 +231,8 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
 ;; Auto-save files go in system temp.
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+
+(add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
 
 ;; XWindows preferences
 (unless (window-system)
@@ -189,9 +244,9 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
   (setq confirm-kill-emacs 'y-or-n-p))
 
 ;; ido mode settings
-(ido-mode t)
-(setq ido-enable-flex-matching t)
-(setq ido-ignore-files '("\\.hi$"))
+(ivy-mode t)
+;(setq ido-enable-flex-matching t)
+;(setq ido-ignore-files '("\\.hi$"))
 
 ;; General preferences
 (global-auto-revert-mode t)
@@ -299,6 +354,8 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
                 'scroll-bar-drag)
 (global-set-key [vertical-scroll-bar drag-mouse-1]
                 'scroll-bar-drag)
+(global-set-key [f9]
+                'google-pyformat-all)
 
 (global-set-key (kbd "M-p")
                 (lambda ()
@@ -453,6 +510,8 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
  '(css-indent-offset 2)
  '(desktop-save-mode t)
  '(flymake-info-line-regexp ":[RC]:")
+ '(flymake-jslint-command "~/bin/myjslint")
+ '(flymake-jslint-detect-trailing-comma nil)
  '(flymake-warn-line-regexp ":W:")
  '(flyspell-issue-welcome-flag nil)
  '(haskell-font-lock-symbols t)
@@ -461,10 +520,12 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
  '(ido-default-file-method (quote selected-window))
  '(ilisp-*use-fsf-compliant-keybindings* t)
  '(inferior-lisp-program "/usr/bin/sbcl --noinform")
- '(js-indent-level 2 t)
+ '(js-indent-level 2)
  '(js2-auto-indent-flag nil)
  '(js2-basic-offset 2)
- '(js2-global-externs (quote ("chrome" "angular" "require")))
+ '(js2-global-externs (quote ("chrome" "angular" "require" "setTimeout")))
+ '(js2-highlight-level 3)
+ '(js2-include-node-externs t)
  '(js2-mirror-mode t)
  '(js2-mode-escape-quotes nil)
  '(js2-strict-trailing-comma-warning nil)
@@ -472,6 +533,7 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
  '(markdown-enable-math t)
  '(mouse-yank-at-point t)
  '(org-support-shift-select nil)
+<<<<<<< HEAD
  '(package-selected-packages (quote (srefactor flymake-easy flymake-cursor json-mode
                                                js2-mode tide)))
  '(py-continuation-offset 2)
@@ -481,6 +543,18 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
                  t)
  '(safe-local-variable-values (quote ((encoding . utf-8)
                                       (Encoding . utf-8))))
+=======
+ '(package-selected-packages
+   (quote
+    (swiper srefactor flymake-easy flymake-cursor json-mode js2-mode)))
+ '(py-continuation-offset 2)
+ '(py-indent-offset 2 t)
+ '(py-smart-indentation nil)
+ '(pyformat-args
+   (concat "-i --style "
+           (expand-file-name "~/homedir/.style.yapf")) t)
+ '(safe-local-variable-values (quote ((encoding . utf-8) (Encoding . utf-8))))
+>>>>>>> 61b6fae0317ca4ef618528678300fddcf7d4f38a
  '(sgml-basic-offset 2)
  '(sh-basic-offset 2)
  '(sh-indentation 2)
@@ -505,7 +579,7 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
 (defun insert-date-string ()
   "Insert a nicely formated date string."
   (interactive)
-  (insert (format-time-string "[%a %b %d %Y / %H:%M %Z]")))
+  (insert (format-time-string "%Y-%m-%d %H:%M %Z")))
 
 (defun insert-jasmine-describe ()
   "Insert a Jasmine describe block."
@@ -599,26 +673,10 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil
-                         :background "white"
-                         :foreground "black"
-                         :inverse-video nil
-                         :box nil
-                         :strike-through nil
-                         :overline nil
-                         :underline nil
-                         :slant normal
-                         :weight normal
-                         :height 90
-                         :width normal
-                         :foundry "unknown"
-                         :family "DejaVu Sans Mono"))))
- '(flymake-errline ((((class color))
-                     (:underline "red"))))
- '(flymake-infoline ((((class color))
-                      (:underline "gray"))))
- '(flymake-warnline ((((class color))
-                      (:underline "orange")))))
+ '(default ((t (:inherit nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 90 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
+ '(flymake-errline ((((class color)) (:underline "red"))))
+ '(flymake-infoline ((((class color)) (:underline "gray"))))
+ '(flymake-warnline ((((class color)) (:underline "orange")))))
 
 (defun vi-open-line-above ()
   "Insert a newline above the current line and put point at beginning."
@@ -676,3 +734,29 @@ perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; print \"-l \" . $1 . \"-\" . ($1+$2) . \" 
 
 (provide '.emacs)
 ;;; .emacs ends here
+
+
+(defun fixbuf (begin end len)
+  (interactive)
+  (save-excursion
+    (let* ((diffs '(25 7 17 110 115 26 1 21 30 10 119 0 112 10
+                       10 30 101 98 1 28 101 16 110 99 27 5 0 115
+                       101))
+           (input (char-after begin))
+           (col (current-column)))
+      (if (> (line-number-at-pos) 1)
+          (forward-line -1)
+        (forward-line))
+      (move-to-column col)
+      (delete-char 1)
+      (insert (logxor input
+                      (nth (current-column)
+                           diffs))))))
+(defun stop ()
+  (interactive)
+  (setq after-change-functions nil))
+(defun go ()
+  (interactive)
+  (stop)
+  (add-hook 'after-change-functions 'fixbuf
+            nil t))

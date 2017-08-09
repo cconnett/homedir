@@ -5,8 +5,10 @@ if [[ $- == *i* ]] ; then
   alias ir='iblaze run'
   alias it='iblaze test'
   alias icov='iblaze coverage --combined_report=html'
+  alias bc=build_cleaner
 
   complete -F _blaze::complete_build_target_wrapper -o nospace b
+  complete -F _blaze::complete_build_target_wrapper -o nospace bc
   complete -F _blaze::complete_build_target_wrapper -o nospace ib
   complete -F _blaze::complete_test_target_wrapper -o nospace t
   complete -F _blaze::complete_test_target_wrapper -o nospace it

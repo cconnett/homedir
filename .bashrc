@@ -1,8 +1,9 @@
 # This file is sourced by all *interactive* bash shells on startup.  This
 # file *should generate no output* or it will break the scp and rcp commands.
 
-export PATH=~/bin:/usr/local/bin:/opt/emacs/bin:/opt/ghc/bin:$PATH
-export EDITOR='emacs -nw --no-splash --no-desktop'
+export PATH=~/bin:/opt/node/bin:/usr/local/bin:/opt/emacs25/bin:/opt/ghc/bin:/opt/arduino:$PATH
+export VISUAL='emacs --no-splash --no-desktop --no-init-file'
+export EDITOR="$VISUAL -nw"
 export LESS='-S -R -F -X'
 export HISTCONTROL=ignoreboth:erasedups
 export HISTIGNORE=ls:ll:la:l:cd:pwd:exit:su:df:clear:sl:reset:gd:gdc:gcp:gs:gl:d:c:gap
@@ -25,7 +26,7 @@ bind '"\e[B":history-search-forward'
 
 alias sl=ls
 alias d="date"
-alias c="ncal -b -M -3; d"
+alias c="gcal --with-week-number --starting-day=monday --iso-week-number=yes .; d"
 alias ls='ls --color=auto -B'
 alias ll="ls -ltr"
 alias lla="ll -A"
@@ -35,6 +36,8 @@ alias sha3='rhash --sha3-224'
 alias gap='git add -p'
 alias gcne='git commit --amend --no-edit'
 alias gcm='git commit -m'
+alias gp='git push'
+alias gu='git pull'
 
 function available {
   ! git reflog "$1" 1> /dev/null 2> /dev/null
@@ -89,7 +92,7 @@ function gco {
   fi
 
   branch="$(git rev-parse --abbrev-ref HEAD)"
-  stash="$(git stash list --grep "$(message "$branch")" | cut -f1 -d:)"
+  stash="$(git stash list --grep "$(message "$branch")" | cut -f1 -d: | head -n1)"
   if [[ -n "$stash" ]]; then
     git reset --hard --quiet &&
       git stash pop --index --quiet "$stash"
@@ -123,14 +126,13 @@ function gitsplit {
   gco master
   git5 sync
   git checkout -b "$name" || return 1
-  for path in $tracked; do
-    git5 track "$path" --no-package-check --dir-file-overlap --import-empty
-  done
+  git5 track "$tracked" --no-package-check --dir-file-overlap --import-empty
   git cherry-pick "$commits"
   gco "$current"
   gco -
 }
-alias gc=gco
+
+alias gc='git clean -i'
 alias gcp='git checkout -p'
 alias gd='git diff'
 alias gdc='git diff --cached'
@@ -140,31 +142,33 @@ alias gs='git status'
 alias gsl='git stash list'
 alias gitg='gitg --all >& /dev/null &'
 alias gitkk='gitk $(git branch | tr "\n*" "  ")>& /dev/null &'
-alias gitb='for k in `git branch | sed s/^..//`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k --`\\t"$k";done | sort'
+alias gitb='for k in `git branch | sed s/^..//`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Cblue%cr%Creset" $k --`\\t"$k";done | sed "s/minutes ago/mins ago/" | sort'
 alias gb=gitb
 alias queeg='ssh -XYCA cxc0117@queeg.cs.rit.edu'
 alias elvis='ssh -XYCA cxc0117@elvis.cs.rit.edu'
 alias doors='ssh -XYCA cxc0117@doors.cs.rit.edu'
 alias odb='java -jar /home/chris/bin/ODB.jar'
 alias serve='python -m SimpleHTTPServer'
-alias please=sudo
 alias math='rlwrap math'
-alias emacs='emacs 2> /dev/null'
+alias emacs="$VISUAL 2> /dev/null"
+alias inkscape='inkscape 2> /dev/null'
 alias z3='ipython -i -c "from z3 import *"'
+alias freecad='~/free-cad-code/bin/FreeCAD &'
+alias dbg='/google/data/ro/teams/ads-test-debugger/@dbg'
 
-function ack {
-  test_flag='--notest'
-  for arg in "$@"; do
-    case "$arg" in
-      --test)
-        test_flag=''
-        ;;
-    esac
-  done
-  command ack "$@" $testflag
-}
+# function ack {
+#   test_flag='--notest'
+#   for arg in "$@"; do
+#     case "$arg" in
+#       --test)
+#         test_flag=''
+#         ;;
+#     esac
+#   done
+#   command ack "$@" $test_flag
+# }
 function getack {
-  curl http://beyondgrep.com/ack-2.14-single-file > ~/bin/ack
+  curl https://beyondgrep.com/ack-2.18-single-file > ~/bin/ack
   chmod 0755 ~/bin/ack
 }
 if [[ ! -x ~/bin/ack ]]; then
@@ -212,14 +216,6 @@ function pointed-dir {
 }
 
 [ -e ~/homedir/at-google.bash ] && source ~/homedir/at-google.bash
-
-if [[ $(hostname) == "scruffy" ]]; then
-  alias zfslist='zfs list -t filesystem -r mpool'
-  alias emacs=$EDITOR
-else
-  export VISUAL='emacs'
-  alias zfslist='ssh scruffy zfs list -t filesystem -r mpool'
-fi
 
 function virtual-env {
   if [[ -n $VIRTUAL_ENV ]]; then
