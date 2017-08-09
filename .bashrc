@@ -221,10 +221,18 @@ else
   alias zfslist='ssh scruffy zfs list -t filesystem -r mpool'
 fi
 
+function virtual-env {
+  if [[ -n $VIRTUAL_ENV ]]; then
+    echo "($(basename $VIRTUAL_ENV)) "
+  else
+    echo ""
+  fi
+}
+
 if [[ ${EUID} == 0 ]] ; then
     PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
 else
-    PROMPT_COMMAND="$PROMPT_COMMAND"';PS1="\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] "'
+    PROMPT_COMMAND="$PROMPT_COMMAND"';PS1="\[\033[01;39m\]\[\033[01;39m\]$(virtual-env)\[\033[01;39m\]\[\033[01;32m\]\u@\h\[\033[01;34m\] $(pointed-dir)\[\033[01;31m\] $(current-git-branch)\[\033[01;34m\]\n$\[\033[00m\] "'
 fi
 
 # Activate bash-completion. Only run if shell is interactive.
@@ -244,3 +252,7 @@ function adb() {
   ANDROID_ADB=${ANDROID_SDK}/platform-tools/adb
   ANDROID_ADB=${ANDROID_ADB} $EMU_SUPPORT/adb.turbo "$@"
 }
+
+# virtualenv and virtualenvwrapper
+export WORKON_HOME=$HOME/.virtualenvs
+source ~/bin/virtualenvwrapper.sh
