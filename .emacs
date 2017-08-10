@@ -533,17 +533,8 @@
  '(markdown-enable-math t)
  '(mouse-yank-at-point t)
  '(org-support-shift-select nil)
-<<<<<<< HEAD
  '(package-selected-packages (quote (srefactor flymake-easy flymake-cursor json-mode
-                                               js2-mode tide)))
- '(py-continuation-offset 2)
- '(py-indent-offset 2 t)
- '(py-smart-indentation nil)
- '(pyformat-args "-i -y --force_quote_type single"
-                 t)
- '(safe-local-variable-values (quote ((encoding . utf-8)
-                                      (Encoding . utf-8))))
-=======
+                                               js2-mode tide swiper)))
  '(package-selected-packages
    (quote
     (swiper srefactor flymake-easy flymake-cursor json-mode js2-mode)))
@@ -554,7 +545,6 @@
    (concat "-i --style "
            (expand-file-name "~/homedir/.style.yapf")) t)
  '(safe-local-variable-values (quote ((encoding . utf-8) (Encoding . utf-8))))
->>>>>>> 61b6fae0317ca4ef618528678300fddcf7d4f38a
  '(sgml-basic-offset 2)
  '(sh-basic-offset 2)
  '(sh-indentation 2)
