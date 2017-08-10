@@ -165,6 +165,12 @@
   (reformat-file (expand-file-name "~/bin/hindent --sort-imports --line-length 80 --indent-size 2")
                  "hs"
                  ".hs"))
+(defun htmlfmt ()
+  "Run tidy on the current file."
+  (interactive)
+  (reformat-file (expand-file-name "/usr/bin/tidy")
+                 "html"
+                 ".html"))
 
 (defun save-buffer-without-format ()
   (interactive)
@@ -224,6 +230,9 @@
      ((memq major-mode
             '(emacs-lisp-mode lisp-mode))
       (lispfmt))
+     ((memq major-mode
+            '(html-mode))
+      (htmlfmt))
      (t (message "No formatter found for %s" major-mode)))
     (when (symbol-value 'flymake-mode)
       (flymake-restart-syntax-check))))
