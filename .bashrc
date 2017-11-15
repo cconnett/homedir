@@ -167,6 +167,19 @@ alias dbg='/google/data/ro/teams/ads-test-debugger/@dbg'
 #   done
 #   command ack "$@" $test_flag
 # }
+
+IWATCH_FILE=~/.iwatch.cache
+function iwatch {
+  while true; do
+    tar c ** | sha1sum > $IWATCH_FILE
+    "$@"
+    if tar c ** | sha1sum -c --status $IWATCH_FILE; then
+      inotifywait -q -q -e modify **
+    fi
+  done
+}
+
+
 function getack {
   curl https://beyondgrep.com/ack-2.18-single-file > ~/bin/ack
   chmod 0755 ~/bin/ack
