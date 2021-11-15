@@ -1,12 +1,7 @@
 ;;; .emacs --- A .emacs file for cjc.
-;;
-;;; Commentary:
-;;
-;;; Code:
 
 (package-initialize)
 (setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
-                         ("marmalade" . "https://marmalade-repo.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")))
 (setq text-quoting-style 'straight)
 
@@ -54,9 +49,9 @@
 (require 'highlight-symbol)
 (require 'column-marker)
 (require 'srefactor)
-(require 'srefactor-lisp)
+                                        ; (require 'srefactor-lisp)
 (require 'clang-format)
-(require 'paren)
+                                        ; (require 'paren)
 
 ;; Home only
 (unless at-google
@@ -64,36 +59,14 @@
     t))
 ;; Google only
 (when at-google
-  (load-file "/usr/share/emacs24/site-lisp/emacs-google-config/devtools/editors/emacs/google.el")
+  (load-file "/usr/share/emacs/site-lisp/emacs-google-config/devtools/editors/emacs/google.el")
   (require 'google)
   (require 'google-coding-style)
   (require 'google-cc-extras)
   (require 'google-pyformat)
-  (require 'flymake-jslint)
+                                        ;(require 'flymake-jslint)
   (google-cc-extras/bind-default-keys)
   (setq create-lockfiles nil))
-
-(autoload 'js2-mode "js2-mode" "Major mode for editing JavaScript code."
-  :interactive)
-
-;; Typescript
-(add-hook 'typescript-mode-hook
-          (lambda ()
-            (tide-setup)
-            (flycheck-mode +1)
-            (setq flycheck-check-syntax-automatically '(save mode-enabled))
-            (eldoc-mode +1)
-            ;; company is an optional dependency. You have to
-            ;; install it separately via package-install
-            (company-mode-on)))
-
-(add-hook 'js2-mode-hook
-          (lambda ()
-            (local-set-key (kbd "C-c d") 'insert-jasmine-describe)
-            (local-set-key (kbd "C-c i") 'insert-jasmine-it)))
-
-;; aligns annotation to the right hand side
-(setq company-tooltip-align-annotations t)
 
 ;; Machine formatting
 (defun clang-format-file ()
@@ -114,7 +87,7 @@
                   (if (file-exists-p buffer-file-name)
                       (shell-command-to-string get-changed-lines-command)
                     "")))
-         (formatter-command (concat "/usr/local/bin/yapf " pyformat-args
+         (formatter-command (concat "python3 -m yapf -i  " pyformat-args
                                     " " lines)))
     (message "%s" formatter-command)
     (if (and (zerop (length lines))
@@ -124,8 +97,7 @@
         (if (zerop (length lines))
             (message "Formatting entire file.")
           (message "Formatting lines %s" lines))
-        (reformat-file formatter-command "pyformat"
-                       ".py")
+        (reformat-file formatter-command "yapf" ".py")
         (delete-file new-file-name)))))
 
 (defun google-pyformat-all ()
@@ -133,6 +105,12 @@
   (reformat-file (concat "/usr/local/bin/yapf " pyformat-args)
                  "pyformat"
                  ".py"))
+
+(defun google-buildifer ()
+  "Run buildifier on the current file."
+  (interactive)
+  (reformat-file "/usr/bin/buildifier" "buildifier"
+                 ".bzl"))
 (defun google-mdformat ()
   "Run http://go/mdformat on the current file."
   (interactive)
@@ -141,8 +119,8 @@
 (defun google-sqlformat ()
   "Run http://go/googlesql_format on the current file."
   (interactive)
-  (reformat-file "/google/data/ro/projects/storage/googlesql/format_sql"
-                 "googlesql" ".sql"))
+  (reformat-file "~/bin/sqlfmtwrapper" "googlesql"
+                 ".sql"))
 (defun google-gclfmt ()
   "Run http://go/gclfmt on the current file."
   (interactive)
@@ -159,6 +137,10 @@
   (reformat-file (expand-file-name "~/bin/lispfmt.el")
                  "lispfmt"
                  "el"))
+(defun google-fpbfmt ()
+  "Run protoprint on the current file."
+  (interactive)
+  (reformat-file "/usr/bin/fpb" "fpb" "textproto"))
 (defun hsfmt ()
   "Run hindent on the current file."
   (interactive)
@@ -168,7 +150,7 @@
 (defun htmlfmt ()
   "Run tidy on the current file."
   (interactive)
-  (reformat-file (expand-file-name "/usr/bin/tidy")
+  (reformat-file (expand-file-name "/usr/bin/tidy -q --doctype omit")
                  "html"
                  ".html"))
 
@@ -201,7 +183,7 @@
             '(c-mode c++-mode js-mode js2-mode protobuf-mode
                      typescript-mode))
       (if at-google
-          (google-clang-format-file)
+          (clang-format-file)
         (clang-format-file)))
      ((memq major-mode
             '(json-mode))
@@ -209,9 +191,15 @@
      ;; ((memq major-mode
      ;;        '(typescript-mode))
      ;;  (tide-format-before-save))
+     ;; ((memq major-mode
+     ;;        '(protobuffer-mode))
+     ;;  (google-fpbfmt))
      ((memq major-mode
             '(python-mode))
-      (local-google-pyformat))
+      (google-pyformat-all))
+     ((memq major-mode
+            '(skylark-mode))
+      (google-buildifier))
      ((memq major-mode
             '(markdown-mode))
       (google-mdformat))
@@ -228,11 +216,11 @@
             '(haskell-mode))
       (hsfmt))
      ((memq major-mode
-            '(emacs-lisp-mode lisp-mode))
+            '(emacs-lisp-mode lisp-mode z3-mode z3-smt2-mode))
       (lispfmt))
-     ((memq major-mode
-            '(html-mode))
-      (htmlfmt))
+     ;; ((memq major-mode
+     ;;        '(html-mode))
+     ;;  (htmlfmt))
      (t (message "No formatter found for %s" major-mode)))
     (when (symbol-value 'flymake-mode)
       (flymake-restart-syntax-check))))
@@ -244,8 +232,8 @@
 (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
 
 ;; XWindows preferences
-(unless (window-system)
-  (menu-bar-mode -1))
+(menu-bar-mode -1)
+(tool-bar-mode -1)
 (when (window-system)
   (setq default-frame-alist '((left-fringe . 0)
                               (right-fringe . 0)))
@@ -254,8 +242,8 @@
 
 ;; ido mode settings
 (ivy-mode t)
-;(setq ido-enable-flex-matching t)
-;(setq ido-ignore-files '("\\.hi$"))
+                                        ;(setq ido-enable-flex-matching t)
+(setq ido-ignore-files '("\\~$"))
 
 ;; General preferences
 (global-auto-revert-mode t)
@@ -283,6 +271,8 @@
 (setq mouse-wheel-follow-mouse 't)
 (setq scroll-step 4)
 
+(global-set-key (kbd "C-c C-d")
+                'delete-trailing-whitespace)
 (global-set-key (kbd "C-<f12>")
                 (lambda ()
                   (interactive)
@@ -299,10 +289,6 @@
                 'insert-date-string)
 (global-set-key (kbd "C-c d")
                 'insert-pydebug-string)
-(global-set-key (kbd "C-c e")
-                'insert-pydebug-dep-string)
-(global-set-key (kbd "C-c t")
-                'insert-pdb-string)
 (global-set-key (kbd "C-c s")
                 'sort-lines)
 (bind-key* "C-c C-s" 'sort-lines)
@@ -316,6 +302,10 @@
                 'increase-left-margin)
 (global-set-key (kbd "C-c l")
                 'font-lock-fontify-buffer)
+
+(global-set-key (kbd "s-t")
+                'my/transpose-args)
+
 (global-set-key (kbd "C-x f")
                 'ido-find-file)
 (global-set-key (kbd "C-x s")
@@ -345,6 +335,8 @@
                 'highlight-symbol-prev)
 (global-set-key [(shift f3)]
                 'highlight-symbol-prev)
+(global-set-key [f15]
+                'highlight-symbol-prev)
 (global-set-key [(meta f2)]
                 'highlight-symbol-prev-force)
 (global-set-key [(shift f2)]
@@ -364,6 +356,8 @@
 (global-set-key [vertical-scroll-bar drag-mouse-1]
                 'scroll-bar-drag)
 (global-set-key [f9]
+                'format-mode-format-file)
+(global-set-key [(control f9)]
                 'google-pyformat-all)
 
 (global-set-key (kbd "M-p")
@@ -389,8 +383,8 @@
 
 (global-unset-key (kbd "<insert>"))
 ;; (global-unset-key [f2])
-(global-unset-key [C-z])
-(global-unset-key [(control z)])
+(global-set-key (kbd "C-z")
+                'undo)
 (global-unset-key [(control x)
                    (control z)])
 
@@ -407,8 +401,7 @@
 (make-face 'py-keyword-face)
 (make-face 'py-pseudo-keyword-face)
 (make-face 'py-type-face)
-(set-face-background 'show-paren-match
-                     "cornflower blue")
+(set-face-background 'show-paren-match "cornflower blue")
 (set-face-foreground 'font-lock-string-face
                      "forest green")
 (set-face-foreground 'py-comment-face "firebrick")
@@ -455,8 +448,6 @@
              (menu-bar-mode 1)))
 
 (setq frame-title-format '("%b - " "emacs@" system-name))
-
-(set-face-attribute 'region nil :background "#ddd")
 (setq-default font-lock-use-fonts t)
 (setq-default font-lock-use-colors t)
 (setq-default font-lock-maximum-decoration
@@ -478,6 +469,7 @@
                                 ("\\.[hg]s$" . haskell-mode)
                                 ("\\.c$" . c-mode)
                                 ("\\.cc$" . c++-mode)
+                                ("\\.clif$" . c++-mode)
                                 ("\\.css$" . css-mode)
                                 ("\\.gss$" . css-mode)
                                 ("\\.ebuild$" . shell-script-mode)
@@ -498,6 +490,7 @@
                                 ("\\.pro$" . prolog-mode)
                                 ("\\.py$" . python-mode)
                                 ("\\.pyx$" . python-mode)
+                                ("\\.smt$" . z3-mode)
                                 ("\\.sp$" . sourcepawn-mode)
                                 ("\\.tex$" . latex-mode)
                                 ("\\.tpl$" . html-mode)
@@ -529,7 +522,7 @@
  '(ido-default-file-method (quote selected-window))
  '(ilisp-*use-fsf-compliant-keybindings* t)
  '(inferior-lisp-program "/usr/bin/sbcl --noinform")
- '(js-indent-level 2)
+ '(js-indent-level 2 t)
  '(js2-auto-indent-flag nil)
  '(js2-basic-offset 2)
  '(js2-global-externs (quote ("chrome" "angular" "require" "setTimeout")))
@@ -542,18 +535,19 @@
  '(markdown-enable-math t)
  '(mouse-yank-at-point t)
  '(org-support-shift-select nil)
- '(package-selected-packages (quote (srefactor flymake-easy flymake-cursor json-mode
-                                               js2-mode tide swiper)))
- '(package-selected-packages
-   (quote
-    (swiper srefactor flymake-easy flymake-cursor json-mode js2-mode)))
+ '(package-selected-packages (quote (boogie-friends z3-mode flx php-mode swiper
+                                                    srefactor flymake-easy flymake-cursor json-mode
+                                                    js2-mode)))
  '(py-continuation-offset 2)
  '(py-indent-offset 2 t)
  '(py-smart-indentation nil)
- '(pyformat-args
-   (concat "-i --style "
-           (expand-file-name "~/homedir/.style.yapf")) t)
- '(safe-local-variable-values (quote ((encoding . utf-8) (Encoding . utf-8))))
+ ;; '(pyformat-args (concat "-i --style "
+ ;;                         (expand-file-name "~/homedir/.style.yapf"))
+ ;;                 t)
+
+ '(pyformat-args "-i " t)
+ '(safe-local-variable-values (quote ((encoding . utf-8)
+                                      (Encoding . utf-8))))
  '(sgml-basic-offset 2)
  '(sh-basic-offset 2)
  '(sh-indentation 2)
@@ -580,30 +574,10 @@
   (interactive)
   (insert (format-time-string "%Y-%m-%d %H:%M %Z")))
 
-(defun insert-jasmine-describe ()
-  "Insert a Jasmine describe block."
-  (interactive)
-  (insert "describe(``, function () {
-});"))
-(defun insert-jasmine-it ()
-  "Insert a nicely formated date string."
-  (interactive)
-  (insert "it(`should`, function() {});"))
-
 (defun insert-pydebug-string ()
   "Insert a python debugger statement."
   (interactive)
   (insert "import IPython; IPython.embed()"))
-
-(defun insert-pydebug-dep-string ()
-  "Insert a python debugger build target."
-  (interactive)
-  (insert "\"//third_party/py/IPython:ipython-libs\","))
-
-(defun insert-pdb-string ()
-  "Insert a python debugger build target."
-  (interactive)
-  (insert "import pdb; pdb.set_trace()"))
 
 (defun intelligent-close ()
   "Quit a frame the same way no matter what kind of frame you are on."
@@ -624,58 +598,36 @@
                 'intelligent-close)
 (global-set-key (kbd "<f5>")
                 'make-frame)
-(global-set-key (kbd "<f6>")
-                'make-frame-on-display)
-(global-set-key (kbd "C-c C-d")
-                'delete-trailing-whitespace)
 
-(defun insert-scc-at-point ()
-  "Insert an SCC annotation at point."
-  (interactive)
-  (if (or (looking-at "\b\|[ t]\|$")
-          (and (not (bolp))
-               (save-excursion
-                 (forward-char -1)
-                 (looking-at "\b\|[ t]"))))
-      (let ((space-at-point (looking-at "[ t]")))
-        (unless (and (not (bolp))
-                     (save-excursion
-                       (forward-char -1)
-                       (looking-at "[ t]")))
-          (insert " "))
-        (insert "{-# SCC \"\" #-}")
-        (unless space-at-point
-          (insert " "))
-        (forward-char (if space-at-point -5 -6)))
-    (error "Not over an area of whitespace")))
-
-(defun kill-scc-at-point ()
-  "Kill the SCC annotation at point."
-  (interactive)
-  (save-excursion
-    (let ((old-point (point))
-          (scc "\({-#[ t]*SCC \"[^\"]*\"[ t]*#-}\)[ t]*"))
-      (while (not (or (looking-at scc)
-                      (bolp)))
-        (forward-char -1))
-      (if (and (looking-at scc)
-               (<= (match-beginning 1) old-point)
-               (> (match-end 1) old-point))
-          (kill-region (match-beginning 0) (match-end 0))
-        (error "No SCC at point")))))
-(global-set-key (kbd "C-c y")
-                'insert-scc-at-point)
-(global-set-key (kbd "C-c k")
-                'kill-scc-at-point)
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 90 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
- '(flymake-errline ((((class color)) (:underline "red"))))
- '(flymake-infoline ((((class color)) (:underline "gray"))))
- '(flymake-warnline ((((class color)) (:underline "orange")))))
+ '(default ((t (:inherit nil :stipple nil
+                         :background "white"
+                         :foreground "black"
+                         :inverse-video nil
+                         :box nil
+                         :strike-through nil
+                         :overline nil
+                         :underline nil
+                         :slant normal
+                         :weight normal
+                         :height 90
+                         :width normal
+                         :foundry "unknown"
+                         :family "DejaVu Sans Mono"))))
+ '(flymake-errline ((((class color))
+                     (:underline "red"))))
+ '(flymake-infoline ((((class color))
+                      (:underline "gray"))))
+ '(flymake-warnline ((((class color))
+                      (:underline "orange"))))
+ '(markdown-code-face ((t (:inherit fixed-pitch :background "azure3")))))
+
+(set-face-attribute 'region nil :background "black")
+(set-face-attribute 'region nil :foreground "white")
 
 (defun vi-open-line-above ()
   "Insert a newline above the current line and put point at beginning."
@@ -710,14 +662,12 @@
             (setq auto-hscroll-mode nil)
             (auto-fill-mode t)))
 
-(setq js2-additional-externs '("goog" "angular"
-                               "describe" "fdescribe" "xdescribe"
-                               "it" "fit" "xit" "inject"
-                               "module" "expect" "beforeEach" "exports" "guitar"
-                               "sandman" "chrome" "Mousetrap" "$" "jQuery"
-                               "require" "spyOn" "beforeEach" "jasmine"
-                               "setInterval" "setTimeout" "clearInterval" "Intl"
-                               ))
+(setq js2-additional-externs '("goog" "angular" "describe" "fdescribe" "xdescribe"
+                               "it" "fit" "xit" "inject" "module" "expect"
+                               "beforeEach" "exports" "guitar" "sandman"
+                               "chrome" "Mousetrap" "$" "jQuery" "require"
+                               "spyOn" "beforeEach" "jasmine" "setInterval"
+                               "setTimeout" "clearInterval" "Intl"))
 
 
 (add-hook 'js2-post-parse-callbacks
@@ -732,8 +682,6 @@
                              (match-string 2 buf))))))
 
 (provide '.emacs)
-;;; .emacs ends here
-
 
 (defun fixbuf (begin end len)
   (interactive)
@@ -759,3 +707,90 @@
   (stop)
   (add-hook 'after-change-functions 'fixbuf
             nil t))
+
+(defun my/calculate-stops ()
+  (save-excursion
+    (let ((start (condition-case e
+                     (while t
+                       (backward-sexp))
+                   (error (point)))) stops)
+      (push start stops)
+      (condition-case e
+          (while t
+            (forward-sexp)
+            (when (looking-at "\\s-*,")
+              (push (point)
+                    stops)))
+        (error (push (point)
+                     stops)))
+      (nreverse stops))))
+
+(defun my/transpose-args ()
+  (interactive)
+  (when (looking-at "\\s-")
+    (backward-sexp))
+  (cl-loop with
+           p
+           =
+           (point)
+           with
+           previous
+           =
+           nil
+           for
+           stop
+           on
+           (my/calculate-stops)
+           for
+           i
+           upfrom
+           0
+           when
+           (<= p (car stop))
+           do
+           (when previous
+             (let* ((end (cadr stop))
+                    (whole (buffer-substring previous end))
+                    middle
+                    last)
+               (delete-region previous end)
+               (goto-char previous)
+               (setf middle (if (> i 1)
+                                (- (car stop)
+                                   previous)
+                              (string-match "[^, \\t]" whole
+                                            (- (car stop)
+                                               previous)))
+                     last
+                     (if (> i 1)
+                         (substring whole 0 middle)
+                       (concat (substring whole
+                                          (- (car stop)
+                                             previous)
+                                          middle)
+                               (substring whole
+                                          0
+                                          (- (car stop)
+                                             previous)))))
+               (insert (substring whole middle)
+                       last)))
+           (cl-return)
+           end
+           do
+           (setf previous (car stop))))
+
+(fset 'post_mortem
+      (lambda (&optional arg)
+        "Wrap current expression in try..except..pdb.post_mortem()."
+        (interactive "p")
+        (kmacro-exec-ring-item (quote ([1 tab 116 114 121 58 return 134217734 return
+                                          101 120 99 101 112 116 32 69 120 99 101 112
+                                          116 105 111 110 32 97 115 32 101 58 32 32
+                                          35 32 112 121 108 105 110 116 58 32 100 105
+                                          115 97 98 108 101 61 98 114 101 backspace
+                                          111 97 100 45 97 99 99 101 112 116 return
+                                          105 109 112 111 114 116 32 112 100 98 return
+                                          112 100 98 46 112 111 115 116 95 109 111 114
+                                          116 101 109 40 41] 0
+                                          "%d"))
+                               arg)))

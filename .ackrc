@@ -6,5 +6,8 @@
 --type-set=md:ext:md
 --type-set=svg:ext:svg
 --type-set=itcnf:ext:itcnf
+--type-set=bzl:ext:bzl
+--type-set=proto:ext:proto,textpb,asciipb,textproto,asciiproto
 --nosvg
 --smart-case
+--ignore-dir=devtools/sandman/deprecated

@@ -2,10 +2,14 @@ BasedOnStyle: Google
 
 ColumnLimit: 80
 
-AllowShortBlocksOnASingleLine: false
-AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: Empty
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
+# AllowShortBlocksOnASingleLine: false
+# AllowShortCaseLabelsOnASingleLine: false
+# AllowShortFunctionsOnASingleLine: Empty
+# AllowShortIfStatementsOnASingleLine: false
+# AllowShortLoopsOnASingleLine: false
 
 BreakBeforeTernaryOperators: true
+
+Language: Cpp
+DerivePointerAlignment: false
+PointerAlignment: Right

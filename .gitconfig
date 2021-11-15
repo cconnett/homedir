@@ -7,8 +7,6 @@
         excludesfile=~/.gitignore
 [push]
 	default = simple
-[pull]
-	rebase = true
 [rebase]
 	autostash = true
 [clangformat]
@@ -21,3 +19,5 @@
 	ignore = update-index --assume-unchanged
 	unignore = update-index --no-assume-unchanged
 	split = !~/bin/gitsplit.sh
+	back = reset HEAD^
+	oblit = reset --hard HEAD^

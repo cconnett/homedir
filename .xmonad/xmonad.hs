@@ -10,12 +10,13 @@ import System.Process
 import XMonad hiding ((|||))
 import XMonad.Actions.CopyWindow
 import XMonad.Actions.CycleSelectedLayouts
+import XMonad.Actions.Minimize
 import XMonad.Config.Gnome
 import XMonad.Core
 import XMonad.Layout.BoringWindows as B
-import XMonad.Layout.LayoutCombinators ((|||), (**|*), (**//*))
+import XMonad.Layout.LayoutCombinators ((**//*), (**|*), (|||))
 import XMonad.Layout.LayoutModifier
-import XMonad.Layout.Minimize
+import XMonad.Layout.Minimize (minimize)
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.NoBorders
@@ -63,6 +64,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
     --, ((modm,               xK_p     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
     -- launch gmrun
   , ((modm .|. shiftMask, xK_p), spawn "gmrun")
+  , ((modm .|. shiftMask, xK_i), spawn "inkscape")
+  , ( (modm .|. shiftMask, xK_e)
+    , spawn "/usr/local/google/home/cjc/bin/mathematica")
     -- launch shutter
   , ((mod4Mask, xK_s), spawn "shutter -s")
   , ((mod4Mask, xK_Up), spawn "amixer -D pulse sset Master 5%+")
@@ -70,8 +74,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
   , ((mod4Mask, xK_m), spawn "amixer -D pulse sset Master toggle")
     -- close focused window
   , ((modm .|. shiftMask, xK_c), kill)
-     -- Rotate through the available layout algorithms
-    --, ((modm,               xK_Insert), sendMessage (Toggle MIRROR))
+    -- Rotate through the available layout algorithms
+  , ((modm, xK_Insert), sendMessage (Toggle MIRROR))
   , ((modm, xK_F11), sendMessage (Toggle FULL))
   , ( (modm, xK_F12)
     , cycleThroughLayouts [description myTiled, description myGrid])
@@ -90,7 +94,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
     -- Minimize the current window
   , ((modm, xK_m), withFocused minimizeWindow)
     -- Restore next minimized window
-  , ((modm .|. shiftMask, xK_m), sendMessage RestoreNextMinimizedWin)
+  , ((modm .|. shiftMask, xK_m), withLastMinimized maximizeWindow)
     -- Swap the focused window and the master window
   , ((modm, xK_Return), windows W.swapMaster)
     -- Swap the focused window with the next window
@@ -118,13 +122,13 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
   [ ( (mod1Mask, key)
     , do focusedScreen <- withWindowSet (return . screen . current)
         --focus to left
-         screenWorkspace 0 >>= flip whenJust (windows . W.view)
-        --set windows on focus to virtual desktop pair's left
-         windows $ W.view (screenPair !! 0)
-        --focus to right
          screenWorkspace 1 >>= flip whenJust (windows . W.view)
-        --set windows on focused screen to virtual desktop pair's right
+        --set windows on focus to virtual desktop pair's left
          windows $ W.view (screenPair !! 1)
+        --focus to right
+         screenWorkspace 0 >>= flip whenJust (windows . W.view)
+        --set windows on focused screen to virtual desktop pair's right
+         windows $ W.view (screenPair !! 0)
         -- focus to original screen
          screenWorkspace focusedScreen >>= flip whenJust (windows . W.view))
   | (screenPair, key) <- zip (pair $ XMonad.workspaces conf) [xK_1 .. xK_9]
@@ -236,7 +240,7 @@ myManageHook =
     , className =? "Gimp" --> doFloat
     , className =? "pidgin" --> doFloat
     , className =? "inkscape" --> doFloat
-    --, className =? "InputOutput"    --> doFloat
+    , stringProperty "WM_ICON_NAME" =? "the-unicoder" --> doFloat
     , stringProperty "WM_WINDOW_ROLE" =? "bubble" --> doFloat
     , resource =? "desktop_window" --> doIgnore
     , resource =? "kdesktop" --> doIgnore
@@ -311,7 +315,9 @@ reload = io $ spawn "xmonad --restart"
 myConfig =
   defaults `additionalKeysP`
   [ ("M-o", spawn "google-chrome") {-(className =? "Google-chrome")-}
-  , ("<XF86WWW>", spawn "google-chrome-beta")
+  --, ("M-S-o", spawn "google-chrome") {-(className =? "Google-chrome")-}
+  , ("<XF86WWW>", spawn "google-chrome")
+  , ("M-S-s", spawn "blueman-manager")
   , ("M-e", spawn "emacs")
   , ("M4-e", spawn "emacs")
                              --,("M-n", spawn "nautilus ~")
@@ -335,23 +341,23 @@ myConfig =
 defaults =
   defaultConfig
       -- simple stuff
-  { terminal = myTerminal
-  , focusFollowsMouse = myFocusFollowsMouse
-  , borderWidth = myBorderWidth
-  , modMask = myModMask
-  , XMonad.workspaces = myWorkspaces
-  , normalBorderColor = myNormalBorderColor
-  , focusedBorderColor = myFocusedBorderColor
+    { terminal = myTerminal
+    , focusFollowsMouse = myFocusFollowsMouse
+    , borderWidth = myBorderWidth
+    , modMask = myModMask
+    , XMonad.workspaces = myWorkspaces
+    , normalBorderColor = myNormalBorderColor
+    , focusedBorderColor = myFocusedBorderColor
       -- key bindings
-  , keys = myKeys
-  , mouseBindings = myMouseBindings
+    , keys = myKeys
+    , mouseBindings = myMouseBindings
       -- hooks, layouts
-  , layoutHook = myLayout
-  , manageHook = myManageHook
-  , handleEventHook = myEventHook
-  , logHook = myLogHook
-  , startupHook = myStartupHook
-  }
+    , layoutHook = myLayout
+    , manageHook = myManageHook
+    , handleEventHook = myEventHook
+    , logHook = myLogHook
+    , startupHook = myStartupHook
+    }
 
 data Grid a
   = Grid

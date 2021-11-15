@@ -2,6 +2,8 @@
 .citc_workspace_id_cache/
 .srcfs_workspace
 .svn
+.gdb_history
+.fdo.zip
 READONLY
 VERSION_MAP
 blaze-bin/
@@ -14,3 +16,6 @@ review/
 sandman-genfiles/
 node_modules/
 at-google.bash
+.emacs.desktop
+.emacs.desktop.lock
+py3
