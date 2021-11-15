@@ -47,12 +47,12 @@ alias pyfactor=/google/data/ro/teams/youtube-code-health/pyfactor
 # Activate submodules. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
   [ -f /etc/bash_completion ] && source /etc/bash_completion
-  [ -f ~/homedir/iblaze.sh ] && source ~/homedir/iblaze.sh
-  [ -f ~/homedir/at-google.bash ] && source ~/homedir/at-google.bash
-  [ -f ~/homedir/virtualenv.sh ] && source ~/homedir/virtualenv.sh
-  [ -f ~/homedir/git.sh ] && source ~/homedir/git.sh
-  [ -f ~/homedir/iwatch.sh ] && source ~/homedir/iwatch.sh
-  [ -f ~/homedir/ack.sh ] && source ~/homedir/ack.sh
+  [ -f ~/homedir/bash/iblaze.sh ] && source ~/homedir/bash/iblaze.sh
+  [ -f ~/homedir/bash/at-google.bash ] && source ~/homedir/bash/at-google.bash
+  [ -f ~/homedir/bash/virtualenv.sh ] && source ~/homedir/bash/virtualenv.sh
+  [ -f ~/homedir/bash/git.sh ] && source ~/homedir/bash/git.sh
+  [ -f ~/homedir/bash/iwatch.sh ] && source ~/homedir/bash/iwatch.sh
+  [ -f ~/homedir/bash/ack.sh ] && source ~/homedir/bash/ack.sh
 fi
 
 function prompt_command {
