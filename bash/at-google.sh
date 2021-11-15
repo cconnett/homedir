@@ -15,7 +15,7 @@ alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/lib
 alias writeme=/google/data/ro/teams/writeme/writeme
 alias spool='/google/data/ro/teams/spool/spool_client_mpm/live/spool.par'
 
-[ -f ~/homedir/g4s.bash ] && source ~/homedir/g4s.bash
+source ~/homedir/bash/g4s.sh
 
 function lastlog {
   less /export/hda3/tmp/$(ls -t1 /export/hda3/tmp | grep $1 | grep $2 | head -1)
