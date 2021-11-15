@@ -339,7 +339,7 @@ myConfig =
 -- No need to modify this.
 --
 defaults =
-  defaultConfig
+  def
       -- simple stuff
     { terminal = myTerminal
     , focusFollowsMouse = myFocusFollowsMouse
