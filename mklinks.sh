@@ -7,6 +7,7 @@ for filename in $(ls -AB1 . | egrep '^\.'); do
 done
 
 # Allowlist two directories.
+mkdir -p "$HOME/.emacs.d"
 for filename in .emacs.d/site-lisp .xmonad; do
   [ -d "$filename" ] && [ ! -e "$HOME/$filename" ] && ln -s "$HOME/homedir/$filename" "$HOME/$filename" && echo "Linked $filename"
 done
