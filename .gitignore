@@ -2,8 +2,6 @@
 .citc_workspace_id_cache/
 .srcfs_workspace
 .svn
-.gdb_history
-.fdo.zip
 READONLY
 VERSION_MAP
 blaze-bin/
