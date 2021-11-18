@@ -31,7 +31,7 @@ function pointed-dir {
   echo "$PWD" | \
     sed -e "s!$HOME!~!" | \
     sed -e 's!/google/src/cloud/cjc!/cloud!' | \
-    sed -e "s/emacs/${red_target_blue}/" | \
+    sed -e "s/${SWITCH_CLIENT}/${red_target_blue}/" | \
     cat
 }
 
