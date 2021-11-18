@@ -92,6 +92,6 @@ function g4s_completion {
 }
 
 
-# if [[ $- == *i* ]] ; then
-#     complete -o default -o nospace -F g4s_completion g4s
-# fi
+if [[ $- == *i* ]] ; then
+    complete -o default -o nospace -F g4s_completion g4s
+fi
