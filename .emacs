@@ -87,7 +87,7 @@
                   (if (file-exists-p buffer-file-name)
                       (shell-command-to-string get-changed-lines-command)
                     "")))
-         (formatter-command (concat "python3 -m yapf -i  " pyformat-args
+         (formatter-command (concat "python3 -m yapf -i " pyformat-args
                                     " " lines)))
     (message "%s" formatter-command)
     (if (and (zerop (length lines))
@@ -409,8 +409,6 @@
 (set-face-foreground 'py-type-face "steel blue")
 (add-hook 'python-mode-hook
           (lambda ()
-            (unless (equal major-mode 'google3-build-mode)
-              (flymake-python-load))
             (set (make-local-variable 'font-lock-type-face)
                  'py-type-face)
             (set (make-local-variable 'font-lock-comment-face)
@@ -423,19 +421,6 @@
 (add-hook 'sh-mode-hook
           (lambda ()
             (set-face-foreground 'sh-heredoc-face "dark magenta")))
-
-(defun flymake-jslint-load ()
-  (interactive)
-  ;; (REGEXP FILE-IDX LINE-IDX COL-IDX ERR-TEXT-IDX)
-  (flymake-easy-load (lambda (filename)
-                       `("~/bin/myjslint" ,filename))
-                     '(("^\\([^:]+\\):\\([^:]+\\):\\([^:]+\\):\\([^:]+\\)$"
-                        1 2 4 3))
-                     'temp-with-folder
-                     "js"
-                     ""))
-
-(add-hook 'js2-mode-hook 'flymake-jslint-load)
 
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
@@ -542,10 +527,6 @@
  '(py-continuation-offset 2)
  '(py-indent-offset 2 t)
  '(py-smart-indentation nil)
- ;; '(pyformat-args (concat "-i --style "
- ;;                         (expand-file-name "~/homedir/.style.yapf"))
- ;;                 t)
-
  '(pyformat-args "-i " t)
  '(safe-local-variable-values (quote ((encoding . utf-8)
                                       (Encoding . utf-8))))
