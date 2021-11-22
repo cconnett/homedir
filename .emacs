@@ -61,7 +61,6 @@
   (require 'google-coding-style)
   (require 'google-cc-extras)
   (require 'google-pyformat)
-                                        ;(require 'flymake-jslint)
   (google-cc-extras/bind-default-keys)
   (setq create-lockfiles nil))
 
@@ -239,8 +238,7 @@
 
 ;; ido mode settings
 (ivy-mode t)
-                                        ;(setq ido-enable-flex-matching t)
-(setq ido-ignore-files '("\\~$"))
+(setq ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
 
 ;; General preferences
 (global-auto-revert-mode t)
