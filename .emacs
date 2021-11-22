@@ -42,9 +42,6 @@
 (require 'pp)
 (require 'font-lock)
 (require 'ivy)
-(require 'flymake)
-(require 'flymake-cursor)
-(require 'flymake-easy)
 (require 'highlight-symbol)
 (require 'column-marker)
 (require 'srefactor)
@@ -217,9 +214,7 @@
      ;; ((memq major-mode
      ;;        '(html-mode))
      ;;  (htmlfmt))
-     (t (message "No formatter found for %s" major-mode)))
-    (when (symbol-value 'flymake-mode)
-      (flymake-restart-syntax-check))))
+     (t (message "No formatter found for %s" major-mode)))))
 
 ;; Auto-save files go in system temp.
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
@@ -517,8 +512,7 @@
  '(mouse-yank-at-point t)
  '(org-support-shift-select nil)
  '(package-selected-packages '(haskell-mode boogie-friends z3-mode flx php-mode
-                                            swiper srefactor flymake-easy flymake-cursor
-                                            json-mode js2-mode))
+                                            swiper srefactor json-mode js2-mode))
  '(py-continuation-offset 2)
  '(py-indent-offset 2 t)
  '(py-smart-indentation nil)
@@ -530,19 +524,6 @@
  '(standard-indent 2)
  '(typescript-indent-level 2)
  '(vc-follow-symlinks t))
-
-(defun flymake-python-load ()
-  (interactive)
-  (flymake-easy-load (lambda (filename)
-                       `("~/bin/mypylint" ,filename))
-                     '(("^1:0:F: \\(.*line \\([0-9]+\\))\\)" nil
-                        2 nil 1)
-                       ("^\\([0-9]+\\):\\([0-9]+\\):\\([FCREW]: .*\\)"
-                        nil 1 2 3))
-                     'temp-with-folder
-                     "py"
-                     "^W:"
-                     "^[RC]:"))
 
 ;; Insertion of Dates.
 (defun insert-date-string ()
