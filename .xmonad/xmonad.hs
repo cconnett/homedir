@@ -306,7 +306,7 @@ choices alist = do
   when ((not . null) answer) $ maybe (return ()) id $ lookup answer alist
 
 lock, logout, reload :: X ()
-lock = io $ spawn "xscreensaver-command -lock"
+lock = io $ spawn "/usr/share/goobuntu-desktop-files/xsecurelock.sh"
 
 logout = io $ exitWith ExitSuccess
 
