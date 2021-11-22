@@ -41,7 +41,6 @@
 ;; Requires
 (require 'pp)
 (require 'font-lock)
-                                        ;(require 'ido)
 (require 'ivy)
 (require 'flymake)
 (require 'flymake-cursor)
@@ -49,9 +48,7 @@
 (require 'highlight-symbol)
 (require 'column-marker)
 (require 'srefactor)
-                                        ; (require 'srefactor-lisp)
 (require 'clang-format)
-                                        ; (require 'paren)
 
 ;; Home only
 (unless at-google
