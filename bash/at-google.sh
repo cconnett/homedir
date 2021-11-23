@@ -14,7 +14,7 @@ alias sgcl2db='gcl2db -- --model=/home/build/google3/production/borg/devtools-sa
 alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/library/sandman.model'
 alias writeme=/google/data/ro/teams/writeme/writeme
 alias spool='/google/data/ro/teams/spool/spool_client_mpm/live/spool.par'
-
+alias onborg='/google/data/ro/projects/smartass/onborg'
 source ~/homedir/bash/g4s.sh
 
 function lastlog {
