@@ -1348,3 +1348,94 @@ include "%L"
 <Multi_key> <-> <1> : "👎" # THUMBS DOWN SIGN
 <Multi_key> <u> <p> : "👍" # THUMBS UP SIGN
 <Multi_key> <d> <n> : "👎" # THUMBS DOWN SIGN
+
+# Diagonal Arrows
+<Multi_key> <Left> <Up> : "↖" # Northwest Arrow
+<Multi_key> <Up> <Left> : "↖" # Northwest Arrow
+<Multi_key> <Right> <Up> : "↗" # Northeast Arrow
+<Multi_key> <Up> <Right> : "↗" # Northeast Arrow
+<Multi_key> <Left> <Down> : "↙" # Southwest Arrow
+<Multi_key> <Down> <Left> : "↙" # Southwest Arrow
+<Multi_key> <Right> <Down> : "↘" # Southeast Arrow
+<Multi_key> <Down> <Right> : "↘" # Southeast Arrow
+
+<Multi_key> <p> <m> : "±"
+<Multi_key> <2> <2> : "²"
+<Multi_key> <3> <3> : "³"
+<Multi_key> <i> <i> : "𝕚"
+<Multi_key> <e> <x> <p> : "𝕖"
+<Multi_key> <|> <.> <.> : "⋮" # VERTICAL ELLIPSIS
+<Multi_key> <o> <c> : "℃" # DEGREES CELSIUS
+<Multi_key> <d> <c> : "℃" # DEGREES CELSIUS
+<Multi_key> <c> <o> : "©" # COPYRIGHT SYMBOL
+<Multi_key> <o> <k> : "👌" # OK HAND SIGN
+<Multi_key> <g> <l> : "🤞" # Good Luck / Fingers Crossed
+<Multi_key> <m> <e>: "✋" # raised hand / me / I do
+<Multi_key> <+> <1> : "👍" # THUMBS UP SIGN
+<Multi_key> <u> <p> : "👍" # THUMBS UP SIGN
+<Multi_key> <-> <1> : "👎" # THUMBS DOWN SIGN
+<Multi_key> <d> <n> : "👎" # THUMBS DOWN SIGN
+<Multi_key> <8> <parenright>: "😎" # CSI Yeah / Sunglasses
+<Multi_key> <.> </> : "✓" # CHECK MARK
+<Multi_key> <$> </> : "✅" # GREEN CHECK / WHITE HEAVY CHECK MARK
+<Multi_key> <$> <x> : "❌" # RED X / CROSS MARK
+<Multi_key> <^> <n> : "ⁿ" # SUPERSCRIPT N
+<Multi_key> <-> <-> <space> : "–" # EN DASH
+<Multi_key> <n> <-> : "–" # EN DASH
+<Multi_key> <m> <-> : "—" # EM DASH
+<Multi_key> <#> <d> <i> <m> : "⦰" # HALF-DIMINISHED CHORD / REVERSED EMPTY SET
+<Multi_key> <$> <e> : "€" # EURO SIGN
+<Multi_key> <$> <E> : "€" # EURO SIGN
+<Multi_key> <e> <$> : "€" # EURO SIGN
+<Multi_key> <E> <$> : "€" # EURO SIGN
+
+
+<Multi_key> <colon> <)> : "🙂" # SLIGHTLY SMILING FACE
+<Multi_key> <colon> <asciicircum> <_> <asciicircum> : "😁" # BEAMING FACE WITH SMILING EYES
+
+<Multi_key> <?> <!> : "‽" # INTERROBANG
+<Multi_key> <|> <|> : "‖" # DOUBLE VERTICAL LINE / DOUBLE VERTICAL BAR
+<Multi_key> <,> <,> : "ˌ" # MODIFIER LETTER LOW VERTICAL LINE
+<Multi_key> <'> <'> : "ˈ" # MODIFIER LETTER [HIGH] VERTICAL LINE
+<Multi_key> <colon> <colon> : "ː" # MODIFIER LETTER TRIANGULAR COLON
+<Multi_key> <o> <u> : "ʊ" # LATIN SMALL LETTER UPSILON
+<Multi_key> <:> <e> : "ɜ" # TURNED ɛ
+
+<Multi_key> <1> <0> <0> : "💯" # 100 emoji / perfect / 100%
+<Multi_key> <6> <9> : "♋" # Nice
+<Multi_key> <k> <a> : "🙃" # Kappa
+<Multi_key> <p> <i> : "π" # GREEK SMALL LETTER PI
+<Multi_key> <t> <t> : "τ" # GREEK SMALL LETTER TAU
+<Multi_key> <t> <a> : "τ" # GREEK SMALL LETTER TAU
+<Multi_key> <m> <m> : "µ" # GREEK SMALL LETTER MU
+<Multi_key> <t> <h> : "θ" # GREEK SMALL LETTER THETA
+<Multi_key> <w> <w> : "ω" # GREEK SMALL LETTER OMEGA
+<Multi_key> <W> <W> : "Ω" # GREEK CAPITAL LETTER OMEGA
+<Multi_key> <p> <d> : "∂" # Partial derivative / differential
+<Multi_key> </> <s>: "😏" # Smirk / Sarcasm
+<Multi_key> <Multi_key> <g> <r> <a> <d>: "∇" # Nabla / Gradient
+<Multi_key> <Multi_key> <b> <o> <l> <t>: "🗲" # Lightning Bolt / AC🗲DC
+<Multi_key> <Multi_key> <a> <c> <d> <c>: "🗲" # Lightning Bolt / AC🗲DC
+<Multi_key> <Multi_key> <p> <u> <k> <e>: "🤮" # Face vomiting / puking (puke)
+<Multi_key> <Multi_key> <s> <i> <c> <k>: "🤢" # Nauseated sick face
+<Multi_key> <Multi_key> <l> <l> <a> <p>: "🖖" # Vulcan Salute / Live Long and Prosper
+<Multi_key> <Multi_key> <h> <o> <p> <e>: "🤞" # Fingers Crossed / Hope
+<Multi_key> <Multi_key> <f> <u>: "🤬" # Fug / swearing / 🤬
+<Multi_key> <Multi_key> <s> <o> <b>: "😭" # Sob / cry
+<Multi_key> <Multi_key> <j> <o> <y>: "😂" # Joy / Face with tears of joy
+<Multi_key> <Multi_key> <c> <s> <i>: "😎" # CSI Yeah / Sunglasses
+<Multi_key> <Multi_key> <y> <e> <a> <h>: "😎" # CSI Yeah / Sunglasses
+<Multi_key> <l> <o> <d>: "ಠ_ಠ" # Look of Disapproval
+<Multi_key> <Multi_key> <l> <o> <d>: "ಠ_ಠ" # Look of Disapproval
+<Multi_key> <Multi_key> <e> <l> <e>: "👁️👄👁️" # Eye Lips Eye
+<Multi_key> <Multi_key> <t> <f> : "feenHeck FlipThis" # TABLE FLIP
+<Multi_key> <Multi_key> <s> <u> <s> : "🤨" # COLBERT / SUS
+<Multi_key> <Multi_key> <l> <o> <l>: "🤭" # Tee Hee / Giggle / SMILING FACE WITH SMILING EYES AND HAND COVERING MOUTH
+<Multi_key> <Multi_key> <r> <o> <f> <l>: "🤣" # ROFL / ROLLING ON THE FLOOR LAUGHING
+<Multi_key> <Multi_key> <t> <h> <a> <n> <k> <s>: "🙏" # Thanks / Thank you
+<Multi_key> <Multi_key> <t> <h> <x>: "🙏" # Thanks / Thank you
+<Multi_key> <Multi_key> <t> <o> <x>: "☣" # Bio-hazard / Toxic
+<Multi_key> <Multi_key> <f> <e> <w>: "😮‍💨" # Face exhaling / Relieved / Phew
+<Multi_key> <Multi_key> <g> <o>: "kosmicGO lackGO rooperGO" # LET'S GO
+<Multi_key> <Multi_key> <g> <g>: "mfpPride recieveDoves mfpPride recieveDoves mfpPride recieveDoves mfpPride " # Good game!
+<Multi_key> <Multi_key> <t> <i> <m> <e>: "gdqTimer gdqTime " # and..... TIME!
