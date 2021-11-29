@@ -43,6 +43,7 @@ alias inkscape='inkscape 2> /dev/null'
 alias z3py='workon z3; ipython -i -c "from z3 import *"'
 alias dbg='/google/data/ro/teams/ads-test-debugger/@dbg'
 alias pyfactor=/google/data/ro/teams/youtube-code-health/pyfactor
+alias pipup='pip install --upgrade pip'
 
 # Activate submodules. Only run if shell is interactive.
 if [[ $- == *i* ]] ; then
