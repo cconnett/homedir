@@ -1,5 +1,5 @@
 [style]
-based_on_style: google
+based_on_style: yapf
 indent_width: 2
-indent_dictionary_value: true
-split_before_bitwise_operator: true
+split_before_named_assigns: true
+column_limit: 80
