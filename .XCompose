@@ -44,7 +44,7 @@ include "%L"
 # a problem for non-American keyboards.
 <Multi_key> <space> <minus>             : " — "                 # EM DASH surrounded by THIN SPACEs.
 <Multi_key> <r> <t> <m>                 : "®"
-<Multi_key> <C <C>                      : "©"
+<Multi_key> <C> <C>                     : "©"
 
 
 # Quotation marks.
@@ -107,6 +107,7 @@ include "%L"
 # to " ‘", for conveniently enclosing things in proper single-quotes.
 <Multi_key> <backslash> <comma>		: " "	U2009		# THIN SPACE
 <Multi_key> <s> <e> <c> : "§"   U00A7   # SECTION SIGN
+<Multi_key> <p> <p> : "¶"   U00B6   # PARAGRAPH SIGN / PILCROW
 # It's in the Asian section, but it's a general-purpose punctuation:
 <Multi_key> <quotedbl> <quotedbl>       : "〃"	U3003		# DITTO MARK
 # Working with the pattern from FLOOR/CEILING
@@ -999,6 +1000,7 @@ include "%L"
 # Music stuff.  # is the music mnemonic.
 <Multi_key> <numbersign> <b>		: "♭" U266d # MUSIC FLAT SIGN
 <Multi_key> <numbersign> <f>		: "♮" U266e # MUSIC NATURAL SIGN
+<Multi_key> <numbersign> <n>		: "♮" U266e # MUSIC NATURAL SIGN
 <Multi_key> <numbersign> <equal>	: "♮" U266e # MUSIC NATURAL SIGN
 <Multi_key> <numbersign> <numbersign>	: "♯" U266f # MUSIC SHARP SIGN
 <Multi_key> <numbersign> <G>             : "𝄞"  U0001d11e # MUSICAL SYMBOL G CLEF
@@ -1340,8 +1342,6 @@ include "%L"
 <Multi_key> <parenleft> <1> <0> <colon> <3> <0> <parenright>     : "🕥" U1F565 # CLOCK FACE TEN-THIRTY
 <Multi_key> <parenleft> <1> <1> <colon> <3> <0> <parenright>     : "🕦" U1F566 # CLOCK FACE ELEVEN-THIRTY
 <Multi_key> <parenleft> <1> <2> <colon> <3> <0> <parenright>     : "🕧" U1F567 # CLOCK FACE TWELVE-THIRTY
-# Real bitcoin symbol now.
-<Multi_key> <B> <bar> : "₿" U20BF  # BITCOIN SIGN
 
 <Multi_key> <o> <k> : "👌" # OK HAND SIGN
 <Multi_key> <+> <1> : "👍" # THUMBS UP SIGN
@@ -1364,7 +1364,7 @@ include "%L"
 <Multi_key> <3> <3> : "³"
 <Multi_key> <i> <i> : "𝕚"
 <Multi_key> <e> <x> <p> : "𝕖"
-<Multi_key> <|> <.> <.> : "⋮" # VERTICAL ELLIPSIS
+<Multi_key> <bar> <period> <period> : "⋮" # VERTICAL ELLIPSIS
 <Multi_key> <o> <c> : "℃" # DEGREES CELSIUS
 <Multi_key> <d> <c> : "℃" # DEGREES CELSIUS
 <Multi_key> <c> <o> : "©" # COPYRIGHT SYMBOL
@@ -1376,30 +1376,29 @@ include "%L"
 <Multi_key> <-> <1> : "👎" # THUMBS DOWN SIGN
 <Multi_key> <d> <n> : "👎" # THUMBS DOWN SIGN
 <Multi_key> <8> <parenright>: "😎" # CSI Yeah / Sunglasses
-<Multi_key> <.> </> : "✓" # CHECK MARK
-<Multi_key> <$> </> : "✅" # GREEN CHECK / WHITE HEAVY CHECK MARK
-<Multi_key> <$> <x> : "❌" # RED X / CROSS MARK
-<Multi_key> <^> <n> : "ⁿ" # SUPERSCRIPT N
+<Multi_key> <period> <slash> : "✓" # CHECK MARK
+<Multi_key> <dollar> <slash> : "✅" # GREEN CHECK / WHITE HEAVY CHECK MARK
+<Multi_key> <dollar> <x> : "❌" # RED X / CROSS MARK
+<Multi_key> <asciicircum> <n> : "ⁿ" # SUPERSCRIPT N
 <Multi_key> <-> <-> <space> : "–" # EN DASH
-<Multi_key> <n> <-> : "–" # EN DASH
-<Multi_key> <m> <-> : "—" # EM DASH
+<Multi_key> <n> <minus> : "–" # EN DASH
+<Multi_key> <m> <minus> : "—" # EM DASH
 <Multi_key> <#> <d> <i> <m> : "⦰" # HALF-DIMINISHED CHORD / REVERSED EMPTY SET
-<Multi_key> <$> <e> : "€" # EURO SIGN
-<Multi_key> <$> <E> : "€" # EURO SIGN
-<Multi_key> <e> <$> : "€" # EURO SIGN
-<Multi_key> <E> <$> : "€" # EURO SIGN
+<Multi_key> <dollar> <e> : "€" # EURO SIGN
+<Multi_key> <dollar> <E> : "€" # EURO SIGN
+<Multi_key> <e> <dollar> : "€" # EURO SIGN
+<Multi_key> <E> <dollar> : "€" # EURO SIGN
 
+<Multi_key> <colon> <rightparen> : "🙂" # SLIGHTLY SMILING FACE
+<Multi_key> <semicolon> <rightparent> : "😉" # WINKING FACE
+<Multi_key> <asciicircum> <_> <asciicircum> : "😁" # BEAMING FACE WITH SMILING EYES
 
-<Multi_key> <colon> <)> : "🙂" # SLIGHTLY SMILING FACE
-<Multi_key> <colon> <asciicircum> <_> <asciicircum> : "😁" # BEAMING FACE WITH SMILING EYES
-
-<Multi_key> <?> <!> : "‽" # INTERROBANG
-<Multi_key> <|> <|> : "‖" # DOUBLE VERTICAL LINE / DOUBLE VERTICAL BAR
-<Multi_key> <,> <,> : "ˌ" # MODIFIER LETTER LOW VERTICAL LINE
-<Multi_key> <'> <'> : "ˈ" # MODIFIER LETTER [HIGH] VERTICAL LINE
+<Multi_key> <bar> <bar> : "‖" # DOUBLE VERTICAL LINE / DOUBLE VERTICAL BAR
+<Multi_key> <comma> <comma> : "ˌ" # MODIFIER LETTER LOW VERTICAL LINE
+<Multi_key> <apostrophe> <apostrophe> : "ˈ" # MODIFIER LETTER [HIGH] VERTICAL LINE
 <Multi_key> <colon> <colon> : "ː" # MODIFIER LETTER TRIANGULAR COLON
 <Multi_key> <o> <u> : "ʊ" # LATIN SMALL LETTER UPSILON
-<Multi_key> <:> <e> : "ɜ" # TURNED ɛ
+<Multi_key> <colon> <e> : "ɜ" # TURNED ɛ
 
 <Multi_key> <1> <0> <0> : "💯" # 100 emoji / perfect / 100%
 <Multi_key> <6> <9> : "♋" # Nice
@@ -1412,7 +1411,9 @@ include "%L"
 <Multi_key> <w> <w> : "ω" # GREEK SMALL LETTER OMEGA
 <Multi_key> <W> <W> : "Ω" # GREEK CAPITAL LETTER OMEGA
 <Multi_key> <p> <d> : "∂" # Partial derivative / differential
-<Multi_key> </> <s>: "😏" # Smirk / Sarcasm
+<Multi_key> <slash> <s>: "😏" # Smirk / Sarcasm
+<Multi_key> <colon> <slash>: "🫤" # :/
+<Multi_key> <colon> <backslash>: "🫤" # :\
 <Multi_key> <Multi_key> <g> <r> <a> <d>: "∇" # Nabla / Gradient
 <Multi_key> <Multi_key> <b> <o> <l> <t>: "🗲" # Lightning Bolt / AC🗲DC
 <Multi_key> <Multi_key> <a> <c> <d> <c>: "🗲" # Lightning Bolt / AC🗲DC
