@@ -10,8 +10,4 @@ function ack {
   command ack "$@" $test_flag
 }
 
-function getack {
-  echo 'Downloading ack...'
-  curl https://beyondgrep.com/ack-v3.5.0 > ~/bin/ack
-  chmod 0755 ~/bin/ack
-}
+# `getack` deleted for being inherently unsafe.
