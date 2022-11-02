@@ -5,7 +5,6 @@ if [[ $- == *i* ]] ; then
   alias br='/google/src/head/depot/google3/devtools/blaze/scripts/blaze-run.sh'
   alias cov='blaze coverage'
   alias ib='iblaze build'
-  alias iblaze=/google/data/ro/teams/iblaze/iblaze
   alias icov='iblaze coverage'
   alias ir='iblaze run'
   alias it='iblaze test'

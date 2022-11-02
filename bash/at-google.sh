@@ -15,6 +15,8 @@ alias sgcl='gcl --model=/home/build/google3/production/borg/devtools-sandman/lib
 alias writeme=/google/data/ro/teams/writeme/writeme
 alias spool='/google/data/ro/teams/spool/spool_client_mpm/live/spool.par'
 alias onborg='/google/data/ro/projects/smartass/onborg'
+alias rudi-cli='/google/data/ro/teams/lsc/bin/rudi-cli'
+
 source ~/homedir/bash/g4s.sh
 
 function lastlog {
