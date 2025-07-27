@@ -1,32 +1,31 @@
-# IBlaze aliases and completions
+# IBazel aliases and completions
 if [[ $- == *i* ]] ; then
-  alias b='blaze build'
+  alias b='bazel build'
   alias bc=build_cleaner
-  alias br='/google/src/head/depot/google3/devtools/blaze/scripts/blaze-run.sh'
-  alias cov='blaze coverage'
-  alias ib='iblaze build'
-  alias icov='iblaze coverage'
-  alias ir='iblaze run'
-  alias it='iblaze test'
-  alias r='blaze run'
-  alias t='blaze test'
+  alias cov='bazel coverage'
+  alias ib='ibazel build'
+  alias icov='ibazel coverage'
+  alias ir='ibazel run'
+  alias it='ibazel test'
+  alias r='bazel run'
+  alias t='bazel test'
 
-  complete -F _blaze::complete_build_target_wrapper -o nospace b
-  complete -F _blaze::complete_build_target_wrapper -o nospace bc
-  complete -F _blaze::complete_build_target_wrapper -o nospace br
-  complete -F _blaze::complete_build_target_wrapper -o nospace ib
-  complete -F _blaze::complete_test_target_wrapper -o nospace t
-  complete -F _blaze::complete_test_target_wrapper -o nospace it
+  complete -F _bazel::complete_build_target_wrapper -o nospace b
+  complete -F _bazel::complete_build_target_wrapper -o nospace bc
+  complete -F _bazel::complete_build_target_wrapper -o nospace br
+  complete -F _bazel::complete_build_target_wrapper -o nospace ib
+  complete -F _bazel::complete_test_target_wrapper -o nospace t
+  complete -F _bazel::complete_test_target_wrapper -o nospace it
 
-  _blaze::complete_run_target_wrapper() {
-    _blaze::complete_target_wrapper "run"
+  _bazel::complete_run_target_wrapper() {
+    _bazel::complete_target_wrapper "run"
   }
-  complete -F _blaze::complete_run_target_wrapper -o nospace r
-  complete -F _blaze::complete_run_target_wrapper -o nospace ir
+  complete -F _bazel::complete_run_target_wrapper -o nospace r
+  complete -F _bazel::complete_run_target_wrapper -o nospace ir
 
-  _blaze::complete_coverage_target_wrapper() {
-    _blaze::complete_target_wrapper "coverage"
+  _bazel::complete_coverage_target_wrapper() {
+    _bazel::complete_target_wrapper "coverage"
   }
-  complete -F _blaze::complete_coverage_target_wrapper -o nospace cov
-  complete -F _blaze::complete_coverage_target_wrapper -o nospace icov
+  complete -F _bazel::complete_coverage_target_wrapper -o nospace cov
+  complete -F _bazel::complete_coverage_target_wrapper -o nospace icov
 fi
