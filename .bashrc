@@ -21,28 +21,22 @@ export P4DIFF='git diff'
 
 alias sl=ls
 alias d="date +'%a %d %b %Y %H:%M:%S %Z'"
-alias c="gcal --with-week-number --starting-day=monday --iso-week-number=yes .; d"
+alias c="gcal --with-week-number --starting-day=monday --iso-week-number=yes -i- .; d"
 alias ls='ls --color=auto -B'
 alias ll="ls -ltr"
 alias lla="ll -A"
 alias la="ls -A"
 alias locate='locate -i'
-alias sha3='rhash --sha3-224'
 alias m='mathematica 2> /dev/null &'
-alias ipython=ipython3
 alias roll=rolldice
 alias python=python3
 alias u="date --utc '+%s ; %a %d %b %Y %T'"
-alias pa=gcert
 
 alias odb='java -jar /home/chris/bin/ODB.jar'
 alias serve='python -m http.server'
-alias math='rlwrap math'
 alias emacs="$VISUAL 2> /dev/null"
 alias inkscape='inkscape 2> /dev/null'
 alias z3py='workon z3; ipython -i -c "from z3 import *"'
-alias dbg='/google/data/ro/teams/ads-test-debugger/@dbg'
-alias pyfactor=/google/data/ro/teams/youtube-code-health/pyfactor
 alias pipup='pip install --upgrade pip'
 alias ipy="python -c 'import IPython; IPython.terminal.ipapp.launch_new_instance()'"
 
@@ -50,7 +44,6 @@ alias ipy="python -c 'import IPython; IPython.terminal.ipapp.launch_new_instance
 if [[ $- == *i* ]] ; then
   [ -f /etc/bash_completion ] && source /etc/bash_completion
   source ~/homedir/bash/ack.sh
-  source ~/homedir/bash/at-google.sh
   source ~/homedir/bash/git.sh
   source ~/homedir/bash/iblaze.sh
   source ~/homedir/bash/iwatch.sh
