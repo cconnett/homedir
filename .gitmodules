@@ -1,0 +1,3 @@
+[submodule "highlight-symbol.el"]
+  path = .emacs.d/site-lisp/highlight-symbol.el
+  url = git@github.com:nschum/highlight-symbol.el.git
