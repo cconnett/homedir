@@ -45,22 +45,11 @@
 (require 'ivy)
 (require 'highlight-symbol)
 (require 'column-marker)
-(require 'srefactor)
+;(require 'srefactor)
 (require 'clang-format)
 
-;; Home only
-(unless at-google
-  (autoload 'python-mode "python-mode" "Python Mode."
-    t))
-;; Google only
-(when at-google
-  (load-file "/usr/share/emacs/site-lisp/emacs-google-config/devtools/editors/emacs/google.el")
-  (require 'google)
-  (require 'google-coding-style)
-  (require 'google-cc-extras)
-  (require 'google-pyformat)
-  (google-cc-extras/bind-default-keys)
-  (setq create-lockfiles nil))
+(autoload 'python-mode "python-mode" "Python Mode."
+    t)
 
 ;; Machine formatting
 (defun clang-format-file ()
@@ -70,7 +59,7 @@
                        (point-max)
                        "file"))
 
-(defun local-google-pyformat ()
+(defun local-python-black ()
   (interactive)
   (let* ((new-file-name (make-temp-file "emacs"))
          (get-changed-lines-command (concat "diff -U0 " buffer-file-name " " new-file-name
@@ -94,10 +83,10 @@
         (reformat-file formatter-command "yapf" ".py")
         (delete-file new-file-name)))))
 
-(defun google-pyformat-all ()
+(defun python-black-all ()
   (interactive)
-  (reformat-file (concat "/usr/local/bin/yapf " pyformat-args)
-                 "pyformat"
+  (reformat-file (concat "black " pyformat-args)
+                 "black"
                  ".py"))
 
 (defun google-buildifer ()
@@ -105,36 +94,17 @@
   (interactive)
   (reformat-file "/usr/bin/buildifier" "buildifier"
                  ".bzl"))
-(defun google-mdformat ()
-  "Run http://go/mdformat on the current file."
-  (interactive)
-  (reformat-file "/google/data/ro/teams/g3doc/mdformat --in_place"
-                 "mdformat" ".md"))
-(defun google-sqlformat ()
-  "Run http://go/googlesql_format on the current file."
-  (interactive)
-  (reformat-file "~/bin/sqlfmtwrapper" "googlesql"
-                 ".sql"))
-(defun google-gclfmt ()
-  "Run http://go/gclfmt on the current file."
-  (interactive)
-  (reformat-file "/usr/bin/gclfmt -w" "gcl"
-                 ".gcl"))
-(defun google-nclfmt ()
-  "Run http://go/nclfmt on the current file."
-  (interactive)
-  (reformat-file "/usr/bin/nclfmt --in_place"
-                 "ncl" ".ncl"))
+;(defun google-mdformat ()
+;  "Run http://go/mdformat on the current file."
+;  (interactive)
+;  (reformat-file "/google/data/ro/teams/g3doc/mdformat --in_place"
+;                 "mdformat" ".md"))
 (defun lispfmt ()
   "Run lispfmt.el on the current file."
   (interactive)
   (reformat-file (expand-file-name "~/bin/lispfmt.el")
                  "lispfmt"
                  "el"))
-(defun google-fpbfmt ()
-  "Run protoprint on the current file."
-  (interactive)
-  (reformat-file "/usr/bin/fpb" "fpb" "textproto"))
 (defun hsfmt ()
   "Run hindent on the current file."
   (interactive)
@@ -176,9 +146,7 @@
      ((memq major-mode
             '(c-mode c++-mode js-mode js2-mode protobuf-mode
                      typescript-mode))
-      (if at-google
-          (clang-format-file)
-        (clang-format-file)))
+      (clang-format-file))
      ((memq major-mode
             '(json-mode))
       (json-mode-beautify))
@@ -190,22 +158,10 @@
      ;;  (google-fpbfmt))
      ((memq major-mode
             '(python-mode))
-      (google-pyformat-all))
-     ((memq major-mode
-            '(skylark-mode))
-      (google-buildifier))
+      (python-black-all))
      ((memq major-mode
             '(markdown-mode))
       (google-mdformat))
-     ((memq major-mode
-            '(sql-mode))
-      (google-sqlformat))
-     ((memq major-mode
-            '(gcl-mode borg-mode))
-      (google-gclfmt))
-     ((memq major-mode
-            '(ncl-mode))
-      (google-nclfmt))
      ((memq major-mode
             '(haskell-mode))
       (hsfmt))
@@ -349,7 +305,7 @@
 (global-set-key [f9]
                 'format-mode-format-file)
 (global-set-key [(control f9)]
-                'google-pyformat-all)
+                'python-black-all)
 
 (global-set-key (kbd "M-p")
                 (lambda ()
