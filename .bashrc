@@ -50,9 +50,16 @@ if [[ $- == *i* ]] ; then
   source ~/homedir/bash/virtualenv.sh
 fi
 
-if [[ $- == *i* ]] ; then
-  { eval `ssh-agent` } &>/dev/null
+if [[ $- == *i* ]]; then
+  { eval `ssh-agent`; } &> /dev/null
 fi
+
+function pointed-dir {
+  echo "$PWD" | \
+    sed -e "s!$HOME!~!" | \
+    #perl -pe 's!/mnt/(.)!\1:!' | \
+    cat
+}
 
 function prompt_command {
   #history -a  ~/.bash_history
