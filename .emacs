@@ -33,6 +33,7 @@
                 'stopwatch-region)
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
+(add-to-list 'load-path "~/.emacs.d/site-lisp/highlight-symbol.el/")
 (add-to-list 'load-path "~/.emacs.d/elpa/")
 
 (defvar at-google (string-suffix-p system-name "corp.google.com")
