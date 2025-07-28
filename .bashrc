@@ -50,6 +50,10 @@ if [[ $- == *i* ]] ; then
   source ~/homedir/bash/virtualenv.sh
 fi
 
+if [[ $- == *i* ]] ; then
+  { eval `ssh-agent` } &>/dev/null
+fi
+
 function prompt_command {
   #history -a  ~/.bash_history
   PS1=""
