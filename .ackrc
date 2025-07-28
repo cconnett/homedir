@@ -1,13 +1,12 @@
---type-set=gcl:ext:gcl,borg,borg_template
---type-set=ncl:ext:ncl
 --type-set=test:match:/_test\b/
 --type-set=build:match:/\bBUILD\b/
 --type-set=doc:ext:md
 --type-set=md:ext:md
 --type-set=svg:ext:svg
---type-set=itcnf:ext:itcnf
 --type-set=bzl:ext:bzl
 --type-set=proto:ext:proto,textpb,asciipb,textproto,asciiproto
+--type-set=log:ext:log
+--notest
 --nosvg
+--nolog
 --smart-case
---ignore-dir=devtools/sandman/deprecated
