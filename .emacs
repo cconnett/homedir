@@ -4,174 +4,77 @@
 (setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")))
 (setq text-quoting-style 'straight)
-
-(defun string-suffix-p (str1 str2 &optional ignore-case)
-  "Python: STR1.endswith(STR2).  IGNORE-CASE passed through."
-  (let ((begin1 (- (length str1)
-                   (length str2)))
-        (end1 (length str1)))
-    (when (< begin1 0)
-      (setq begin1 0))
-    (eq t (compare-strings str2 nil nil str1 begin1
-                           end1 ignore-case))))
-
-(defun stopwatch-region ()
-  "Enclose the region in stopwatch timing commands."
-  (interactive)
-  (let ((name (read-string "description: ")))
-    (save-excursion
-      (move-beginning-of-line nil)
-      (indent-for-tab-command)
-      (insert (format "sw.stop('%s')" name))
-      (newline-and-indent)
-      (exchange-point-and-mark)
-      (move-beginning-of-line nil)
-      (indent-for-tab-command)
-      (insert (format "sw.start('%s')\n" name))
-      (indent-for-tab-command))))
-(global-set-key (kbd "C-c n")
-                'stopwatch-region)
+(setq ring-bell-function 'ignore)
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path "~/.emacs.d/site-lisp/highlight-symbol.el/")
 (add-to-list 'load-path "~/.emacs.d/elpa/")
 
-(defvar at-google (string-suffix-p system-name "corp.google.com")
-  "Whether the current machine is a Google corp workstation.")
-
-;; Requires
-(require 'pp)
 (require 'font-lock)
 (require 'ivy)
 (require 'highlight-symbol)
 (require 'column-marker)
-;(require 'srefactor)
-(require 'clang-format)
-
-(autoload 'python-mode "python-mode" "Python Mode."
-    t)
+(require 'flymake)
+(require 'apheleia)
+(require 'python-mode)
+(require 'cc-mode)
 
 ;; Machine formatting
-(defun clang-format-file ()
-  "Format the whole buffer with clang."
-  (interactive)
-  (clang-format-region (point-min)
-                       (point-max)
-                       "file"))
 
-(defun local-python-black ()
-  (interactive)
-  (let* ((new-file-name (make-temp-file "emacs"))
-         (get-changed-lines-command (concat "diff -U0 " buffer-file-name " " new-file-name
-                                            " | grep @@ | " " cut -d' ' -f3 | " " perl -n -e '/[+]+(\\d+)(?:,(\\d+))?/; "
-                                            "print \"-l \" . $1 . \"-\" . ($1+$2) . \" \"'"))
-         (lines (progn
-                  (append-to-file nil nil new-file-name)
-                  (if (file-exists-p buffer-file-name)
-                      (shell-command-to-string get-changed-lines-command)
-                    "")))
-         (formatter-command (concat "python3 -m yapf -i " pyformat-args
-                                    " " lines)))
-    (message "%s" formatter-command)
-    (if (and (zerop (length lines))
-             (file-exists-p buffer-file-name))
-        (message "No changes. Skipping formatting.")
-      (progn
-        (if (zerop (length lines))
-            (message "Formatting entire file.")
-          (message "Formatting lines %s" lines))
-        (reformat-file formatter-command "yapf" ".py")
-        (delete-file new-file-name)))))
+;; (defun save-buffer-without-format ()
+;;   (interactive)
+;;   (let ((b (current-buffer)))
+;;     (with-temp-file (format "/tmp/%s"
+;;                             (buffer-name b))
+;;       (let ((before-save-hook (remove #'format-mode-format-file before-save-hook)))
+;;         (with-current-buffer b
+;;           (let ((before-save-hook (remove #'format-mode-format-file before-save-hook)))
+;;             (save-buffer)))))))
 
-(defun python-black-all ()
-  (interactive)
-  (reformat-file (concat "black " pyformat-args)
-                 "black"
-                 ".py"))
+;; (define-minor-mode format-mode
+;;   "Machine format the buffer before saving."
+;;   :lighter " Format"
+;;   (unless (member 'format-mode-format-file before-save-hook)
+;;     (add-hook 'before-save-hook #'format-mode-format-file)))
 
-(defun google-buildifer ()
-  "Run buildifier on the current file."
-  (interactive)
-  (reformat-file "/usr/bin/buildifier" "buildifier"
-                 ".bzl"))
-;(defun google-mdformat ()
-;  "Run http://go/mdformat on the current file."
-;  (interactive)
-;  (reformat-file "/google/data/ro/teams/g3doc/mdformat --in_place"
-;                 "mdformat" ".md"))
-(defun lispfmt ()
-  "Run lispfmt.el on the current file."
-  (interactive)
-  (reformat-file (expand-file-name "~/bin/lispfmt.el")
-                 "lispfmt"
-                 "el"))
-(defun hsfmt ()
-  "Run hindent on the current file."
-  (interactive)
-  (reformat-file (expand-file-name "~/bin/hindent --sort-imports --line-length 80 --indent-size 2")
-                 "hs"
-                 ".hs"))
-(defun htmlfmt ()
-  "Run tidy on the current file."
-  (interactive)
-  (reformat-file (expand-file-name "/usr/bin/tidy -q --doctype omit")
-                 "html"
-                 ".html"))
+;; (global-set-key [f12]
+;;                 #'format-mode)
 
-(defun save-buffer-without-format ()
-  (interactive)
-  (let ((b (current-buffer)))
-    (with-temp-file (format "/tmp/%s"
-                            (buffer-name b))
-      (let ((before-save-hook (remove #'format-mode-format-file before-save-hook)))
-        (with-current-buffer b
-          (let ((before-save-hook (remove #'format-mode-format-file before-save-hook)))
-            (save-buffer)))))))
-
-(define-minor-mode format-mode
-  "Machine format the buffer before saving."
-  :lighter " Format"
-  (unless (member 'format-mode-format-file before-save-hook)
-    (add-hook 'before-save-hook #'format-mode-format-file)))
-
-(global-set-key [f12]
-                #'format-mode)
-
-(defun format-mode-format-file ()
-  "Format the current buffer with a machine formatter for the major mode."
-  (interactive)
-  (when (symbol-value 'format-mode)
-    (message "Machine formatting for %s" major-mode)
-    (cond
-     ((memq major-mode
-            '(c-mode c++-mode js-mode js2-mode protobuf-mode
-                     typescript-mode))
-      (clang-format-file))
-     ((memq major-mode
-            '(json-mode))
-      (json-mode-beautify))
-     ;; ((memq major-mode
-     ;;        '(typescript-mode))
-     ;;  (tide-format-before-save))
-     ;; ((memq major-mode
-     ;;        '(protobuffer-mode))
-     ;;  (google-fpbfmt))
-     ((memq major-mode
-            '(python-mode))
-      (python-black-all))
-     ((memq major-mode
-            '(markdown-mode))
-      (google-mdformat))
-     ((memq major-mode
-            '(haskell-mode))
-      (hsfmt))
-     ((memq major-mode
-            '(emacs-lisp-mode lisp-mode z3-mode z3-smt2-mode))
-      (lispfmt))
-     ;; ((memq major-mode
-     ;;        '(html-mode))
-     ;;  (htmlfmt))
-     (t (message "No formatter found for %s" major-mode)))))
+;; (defun format-mode-format-file ()
+;;   "Format the current buffer with a machine formatter for the major mode."
+;;   (interactive)
+;;   (when (symbol-value 'format-mode)
+;;     (message "Machine formatting for %s" major-mode)
+;;     (cond
+;;      ((memq major-mode
+;;             '(c-mode c++-mode js-mode js2-mode protobuf-mode
+;;                      typescript-mode))
+;;       (clang-format-file))
+;;      ((memq major-mode
+;;             '(json-mode))
+;;       (json-mode-beautify))
+;;      ;; ((memq major-mode
+;;      ;;        '(typescript-mode))
+;;      ;;  (tide-format-before-save))
+;;      ;; ((memq major-mode
+;;      ;;        '(protobuffer-mode))
+;;      ;;  (google-fpbfmt))
+;;      ((memq major-mode
+;;             '(python-mode))
+;;       (python-black-all))
+;;      ((memq major-mode
+;;             '(markdown-mode))
+;;       (google-mdformat))
+;;      ((memq major-mode
+;;             '(haskell-mode))
+;;       (hsfmt))
+;;      ((memq major-mode
+;;             '(emacs-lisp-mode lisp-mode z3-mode z3-smt2-mode))
+;;       (lispfmt))
+;;      ;; ((memq major-mode
+;;      ;;        '(html-mode))
+;;      ;;  (htmlfmt))
+;;      (t (message "No formatter found for %s" major-mode)))))
 
 ;; Auto-save files go in system temp.
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
@@ -203,7 +106,7 @@
 (setq shift-select-mode nil)
 (setq-default show-trailing-whitespace t)
 (setq-default truncate-lines t)
-(setq-default fill-column (if at-google 80 72))
+(setq-default fill-column 80)
 (setq-default resize-mini-windows nil)
 (set-face-background 'column-marker-1 "magenta")
 (add-hook 'find-file-hook
@@ -230,12 +133,12 @@
                   (save-buffers-kill-emacs)))
 (global-set-key (kbd "C-c SPC")
                 'just-one-space)
+(global-set-key (kbd "M-SPC")
+                'just-one-space)
 (global-set-key (kbd "C-c TAB")
                 'tab-to-tab-stop)
 (global-set-key (kbd "C-c i")
                 'insert-date-string)
-(global-set-key (kbd "C-c d")
-                'insert-pydebug-string)
 (global-set-key (kbd "C-c s")
                 'sort-lines)
 (bind-key* "C-c C-s" 'sort-lines)
@@ -262,13 +165,13 @@
 (global-set-key (kbd "C-x C-i")
                 'insert-char)
 ;; These don't work in -nw mode.
-(global-set-key (kbd "s-j")
+(global-set-key (kbd "M-j")
                 'next-line)
-(global-set-key (kbd "s-k")
+(global-set-key (kbd "M-k")
                 'previous-line)
-(global-set-key (kbd "s-h")
+(global-set-key (kbd "M-h")
                 'backward-char)
-(global-set-key (kbd "s-l")
+(global-set-key (kbd "M-l")
                 'forward-char)
 ;; N.B.: Emacs cannot distinguish between these two in -nw mode
 (global-set-key (kbd "C-S-o")
@@ -281,8 +184,6 @@
 (global-set-key [(meta f3)]
                 'highlight-symbol-prev)
 (global-set-key [(shift f3)]
-                'highlight-symbol-prev)
-(global-set-key [f15]
                 'highlight-symbol-prev)
 (global-set-key [(meta f2)]
                 'highlight-symbol-prev-force)
@@ -298,6 +199,14 @@
                 'scroll-down)
 (global-set-key [mouse-5]
                 'scroll-up)
+(global-set-key [mouse-8]
+                'pop-to-mark-command)
+(global-set-key [mouse-9]
+                'unpop-to-mark-command)
+(global-set-key (kbd "M-<left>")
+                'pop-to-mark-command)
+(global-set-key (kbd "M-<right>")
+                'unpop-to-mark-command)
 (global-set-key [vertical-scroll-bar down-mouse-1]
                 'scroll-bar-drag)
 (global-set-key [vertical-scroll-bar drag-mouse-1]
@@ -307,29 +216,28 @@
 (global-set-key [(control f9)]
                 'python-black-all)
 
-(global-set-key (kbd "M-p")
-                (lambda ()
-                  (interactive)
-                  (flymake-goto-prev-error)
-                  (let ((err-info (flymake-find-err-info flymake-err-info
-                                                         (line-number-at-pos))))
-                    (if (car err-info)
-                        (message "%s"
-                                 (flymake-ler-text (caar err-info)))
-                      (message "No lint errors.")))))
-(global-set-key (kbd "M-n")
-                (lambda ()
-                  (interactive)
-                  (flymake-goto-next-error)
-                  (let ((err-info (flymake-find-err-info flymake-err-info
-                                                         (line-number-at-pos))))
-                    (if (car err-info)
-                        (message "%s"
-                                 (flymake-ler-text (caar err-info)))
-                      (message "No lint errors.")))))
+;; (global-set-key (kbd "M-p")
+;;                 (lambda ()
+;;                   (interactive)
+;;                   (flymake-goto-prev-error)
+;;                   (let ((err-info (flymake-find-err-info flymake-err-info
+;;                                                          (line-number-at-pos))))
+;;                     (if (car err-info)
+;;                         (message "%s"
+;;                                  (flymake-ler-text (caar err-info)))
+;;                       (message "No lint errors.")))))
+;; (global-set-key (kbd "M-n")
+;;                 (lambda ()
+;;                   (interactive)
+;;                   (flymake-goto-next-error)
+;;                   (let ((err-info (flymake-find-err-info flymake-err-info
+;;                                                          (line-number-at-pos))))
+;;                     (if (car err-info)
+;;                         (message "%s"
+;;                                  (flymake-ler-text (caar err-info)))
+;;                       (message "No lint errors.")))))
 
 (global-unset-key (kbd "<insert>"))
-;; (global-unset-key [f2])
 (global-set-key (kbd "C-z")
                 'undo)
 (global-unset-key [(control x)
@@ -342,6 +250,9 @@
 (add-hook 'org-shiftleft-final-hook 'windmove-left)
 (add-hook 'org-shiftdown-final-hook 'windmove-down)
 (add-hook 'org-shiftright-final-hook 'windmove-right)
+
+(global-set-key (kbd "C-<next>") 'next-window-any-frame)
+(global-set-key (kbd "C-<prior>") 'previous-window-any-frame)
 
 ;; Python font faces
 (make-face 'py-comment-face)
@@ -363,7 +274,12 @@
             (set (make-local-variable 'font-lock-keyword-face)
                  'py-keyword-face)
             (set-face-foreground 'py-pseudo-keyword-face
-                                 "dodger blue")))
+                                 "dodger blue")
+            (bind-key* "C-<backspace>" 'backward-kill-word)
+            (bind-key* "<del>" 'delete-forward-char)
+
+            )
+          )
 
 (add-hook 'sh-mode-hook
           (lambda ()
@@ -376,8 +292,18 @@
 
 (add-hook 'latex-mode-hook 'll-mode)
 (add-hook 'bibtex-mode-hook
-          '(lambda ()
-             (menu-bar-mode 1)))
+          (lambda ()
+            (menu-bar-mode 1)))
+
+(defun unpop-to-mark-command ()
+  "Unpop off mark ring. Does nothing if mark ring is empty."
+  (interactive)
+  (when mark-ring
+    (setq mark-ring (cons (copy-marker (mark-marker)) mark-ring))
+    (set-marker (mark-marker) (car (last mark-ring)) (current-buffer))
+    (when (null (mark t)) (ding))
+    (setq mark-ring (nbutlast mark-ring))
+    (goto-char (marker-position (car (last mark-ring))))))
 
 (setq frame-title-format '("%b - " "emacs@" system-name))
 (setq-default font-lock-use-fonts t)
@@ -387,26 +313,20 @@
 (setq-default scroll-preserve-screen-position
               t)
 (setq-default indent-tabs-mode nil)
-(setq-default format-mode t)
+                                        ;(setq-default format-mode t)
+(apheleia-global-mode +1)
 (setq-default default-major-mode 'text-mode)
-(setq-default js-indent-level 2)
-;;(setq default-major-mode 'org-mode)
 
 (setq interpreter-mode-alist (cons '("python" . python-mode) interpreter-mode-alist))
 
-(setq auto-mode-alist (append '(("TODO$" . org-mode)
-                                ("Tupfile$" . makefile-mode)
-                                ("\\.C$" . c++-mode)
+(setq auto-mode-alist (append '(("\\.C$" . c++-mode)
                                 ("\\.ino$" . c++-mode)
                                 ("\\.PY$" . python-mode)
                                 ("\\.[hg]s$" . haskell-mode)
                                 ("\\.c$" . c-mode)
                                 ("\\.cc$" . c++-mode)
-                                ("\\.clif$" . c++-mode)
                                 ("\\.css$" . css-mode)
-                                ("\\.gss$" . css-mode)
                                 ("BUILD$" . bazel-mode)
-                                ("\\.gcl$" . borg-mode)
                                 ("\\.h$" . c++-mode)
                                 ("\\.hh$" . c++-mode)
                                 ("\\.hi$" . haskell-mode)
@@ -417,35 +337,122 @@
                                 ("\\.md$" . markdown-mode)
                                 ("\\.model$" . borg-mode)
                                 ("\\.ng$" . html-mode)
-                                ("\\.org$" . org-mode)
                                 ("\\.pl$" . perl-mode)
                                 ("\\.pp$" . c++-mode)
                                 ("\\.pro$" . prolog-mode)
                                 ("\\.py$" . python-mode)
-                                ("\\.pyx$" . python-mode)
                                 ("\\.smt$" . z3-mode)
-                                ("\\.sp$" . sourcepawn-mode)
                                 ("\\.tex$" . latex-mode)
-                                ("\\.tpl$" . html-mode)
                                 ("\\.txt$" . text-mode)
-                                ("generated_Tupdeps$" . makefile-mode)
-                                ("todo$" . org-mode))
+                                )
                               auto-mode-alist))
-
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(apheleia-mode-alist
+   '((asm-mode . asmfmt)
+     (awk-mode . gawk)
+     (bash-ts-mode . shfmt)
+     (bazel-mode . buildifier)
+     (beancount-mode . bean-format)
+     (c++-ts-mode . clang-format)
+     (caddyfile-mode . caddyfmt)
+     (cc-mode . clang-format)
+     (c-mode . clang-format)
+     (c-ts-mode . clang-format)
+     (c++-mode . clang-format)
+     (caml-mode . ocamlformat)
+     (clojure-mode . cljfmt)
+     (clojure-ts-mode . cljfmt)
+     (cmake-mode . cmake-format)
+     (cmake-ts-mode . cmake-format)
+     (common-lisp-mode . lisp-indent)
+     (conf-toml-mode . dprint)
+     (cperl-mode . perltidy)
+     (crystal-mode . crystal-tool-format)
+     (csharp-mode . csharpier)
+     (css-mode . prettier-css)
+     (css-ts-mode . prettier-css)
+     (dart-mode . dart-format)
+     (dart-ts-mode . dart-format)
+     (dockerfile-mode . dprint)
+     (elixir-mode . mix-format)
+     (elixir-ts-mode . mix-format)
+     (elm-mode . elm-format)
+     (emacs-lisp-mode . lisp-indent)
+     (fish-mode . fish-indent)
+     (gdscript-mode . gdformat)
+     (gdscript-ts-mode . gdformat)
+     (gleam-ts-mode . gleam)
+     (go-mode . gofmt)
+     (go-ts-mode . gofmt)
+     (graphql-mode . prettier-graphql)
+     (haskell-mode . fourmolu)
+     (haskell-ts-mode . fourmolu)
+     (hcl-mode . hclfmt)
+     (html-mode . prettier-html)
+     (html-ts-mode . prettier-html)
+     (hurl-mode . hurlfmt)
+     (java-mode . google-java-format)
+     (java-ts-mode . google-java-format)
+     (jinja2-mode)
+     (js3-mode . prettier-javascript)
+     (js-json-mode . prettier-json)
+     (js-mode . prettier-javascript)
+     (js-ts-mode . prettier-javascript)
+     (json-mode . prettier-json)
+     (json-ts-mode . prettier-json)
+     (kotlin-mode . ktlint)
+     (kotlin-ts-mode . ktlint)
+     (latex-mode . latexindent)
+     (LaTeX-mode . latexindent)
+     (lua-mode . stylua)
+     (lua-ts-mode . stylua)
+     (lisp-mode . lisp-indent)
+     (nasm-mode . asmfmt)
+     (nix-mode . nixfmt)
+     (nix-ts-mode . nixfmt)
+     (nomad-mode . nomad)
+     (perl-mode . perltidy)
+     (php-mode . phpcs)
+     (purescript-mode . purs-tidy)
+     (python-mode isort black)
+     (python-ts-mode . black)
+     (robot-mode . robotidy)
+     (ruby-mode . prettier-ruby)
+     (ruby-ts-mode . prettier-ruby)
+     (rustic-mode . rustfmt)
+     (rust-mode . rustfmt)
+     (rust-ts-mode . rustfmt)
+     (snakemake-mode . snakefmt)
+     (scss-mode . prettier-scss)
+     (sql-mode . pgformatter)
+     (svelte-mode . prettier-svelte)
+     (terraform-mode . terraform)
+     (TeX-latex-mode . latexindent)
+     (TeX-mode . latexindent)
+     (toml-ts-mode . taplo)
+     (tsx-ts-mode . prettier-typescript)
+     (tuareg-mode . ocamlformat)
+     (typescript-mode . prettier-typescript)
+     (typescript-ts-mode . prettier-typescript)
+     (typst-mode . typstyle)
+     (typst-ts-mode . typstyle)
+     (v-mode . vfmt)
+     (web-mode . prettier)
+     (yaml-mode . prettier-yaml)
+     (yaml-ts-mode . prettier-yaml)
+     (yang-mode . pyang)
+     (zig-mode . zig-fmt)
+     (zig-ts-mode . zig-fmt)))
  '(auto-hscroll-mode t)
- '(c-basic-offset 2)
- '(clang-format-executable "~/bin/clang-format")
- '(clang-format-style "google")
- '(css-indent-offset 2)
+ '(c-basic-offset 4)
+ '(css-indent-offset 4)
  '(desktop-save-mode t)
  '(flymake-info-line-regexp ":[RC]:")
- '(flymake-jslint-command "~/bin/myjslint")
  '(flymake-jslint-detect-trailing-comma nil)
  '(flymake-warn-line-regexp ":W:")
  '(flyspell-issue-welcome-flag nil)
@@ -455,31 +462,19 @@
  '(ido-default-file-method 'selected-window)
  '(ilisp-*use-fsf-compliant-keybindings* t)
  '(inferior-lisp-program "/usr/bin/sbcl --noinform")
- '(js-indent-level 2)
- '(js2-auto-indent-flag nil)
- '(js2-basic-offset 2)
- '(js2-global-externs '("chrome" "angular" "require" "setTimeout"))
- '(js2-highlight-level 3)
- '(js2-include-node-externs t)
- '(js2-mirror-mode t)
- '(js2-mode-escape-quotes nil)
- '(js2-strict-trailing-comma-warning nil)
  '(lisp-indent-fuction 'common-lisp-indent-function)
  '(markdown-enable-math t)
  '(mouse-yank-at-point t)
- '(org-support-shift-select nil)
- '(package-selected-packages '(haskell-mode boogie-friends z3-mode flx php-mode
-                                            swiper srefactor json-mode js2-mode))
- '(py-continuation-offset 2)
- '(py-indent-offset 2 t)
+ '(package-selected-packages
+   '(python-mode eldoc flycheck ivy flycheck-pycheckers flymake apheleia haskell-mode z3-mode json-mode))
+ '(py-continuation-offset 4)
+ '(py-indent-offset 4)
  '(py-smart-indentation nil)
- '(pyformat-args "-i " t)
- '(safe-local-variable-values '((encoding . utf-8)
-                                (Encoding . utf-8)))
- '(sgml-basic-offset 2)
- '(sh-basic-offset 2)
- '(standard-indent 2)
- '(typescript-indent-level 2)
+ '(safe-local-variable-values '((encoding . utf-8) (Encoding . utf-8)))
+ '(sgml-basic-offset 4)
+ '(sh-basic-offset 4)
+ '(standard-indent 4)
+ '(typescript-indent-level 4)
  '(vc-follow-symlinks t))
 
 ;; Insertion of Dates.
@@ -487,11 +482,6 @@
   "Insert a nicely formated date string."
   (interactive)
   (insert (format-time-string "%Y-%m-%d %H:%M %Z")))
-
-(defun insert-pydebug-string ()
-  "Insert a python debugger statement."
-  (interactive)
-  (insert "import IPython; IPython.embed()"))
 
 (defun intelligent-close ()
   "Quit a frame the same way no matter what kind of frame you are on."
@@ -518,26 +508,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil
-                         :background "white"
-                         :foreground "black"
-                         :inverse-video nil
-                         :box nil
-                         :strike-through nil
-                         :overline nil
-                         :underline nil
-                         :slant normal
-                         :weight normal
-                         :height 90
-                         :width normal
-                         :foundry "unknown"
-                         :family "DejaVu Sans Mono"))))
- '(flymake-error ((((class color))
-                   (:underline "red"))))
- '(flymake-infoline ((((class color))
-                      (:underline "gray"))))
- '(flymake-warning ((((class color))
-                     (:underline "orange"))))
+ '(default ((t (:inherit nil :extend nil :stipple nil :background "white" :foreground "black" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight regular :height 110 :width normal :foundry "PfEd" :family "DejaVu Sans Mono"))))
+ '(flymake-error ((((class color)) (:underline "red"))))
+ '(flymake-infoline ((((class color)) (:underline "gray"))))
+ '(flymake-warning ((((class color)) (:underline "orange"))))
  '(markdown-code-face ((t (:inherit fixed-pitch :background "azure3")))))
 
 (set-face-attribute 'region nil :background "black")
@@ -575,24 +549,5 @@
           (lambda ()
             (setq auto-hscroll-mode nil)
             (auto-fill-mode t)))
-
-(setq js2-additional-externs '("goog" "angular" "describe" "fdescribe" "xdescribe"
-                               "it" "fit" "xit" "inject" "module" "expect"
-                               "beforeEach" "exports" "guitar" "sandman"
-                               "chrome" "Mousetrap" "$" "jQuery" "require"
-                               "spyOn" "beforeEach" "jasmine" "setInterval"
-                               "setTimeout" "clearInterval" "Intl"))
-
-
-(add-hook 'js2-post-parse-callbacks
-          (lambda ()
-            (let ((buf (buffer-string))
-                  (index 0))
-              (while (string-match "\\(goog\\.require\\|goog\\.provide|\\goog\\.module\\)('\\([^'.]*\\)"
-                                   buf index)
-                (setq index (+ 1
-                               (match-end 0)))
-                (add-to-list 'js2-additional-externs
-                             (match-string 2 buf))))))
 
 (provide '.emacs)
