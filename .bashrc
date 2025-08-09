@@ -32,9 +32,8 @@ alias roll=rolldice
 alias python=python3
 alias u="date --utc '+%s ; %a %d %b %Y %T'"
 
-alias odb='java -jar /home/chris/bin/ODB.jar'
 alias serve='python -m http.server'
-alias emacs="$VISUAL 2> /dev/null"
+alias emacs="emacs --no-splash 2> /dev/null"
 alias inkscape='inkscape 2> /dev/null'
 alias z3py='workon z3; ipython -i -c "from z3 import *"'
 alias pipup='pip install --upgrade pip'
