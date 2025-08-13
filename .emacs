@@ -93,7 +93,7 @@
 
 ;; ido mode settings
 (ivy-mode t)
-(setq ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
+(load-file "~/.emacs.d/site-lisp/ivy-difflib.el")
 
 ;; General preferences
 (global-auto-revert-mode t)
@@ -466,7 +466,7 @@
  '(markdown-enable-math t)
  '(mouse-yank-at-point t)
  '(package-selected-packages
-   '(python-mode eldoc flycheck ivy flycheck-pycheckers flymake apheleia haskell-mode z3-mode json-mode))
+   '(heap counsel difflib python-mode eldoc flycheck ivy flycheck-pycheckers flymake apheleia haskell-mode z3-mode json-mode))
  '(py-continuation-offset 4)
  '(py-indent-offset 4)
  '(py-smart-indentation nil)
