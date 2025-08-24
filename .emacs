@@ -212,9 +212,9 @@
 (global-set-key [vertical-scroll-bar drag-mouse-1]
                 'scroll-bar-drag)
 (global-set-key [f9]
-                'format-mode-format-file)
-(global-set-key [(control f9)]
-                'python-black-all)
+                'apheleia-format-buffer)
+(global-set-key [f12]
+                'apheleia-global-mode)
 
 ;; (global-set-key (kbd "M-p")
 ;;                 (lambda ()
@@ -242,6 +242,25 @@
                 'undo)
 (global-unset-key [(control x)
                    (control z)])
+(global-set-key
+ (kbd "M-<down>")
+ (lambda ()
+   (interactive)
+   (condition-case nil
+       (up-list)
+     (error (forward-sexp)))))
+(global-set-key
+ (kbd "M-<up>")
+ (lambda ()
+   (interactive)
+   (condition-case nil
+       (up-list -1)
+     (error (backward-sexp)))))
+
+
+
+(global-set-key (kbd "C-S-<down>") 'move-text-down)
+(global-set-key (kbd "C-S-<up>") 'move-text-up)
 
 ;; Windmove
 (when (fboundp 'windmove-default-keybindings)
@@ -252,7 +271,10 @@
 (add-hook 'org-shiftright-final-hook 'windmove-right)
 
 (global-set-key (kbd "C-<next>") 'next-window-any-frame)
+(global-set-key (kbd "M-J") 'next-window-any-frame)
 (global-set-key (kbd "C-<prior>") 'previous-window-any-frame)
+(global-set-key (kbd "M-K") 'previous-window-any-frame)
+(global-set-key (kbd "M-o") 'other-window)
 
 ;; Python font faces
 (make-face 'py-comment-face)
@@ -277,7 +299,7 @@
                                  "dodger blue")
             (bind-key* "C-<backspace>" 'backward-kill-word)
             (bind-key* "<del>" 'delete-forward-char)
-
+            (py-electric-backspace-mode t)
             )
           )
 
@@ -313,12 +335,12 @@
 (setq-default scroll-preserve-screen-position
               t)
 (setq-default indent-tabs-mode nil)
-                                        ;(setq-default format-mode t)
+;;(setq-default format-mode t)
 (apheleia-global-mode +1)
 (setq-default default-major-mode 'text-mode)
 
-(setq interpreter-mode-alist (cons '("python" . python-mode) interpreter-mode-alist))
-
+(autoload 'python-mode "python-mode" "Python Mode." t)
+(add-to-list 'interpreter-mode-alist '("python" . python-mode))
 (setq auto-mode-alist (append '(("\\.C$" . c++-mode)
                                 ("\\.ino$" . c++-mode)
                                 ("\\.PY$" . python-mode)
@@ -330,7 +352,7 @@
                                 ("\\.h$" . c++-mode)
                                 ("\\.hh$" . c++-mode)
                                 ("\\.hi$" . haskell-mode)
-                                ("\\.js$" . js2-mode)
+                                ("\\.js$" . javascript-mode)
                                 ("\\.json$" . json-mode)
                                 ("\\.l[hg]s$" . literate-haskell-mode)
                                 ("\\.m$" . matlab-mode)
@@ -401,7 +423,7 @@
      (jinja2-mode)
      (js3-mode . prettier-javascript)
      (js-json-mode . prettier-json)
-     (js-mode . prettier-javascript)
+     (js-mode . clang-format)
      (js-ts-mode . prettier-javascript)
      (json-mode . prettier-json)
      (json-ts-mode . prettier-json)
@@ -466,7 +488,7 @@
  '(markdown-enable-math t)
  '(mouse-yank-at-point t)
  '(package-selected-packages
-   '(heap counsel difflib python-mode eldoc flycheck ivy flycheck-pycheckers flymake apheleia haskell-mode z3-mode json-mode))
+   '(move-text heap counsel difflib python-mode eldoc flycheck ivy flycheck-pycheckers flymake apheleia haskell-mode z3-mode json-mode))
  '(py-continuation-offset 4)
  '(py-indent-offset 4)
  '(py-smart-indentation nil)
@@ -534,6 +556,12 @@
   (newline-and-indent))
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
+
+(defun my-py-indent-line-advice (orig-fn &rest args)
+  "Advise `py-indent-line' to first jump to the beginning of indentation."
+  (back-to-indentation)
+  (apply orig-fn args))
+(advice-add 'py-indent-line :around 'my-py-indent-line-advice)
 
 (add-hook 'after-save-hook
           (lambda ()
